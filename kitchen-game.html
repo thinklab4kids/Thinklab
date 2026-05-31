@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Kitchen Helper! 🍳</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --orange:#FF8C42; --yellow:#FFD93D; --red:#FF5252;
+  --green:#3DD68C;  --blue:#4A90D9;   --purple:#A855F7;
+  --pink:#FF6B9D;   --navy:#1B3A6B;   --cream:#FFF8F0;
+  --brown:#92400E;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;min-height:100vh;overflow-x:hidden;}
+body{font-family:'Nunito',sans-serif;background:var(--cream);touch-action:pan-y;}
+
+.screen{display:none;min-height:100vh;flex-direction:column;align-items:center;}
+.screen.active{display:flex;}
+
+/* ══ WELCOME ══ */
+#welcome{
+  background:linear-gradient(160deg,#FFF3E0 0%,#FCE4EC 50%,#FFF8E1 100%);
+  justify-content:center;align-items:center;text-align:center;padding:28px 20px;gap:4px;
+  position:relative;overflow:hidden;
+}
+.kitchen-bg{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+.kb-tile{position:absolute;font-size:1.8rem;opacity:0.07;animation:kbFloat 6s ease-in-out infinite;}
+.kb-tile:nth-child(1){top:5%;left:5%;animation-delay:0s;}
+.kb-tile:nth-child(2){top:10%;right:8%;animation-delay:1s;}
+.kb-tile:nth-child(3){top:25%;left:12%;animation-delay:2s;}
+.kb-tile:nth-child(4){top:20%;right:15%;animation-delay:0.5s;}
+.kb-tile:nth-child(5){bottom:20%;left:6%;animation-delay:1.5s;}
+.kb-tile:nth-child(6){bottom:15%;right:10%;animation-delay:2.5s;}
+.kb-tile:nth-child(7){top:50%;left:2%;animation-delay:3s;}
+.kb-tile:nth-child(8){top:55%;right:3%;animation-delay:3.5s;}
+@keyframes kbFloat{0%,100%{transform:translateY(0) rotate(-5deg);}50%{transform:translateY(-14px) rotate(5deg);}}
+
+.w-emoji-row{display:flex;gap:12px;justify-content:center;margin-bottom:10px;margin-top:20px;position:relative;z-index:1;}
+.we{font-size:clamp(2.8rem,11vw,4.5rem);filter:drop-shadow(0 6px 12px rgba(0,0,0,0.15));animation:wPop 1.8s ease-in-out infinite;}
+.we:nth-child(2){animation-delay:0.3s;font-size:clamp(3.5rem,13vw,5.5rem);}
+.we:nth-child(3){animation-delay:0.6s;}
+@keyframes wPop{0%,100%{transform:translateY(0) rotate(-4deg);}50%{transform:translateY(-16px) rotate(4deg);}}
+
+.w-title{font-family:'Fredoka One',cursive;font-size:clamp(2.2rem,9vw,4rem);color:var(--navy);line-height:1.05;margin-bottom:6px;position:relative;z-index:1;}
+.w-title .or{color:var(--orange);}
+.w-title .rd{color:var(--red);}
+.w-sub{font-size:clamp(0.9rem,3.5vw,1.15rem);color:#777;font-weight:800;margin-bottom:22px;position:relative;z-index:1;}
+
+.steps-preview{
+  background:var(--navy);border-radius:20px;padding:14px 20px;
+  max-width:360px;width:100%;margin-bottom:22px;
+  box-shadow:0 8px 28px rgba(27,58,107,0.3);position:relative;z-index:1;
+}
+.sp-title{font-family:'Fredoka One',cursive;font-size:0.78rem;color:rgba(255,255,255,0.5);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.sp-row{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+.sp-num{background:var(--yellow);color:var(--navy);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:0.75rem;flex-shrink:0;}
+.sp-txt{font-family:'Fredoka One',cursive;font-size:0.88rem;color:white;}
+.sp-arr{color:var(--green);font-size:0.75rem;}
+
+.start-btn{
+  background:linear-gradient(135deg,var(--orange),var(--red));
+  color:white;border:none;padding:18px 52px;
+  font-family:'Fredoka One',cursive;font-size:1.5rem;
+  border-radius:60px;cursor:pointer;letter-spacing:1px;
+  box-shadow:0 8px 28px rgba(255,140,66,0.45);
+  animation:sBtnPulse 2s ease infinite;transition:transform 0.15s;
+  position:relative;z-index:1;
+}
+.start-btn:hover{transform:scale(1.06);}
+.start-btn:active{transform:scale(0.95);}
+@keyframes sBtnPulse{
+  0%,100%{box-shadow:0 8px 28px rgba(255,140,66,0.45),0 0 0 0 rgba(255,140,66,0.2);}
+  50%{box-shadow:0 8px 28px rgba(255,140,66,0.45),0 0 0 14px rgba(255,140,66,0);}
+}
+.tl-tag{margin-top:16px;font-family:'Fredoka One',cursive;font-size:0.82rem;color:#bbb;letter-spacing:1px;position:relative;z-index:1;}
+.tl-tag span{color:var(--navy);}
+
+/* ══ GAME SCREEN ══ */
+#game{background:linear-gradient(160deg,#FFF3E0 0%,#FFF8F0 100%);padding:0;justify-content:flex-start;}
+
+/* Kitchen scene */
+.kitchen-scene{
+  width:100%;background:linear-gradient(180deg,#E3F2FD 0%,#B3E5FC 40%,#FFE0B2 40%,#FF8A65 100%);
+  height:130px;position:relative;overflow:hidden;flex-shrink:0;
+}
+.ks-shelf{position:absolute;bottom:0;left:0;right:0;height:55px;background:#8D6E63;border-radius:0;}
+.ks-shelf::before{content:'';position:absolute;top:0;left:0;right:0;height:8px;background:#6D4C41;}
+.ks-tiles{position:absolute;top:0;left:0;right:0;height:75px;display:flex;flex-wrap:wrap;overflow:hidden;}
+.ks-tile-row{display:flex;width:100%;}
+.ks-tile{height:20px;flex:1;border:1px solid rgba(255,255,255,0.3);}
+.ks-tile.t1{background:rgba(255,255,255,0.15);}
+.ks-tile.t2{background:rgba(255,255,255,0.08);}
+/* items on shelf */
+.shelf-items{position:absolute;bottom:8px;display:flex;gap:8px;left:50%;transform:translateX(-50%);font-size:1.4rem;z-index:2;}
+/* monster chef */
+.chef-monster{position:absolute;right:16px;bottom:0;font-size:3.5rem;animation:chefBob 2s ease-in-out infinite;z-index:3;}
+@keyframes chefBob{0%,100%{transform:translateY(0) rotate(-3deg);}50%{transform:translateY(-8px) rotate(3deg);}}
+/* speech bubble */
+.chef-speech{
+  position:absolute;right:60px;bottom:72px;
+  background:white;border-radius:14px 14px 4px 14px;
+  padding:6px 12px;font-family:'Fredoka One',cursive;font-size:0.78rem;
+  color:var(--navy);box-shadow:0 3px 12px rgba(0,0,0,0.12);
+  white-space:nowrap;z-index:4;opacity:0;transition:opacity 0.3s;
+}
+.chef-speech.show{opacity:1;}
+.steam{position:absolute;font-size:1.2rem;z-index:3;opacity:0;animation:none;}
+.steam.show{opacity:1;animation:steamRise 1.5s ease infinite;}
+@keyframes steamRise{0%{transform:translateY(0);opacity:1;}100%{transform:translateY(-30px);opacity:0;}}
+
+/* GAME CONTENT */
+.game-content{position:relative;z-index:10;width:100%;max-width:520px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;padding-bottom:20px;}
+
+.top-bar{display:flex;align-items:center;gap:8px;width:100%;}
+.home-btn{background:white;border:none;border-radius:12px;padding:8px 12px;font-size:1rem;cursor:pointer;font-weight:800;color:var(--navy);box-shadow:0 2px 10px rgba(0,0,0,0.08);transition:transform 0.15s;}
+.home-btn:active{transform:scale(0.9);}
+.level-pill{background:white;border-radius:18px;padding:5px 14px;font-family:'Fredoka One',cursive;font-size:0.95rem;color:var(--navy);box-shadow:0 2px 10px rgba(0,0,0,0.08);}
+.score-pill{background:linear-gradient(135deg,var(--yellow),var(--orange));border-radius:18px;padding:5px 14px;font-family:'Fredoka One',cursive;font-size:0.95rem;color:white;margin-left:auto;box-shadow:0 3px 10px rgba(255,140,66,0.35);}
+.lives-pill{background:white;border-radius:18px;padding:5px 10px;font-size:0.95rem;letter-spacing:2px;box-shadow:0 2px 10px rgba(0,0,0,0.08);}
+
+.prog-row{display:flex;align-items:center;gap:8px;width:100%;}
+.prog-bg{flex:1;height:13px;background:rgba(0,0,0,0.08);border-radius:20px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--green),#00E676);border-radius:20px;transition:width 0.5s ease;}
+.prog-txt{font-family:'Fredoka One',cursive;font-size:0.82rem;color:#aaa;white-space:nowrap;}
+
+/* MEAL CARD */
+.meal-card{
+  background:white;border-radius:24px;padding:16px 18px;
+  box-shadow:0 6px 22px rgba(0,0,0,0.09);
+  border:3px solid rgba(255,140,66,0.2);
+  display:flex;align-items:center;gap:16px;
+}
+.meal-emoji{font-size:clamp(3rem,12vw,4.2rem);filter:drop-shadow(0 4px 8px rgba(0,0,0,0.15));animation:mealPop 0.5s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes mealPop{from{transform:scale(0.3) rotate(-20deg);opacity:0;}to{transform:scale(1);opacity:1;}}
+.meal-info{}
+.meal-lbl{font-family:'Fredoka One',cursive;font-size:0.72rem;color:#ccc;letter-spacing:2px;text-transform:uppercase;}
+.meal-name{font-family:'Fredoka One',cursive;font-size:clamp(1.2rem,5vw,1.6rem);color:var(--navy);margin-bottom:2px;}
+.meal-desc{font-size:0.75rem;color:#888;font-weight:700;}
+
+/* INSTRUCTION BOX */
+.instr-box{
+  background:linear-gradient(135deg,var(--orange),var(--red));
+  border-radius:18px;padding:12px 16px;
+  font-family:'Fredoka One',cursive;font-size:clamp(0.88rem,3.2vw,1.05rem);
+  color:white;text-align:center;
+  box-shadow:0 4px 16px rgba(255,140,66,0.35);
+}
+
+/* SEQUENCE TRACK */
+.seq-track{
+  background:white;border-radius:20px;padding:14px 14px 10px;
+  box-shadow:0 4px 16px rgba(0,0,0,0.07);
+}
+.seq-lbl{font-family:'Fredoka One',cursive;font-size:0.88rem;color:var(--orange);margin-bottom:10px;}
+.seq-slots{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+.seq-slot{
+  width:46px;height:46px;border-radius:12px;
+  border:3px dashed #E5E7EB;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.3rem;transition:all 0.25s;flex-shrink:0;
+}
+.seq-slot.filled{border-color:var(--orange);background:linear-gradient(135deg,#FFF3E0,#FFE0B2);}
+.seq-slot.done{border-color:var(--green);background:linear-gradient(135deg,#F0FFF4,#DCFCE7);animation:slotPop 0.3s ease;}
+@keyframes slotPop{0%{transform:scale(0.7);opacity:0;}70%{transform:scale(1.15);}100%{transform:scale(1);opacity:1;}}
+.seq-arr{color:#DDD;font-weight:900;font-size:0.9rem;flex-shrink:0;}
+
+/* STEP BUTTONS */
+.steps-lbl{font-family:'Fredoka One',cursive;font-size:0.88rem;color:#888;text-align:center;margin-bottom:8px;}
+.steps-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:9px;}
+.step-btn{
+  background:white;border:3px solid #EEE;border-radius:18px;
+  padding:11px 6px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  transition:all 0.15s;
+  font-family:'Nunito',sans-serif;font-weight:800;font-size:0.72rem;color:#555;
+  box-shadow:0 3px 12px rgba(0,0,0,0.06);
+}
+.step-btn:not(.used):not(.correct):hover{transform:scale(1.1);border-color:var(--orange);box-shadow:0 6px 18px rgba(255,140,66,0.25);}
+.step-btn:active{transform:scale(0.92);}
+.step-btn .s-icon{font-size:1.75rem;line-height:1;}
+.step-btn.correct{background:linear-gradient(135deg,#ECFDF5,#D1FAE5);border-color:var(--green);color:#047857;animation:slotPop 0.3s ease;}
+.step-btn.wrong{animation:wrongShake 0.4s ease;border-color:#EF4444;background:#FFF0F0;}
+.step-btn.used{opacity:0.3;cursor:not-allowed;}
+@keyframes wrongShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-8px);}75%{transform:translateX(8px);}}
+
+/* TOAST */
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-80px);background:white;border-radius:28px;padding:10px 20px;font-family:'Fredoka One',cursive;font-size:1rem;box-shadow:0 8px 28px rgba(0,0,0,0.15);z-index:9999;transition:transform 0.3s ease;white-space:nowrap;pointer-events:none;}
+.toast.on{transform:translateX(-50%) translateY(0);}
+.toast.ok{color:#10B981;border-left:5px solid #10B981;}
+.toast.bad{color:#EF4444;border-left:5px solid #EF4444;}
+
+/* CONFETTI */
+.cf{position:fixed;pointer-events:none;z-index:9998;border-radius:3px;animation:cfFall linear forwards;}
+@keyframes cfFall{to{transform:translateY(110vh) rotate(600deg);opacity:0;}}
+
+/* ══ VICTORY ══ */
+#victory{
+  background:linear-gradient(160deg,#FFF3E0,#FCE4EC,#FFF8E1);
+  justify-content:center;align-items:center;text-align:center;padding:40px 20px;gap:14px;
+}
+.v-emoji{font-size:5.5rem;display:block;animation:vBounce 0.9s ease infinite;filter:drop-shadow(0 8px 16px rgba(0,0,0,0.15));}
+@keyframes vBounce{0%,100%{transform:translateY(0) rotate(-5deg);}50%{transform:translateY(-18px) rotate(5deg);}}
+.v-title{font-family:'Fredoka One',cursive;font-size:clamp(2rem,8vw,3.2rem);color:var(--navy);}
+.v-msg{font-size:1rem;color:#888;font-weight:800;max-width:300px;}
+.v-stars{font-size:2.6rem;letter-spacing:5px;}
+.v-score-box{background:var(--navy);border-radius:22px;padding:14px 36px;}
+.v-score-num{font-family:'Fredoka One',cursive;font-size:2.6rem;color:var(--yellow);display:block;}
+.v-score-lbl{font-size:0.8rem;color:rgba(255,255,255,0.55);font-weight:800;letter-spacing:1px;text-transform:uppercase;}
+.v-learned{background:var(--navy);border-radius:18px;padding:14px 20px;max-width:320px;width:100%;}
+.vl-title{font-family:'Fredoka One',cursive;font-size:0.78rem;color:rgba(255,255,255,0.45);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.vl-steps{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;}
+.vl-step{background:rgba(255,255,255,0.1);border-radius:10px;padding:5px 10px;font-family:'Fredoka One',cursive;font-size:0.78rem;color:var(--yellow);}
+.v-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+.vbtn{padding:14px 26px;font-family:'Fredoka One',cursive;font-size:1rem;border:none;border-radius:50px;cursor:pointer;transition:transform 0.15s;}
+.vbtn:active{transform:scale(0.94);}
+.vbtn-play{background:linear-gradient(135deg,var(--orange),var(--red));color:white;box-shadow:0 6px 20px rgba(255,140,66,0.4);}
+.vbtn-home{background:white;color:#aaa;border:2px solid #EEE;}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- ══ WELCOME ══ -->
+<div class="screen active" id="welcome">
+  <div class="kitchen-bg">
+    <div class="kb-tile">🍳</div><div class="kb-tile">🥚</div>
+    <div class="kb-tile">🍞</div><div class="kb-tile">🧇</div>
+    <div class="kb-tile">🥞</div><div class="kb-tile">🫐</div>
+    <div class="kb-tile">🍯</div><div class="kb-tile">🥛</div>
+  </div>
+
+  <div class="w-emoji-row">
+    <span class="we">👾</span>
+    <span class="we">🍳</span>
+    <span class="we">👨‍🍳</span>
+  </div>
+
+  <h1 class="w-title">Kitchen<br><span class="or">Helper</span><br><span class="rd">Game!</span></h1>
+  <p class="w-sub">Help the monster cook breakfast! 🥞✨</p>
+
+  <div class="steps-preview">
+    <div class="sp-title">👨‍🍳 How to cook breakfast</div>
+    <div class="sp-row"><div class="sp-num">1</div><span class="sp-txt">🙌 Wash Hands</span><span class="sp-arr">→</span></div>
+    <div class="sp-row"><div class="sp-num">2</div><span class="sp-txt">🥚 Get Ingredients</span><span class="sp-arr">→</span></div>
+    <div class="sp-row"><div class="sp-num">3</div><span class="sp-txt">🍳 Cook the Food</span><span class="sp-arr">→</span></div>
+    <div class="sp-row"><div class="sp-num">4</div><span class="sp-txt">🍽️ Put on Plate</span><span class="sp-arr">→</span></div>
+    <div class="sp-row"><div class="sp-num">5</div><span class="sp-txt">😋 Eat & Enjoy!</span></div>
+  </div>
+
+  <button class="start-btn" onclick="startGame()">▶ Start Cooking!</button>
+  <div class="tl-tag">by <span>ThinkLab</span> — Raising smart thinkers!</div>
+</div>
+
+<!-- ══ GAME ══ -->
+<div class="screen" id="game">
+
+  <div class="kitchen-scene" id="kitchen-scene">
+    <div class="ks-tiles">
+      <div class="ks-tile-row">
+        <div class="ks-tile t1"></div><div class="ks-tile t2"></div><div class="ks-tile t1"></div>
+        <div class="ks-tile t2"></div><div class="ks-tile t1"></div><div class="ks-tile t2"></div>
+        <div class="ks-tile t1"></div><div class="ks-tile t2"></div>
+      </div>
+      <div class="ks-tile-row">
+        <div class="ks-tile t2"></div><div class="ks-tile t1"></div><div class="ks-tile t2"></div>
+        <div class="ks-tile t1"></div><div class="ks-tile t2"></div><div class="ks-tile t1"></div>
+        <div class="ks-tile t2"></div><div class="ks-tile t1"></div>
+      </div>
+      <div class="ks-tile-row">
+        <div class="ks-tile t1"></div><div class="ks-tile t2"></div><div class="ks-tile t1"></div>
+        <div class="ks-tile t2"></div><div class="ks-tile t1"></div><div class="ks-tile t2"></div>
+        <div class="ks-tile t1"></div><div class="ks-tile t2"></div>
+      </div>
+    </div>
+    <div class="ks-shelf"></div>
+    <div class="shelf-items" id="shelf-items">🫙🥛🍯🧂</div>
+    <div class="steam" id="steam" style="left:42%;bottom:55px;">💨</div>
+    <div class="chef-speech" id="chef-speech">Let's cook! 🍳</div>
+    <div class="chef-monster">👾</div>
+  </div>
+
+  <div class="game-content">
+    <div class="top-bar">
+      <button class="home-btn" onclick="goHome()">🏠</button>
+      <div class="level-pill" id="level-pill">Meal 1</div>
+      <div class="lives-pill" id="lives-pill">❤️❤️❤️</div>
+      <div class="score-pill">⭐<span id="score-num">0</span></div>
+    </div>
+
+    <div class="prog-row">
+      <div class="prog-bg"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+      <div class="prog-txt" id="prog-txt">0 / 5</div>
+    </div>
+
+    <!-- Meal Card -->
+    <div class="meal-card" id="meal-card">
+      <span class="meal-emoji" id="meal-emoji">🥞</span>
+      <div class="meal-info">
+        <div class="meal-lbl">Today's Meal</div>
+        <div class="meal-name" id="meal-name">Pancakes!</div>
+        <div class="meal-desc" id="meal-desc">Fluffy and delicious 😋</div>
+      </div>
+    </div>
+
+    <!-- Instruction -->
+    <div class="instr-box" id="instr-box">
+      👆 Tap the steps in the RIGHT ORDER to cook!
+    </div>
+
+    <!-- Sequence track -->
+    <div class="seq-track">
+      <div class="seq-lbl">🍳 Cooking steps so far:</div>
+      <div class="seq-slots" id="seq-slots"></div>
+    </div>
+
+    <!-- Step buttons -->
+    <div class="steps-lbl" id="steps-lbl">Tap the FIRST step to start cooking!</div>
+    <div class="steps-grid" id="steps-grid"></div>
+  </div>
+</div>
+
+<!-- ══ VICTORY ══ -->
+<div class="screen" id="victory">
+  <span class="v-emoji" id="v-emoji">🍳</span>
+  <h2 class="v-title" id="v-title">Amazing Chef!</h2>
+  <p class="v-msg" id="v-msg">You cooked all the meals!</p>
+  <div class="v-stars" id="v-stars">⭐⭐⭐</div>
+  <div class="v-score-box">
+    <span class="v-score-num" id="v-score-num">0</span>
+    <span class="v-score-lbl">Points Earned</span>
+  </div>
+  <div class="v-learned">
+    <div class="vl-title">You learned to cook:</div>
+    <div class="vl-steps" id="vl-steps"></div>
+  </div>
+  <div class="v-btns">
+    <button class="vbtn vbtn-home" onclick="goHome()">🏠 Home</button>
+    <button class="vbtn vbtn-play" onclick="startGame()">▶ Cook Again!</button>
+  </div>
+  <div class="tl-tag" style="color:#bbb;font-family:'Fredoka One',cursive;font-size:0.82rem;letter-spacing:1px;">by <span style="color:var(--navy)">ThinkLab</span> — Raising smart thinkers!</div>
+</div>
+
+<script>
+// ── MEALS DATA ──────────────────────────────────────────────────────────
+var MEALS = [
+  {
+    emoji:'🥞', name:'Pancakes!', desc:'Fluffy and delicious 😋',
+    steps:[
+      {icon:'🙌', label:'Wash Hands'},
+      {icon:'🥚', label:'Get Eggs'},
+      {icon:'🥛', label:'Add Milk'},
+      {icon:'🍳', label:'Cook Pancake'},
+      {icon:'😋', label:'Eat & Enjoy!'}
+    ],
+    shelf:'🫙🥛🍯🧂', speech:'Pancakes today! 🥞', steamPos:'42%'
+  },
+  {
+    emoji:'🍳', name:'Fried Eggs!', desc:'Sunny side up! ☀️',
+    steps:[
+      {icon:'🙌', label:'Wash Hands'},
+      {icon:'🥚', label:'Crack Eggs'},
+      {icon:'🧈', label:'Add Butter'},
+      {icon:'🍳', label:'Fry Eggs'},
+      {icon:'🍽️', label:'Serve on Plate'}
+    ],
+    shelf:'🧈🧂🫙🥛', speech:'Eggy time! 🍳', steamPos:'38%'
+  },
+  {
+    emoji:'🥣', name:'Porridge!', desc:'Warm and yummy! 🌟',
+    steps:[
+      {icon:'🙌', label:'Wash Hands'},
+      {icon:'🌾', label:'Get Oats'},
+      {icon:'🥛', label:'Add Milk'},
+      {icon:'♨️', label:'Heat it Up'},
+      {icon:'🍯', label:'Add Honey'}
+    ],
+    shelf:'🌾🍯🥛🫐', speech:'Porridge time! 🥣', steamPos:'44%'
+  },
+  {
+    emoji:'🍞', name:'Toast!', desc:'Crunchy and golden! 🟡',
+    steps:[
+      {icon:'🙌', label:'Wash Hands'},
+      {icon:'🍞', label:'Get Bread'},
+      {icon:'🔥', label:'Toast Bread'},
+      {icon:'🧈', label:'Spread Butter'},
+      {icon:'😋', label:'Eat & Enjoy!'}
+    ],
+    shelf:'🍞🧈🍯🧂', speech:'Toast is best! 🍞', steamPos:'40%'
+  },
+  {
+    emoji:'🥛', name:'Cereal!', desc:'Quick and easy! ⚡',
+    steps:[
+      {icon:'🙌', label:'Wash Hands'},
+      {icon:'🥣', label:'Get Bowl'},
+      {icon:'🌾', label:'Add Cereal'},
+      {icon:'🥛', label:'Pour Milk'},
+      {icon:'🫐', label:'Add Berries'}
+    ],
+    shelf:'🌾🥛🫐🍯', speech:'Cereal is fun! 🥣', steamPos:'45%'
+  }
+];
+
+// ── STATE ──────────────────────────────────────────────────────────────
+var curMeal = 0, score = 0, lives = 3, stepDone = 0;
+var shuffledMeals = [];
+var cooked = [];
+
+// ── HELPERS ────────────────────────────────────────────────────────────
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+var toastTmr;
+function showToast(type,msg){
+  clearTimeout(toastTmr);
+  var t=document.getElementById('toast');
+  t.className='toast '+type+' on';
+  t.textContent=msg;
+  toastTmr=setTimeout(function(){t.classList.remove('on');},2000);
+}
+
+function updateLives(){
+  document.getElementById('lives-pill').textContent='❤️'.repeat(lives)+'🖤'.repeat(3-lives);
+}
+
+function shuffle(arr){
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}
+  return a;
+}
+
+function confetti(){
+  var cols=['#FFD93D','#FF8C42','#3DD68C','#FF6B9D','#4A90D9','#A855F7'];
+  for(var i=0;i<40;i++){
+    (function(i){
+      setTimeout(function(){
+        var el=document.createElement('div');
+        el.className='cf';
+        el.style.cssText='left:'+Math.random()*100+'vw;top:-12px;width:'+(6+Math.random()*7)+'px;height:'+(6+Math.random()*7)+'px;background:'+cols[Math.floor(Math.random()*cols.length)]+';animation-duration:'+(1.2+Math.random()*1.4)+'s;';
+        document.body.appendChild(el);
+        setTimeout(function(){el.remove();},3000);
+      },i*30);
+    })(i);
+  }
+}
+
+// ── RENDER SLOTS ──────────────────────────────────────────────────────
+function renderSlots(meal){
+  var row=document.getElementById('seq-slots');
+  row.innerHTML='';
+  meal.steps.forEach(function(s,i){
+    var slot=document.createElement('div');
+    slot.className='seq-slot';
+    slot.id='slot-'+i;
+    row.appendChild(slot);
+    if(i<meal.steps.length-1){
+      var arr=document.createElement('div');
+      arr.className='seq-arr';
+      arr.textContent='→';
+      row.appendChild(arr);
+    }
+  });
+}
+
+// ── RENDER BUTTONS ─────────────────────────────────────────────────────
+function renderButtons(meal){
+  var grid=document.getElementById('steps-grid');
+  grid.innerHTML='';
+  var shuffledSteps=shuffle(meal.steps);
+  shuffledSteps.forEach(function(s){
+    // find original index
+    var origIdx=meal.steps.findIndex(function(ms){return ms.label===s.label;});
+    var btn=document.createElement('button');
+    btn.className='step-btn';
+    btn.id='sbtn-'+origIdx;
+    btn.innerHTML='<span class="s-icon">'+s.icon+'</span>'+s.label;
+    btn.onclick=function(){tapStep(origIdx);};
+    grid.appendChild(btn);
+  });
+}
+
+// ── LOAD MEAL ──────────────────────────────────────────────────────────
+function loadMeal(){
+  if(curMeal>=shuffledMeals.length){showVictory();return;}
+  stepDone=0;
+  var meal=shuffledMeals[curMeal];
+
+  // kitchen scene
+  document.getElementById('shelf-items').textContent=meal.shelf;
+  var speech=document.getElementById('chef-speech');
+  speech.textContent=meal.speech;
+  speech.classList.add('show');
+  setTimeout(function(){speech.classList.remove('show');},2500);
+  document.getElementById('steam').classList.remove('show');
+
+  // top bar
+  document.getElementById('level-pill').textContent='Meal '+(curMeal+1);
+  document.getElementById('score-num').textContent=score;
+  document.getElementById('prog-fill').style.width=(curMeal/shuffledMeals.length*100)+'%';
+  document.getElementById('prog-txt').textContent=curMeal+' / '+shuffledMeals.length;
+  updateLives();
+
+  // meal card
+  var me=document.getElementById('meal-emoji');
+  me.textContent=meal.emoji;
+  me.style.animation='none'; void me.offsetWidth; me.style.animation='mealPop 0.5s cubic-bezier(0.34,1.56,0.64,1)';
+  document.getElementById('meal-name').textContent=meal.name;
+  document.getElementById('meal-desc').textContent=meal.desc;
+
+  // instruction
+  document.getElementById('instr-box').textContent='👆 Tap the '+meal.steps.length+' steps in the RIGHT ORDER to cook!';
+  document.getElementById('steps-lbl').textContent='Tap the FIRST step to start cooking!';
+
+  renderSlots(meal);
+  renderButtons(meal);
+}
+
+// ── TAP STEP ──────────────────────────────────────────────────────────
+function tapStep(idx){
+  var meal=shuffledMeals[curMeal];
+  var btn=document.getElementById('sbtn-'+idx);
+  if(!btn||btn.classList.contains('used')) return;
+
+  if(idx===stepDone){
+    // CORRECT
+    score+=10;
+    var slot=document.getElementById('slot-'+stepDone);
+    slot.textContent=meal.steps[idx].icon;
+    slot.classList.add('filled','done');
+    btn.classList.add('correct','used');
+
+    document.getElementById('score-num').textContent=score;
+
+    // update instruction
+    var next=stepDone+1;
+    if(next<meal.steps.length){
+      document.getElementById('steps-lbl').textContent='Great! Now tap step '+(next+1)+'!';
+    }
+
+    // steam effect on cook steps
+    if(meal.steps[idx].label.toLowerCase().includes('cook')||
+       meal.steps[idx].label.toLowerCase().includes('fry')||
+       meal.steps[idx].label.toLowerCase().includes('heat')||
+       meal.steps[idx].label.toLowerCase().includes('toast')){
+      var steam=document.getElementById('steam');
+      steam.style.left=meal.steamPos;
+      steam.classList.add('show');
+    }
+
+    // chef speech
+    var speeches=['Great job! 👏','Keep going! 💪','Yes! 🌟','Perfect! ⭐','Almost done! 🍽️'];
+    var sp=document.getElementById('chef-speech');
+    sp.textContent=speeches[stepDone]||'Amazing! 🎉';
+    sp.classList.add('show');
+    setTimeout(function(){sp.classList.remove('show');},1500);
+
+    showToast('ok',['Correct! ✅','Great step! 🌟','Yes! Perfect! ⭐','Amazing! 🎉','Well done! 💪'][Math.floor(Math.random()*5)]);
+    confetti();
+    stepDone++;
+
+    if(stepDone>=meal.steps.length){
+      cooked.push(meal.emoji+' '+meal.name);
+      document.getElementById('steam').classList.remove('show');
+      var finSp=document.getElementById('chef-speech');
+      finSp.textContent='Meal ready! 🍽️😋';
+      finSp.classList.add('show');
+      setTimeout(function(){
+        finSp.classList.remove('show');
+        curMeal++;
+        loadMeal();
+      },1500);
+    }
+  } else {
+    // WRONG
+    lives=Math.max(0,lives-1);
+    updateLives();
+    btn.classList.add('wrong');
+    setTimeout(function(){btn.classList.remove('wrong');},450);
+    var hint=meal.steps[stepDone];
+    showToast('bad','Not yet! Try "'+hint.label+'" '+hint.icon+' next!');
+    if(lives===0){lives=3;updateLives();showToast('ok','No worries! Keep trying! 💪');}
+  }
+}
+
+// ── START / HOME / VICTORY ─────────────────────────────────────────────
+function startGame(){
+  curMeal=0; score=0; lives=3; cooked=[];
+  shuffledMeals=shuffle(MEALS);
+  showScreen('game');
+  loadMeal();
+}
+
+function goHome(){
+  showScreen('welcome');
+}
+
+function showVictory(){
+  var stars=lives===3?'⭐⭐⭐':lives===2?'⭐⭐☆':'⭐☆☆';
+  var titles=['Master Chef! 👨‍🍳','Amazing Cook! 🍳','Kitchen Hero! 🏆','Super Helper! 🌟','Breakfast Boss! 🥞'];
+  var emojis=['🍳','🏆','👨‍🍳','🥞','⭐'];
+  document.getElementById('v-emoji').textContent=emojis[Math.floor(Math.random()*emojis.length)];
+  document.getElementById('v-title').textContent=titles[Math.floor(Math.random()*titles.length)];
+  document.getElementById('v-stars').textContent=stars;
+  document.getElementById('v-score-num').textContent=score;
+  // cooked meals list
+  var vls=document.getElementById('vl-steps');
+  vls.innerHTML='';
+  cooked.forEach(function(m){
+    var d=document.createElement('div');
+    d.className='vl-step';
+    d.textContent=m;
+    vls.appendChild(d);
+  });
+  showScreen('victory');
+  confetti(); confetti();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Laundry Fun!</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+html,body { width:100%; min-height:100vh; overflow-x:hidden; }
+body { font-family:'Nunito',sans-serif; background:#FFF5F8; touch-action:pan-y; }
+
+.screen { display:none; min-height:100vh; }
+.screen.active { display:flex; flex-direction:column; }
+
+/* WELCOME */
+#welcome {
+  background:linear-gradient(180deg,#FFE4F0 0%,#E8F4FF 60%,#E8FFE8 100%);
+  align-items:center; justify-content:center; padding:24px 16px; text-align:center;
+}
+.game-logo { font-size:clamp(5rem,18vw,9rem); line-height:1; margin-bottom:8px; filter:drop-shadow(0 6px 12px rgba(0,0,0,0.15)); animation:wiggle 2s infinite ease-in-out; }
+@keyframes wiggle { 0%,100%{transform:rotate(-5deg);} 50%{transform:rotate(5deg);} }
+.game-title { font-family:'Fredoka One',cursive; font-size:clamp(2.4rem,9vw,4rem); color:#FF4FA3; text-shadow:0 4px 0 rgba(255,79,163,0.2); margin-bottom:6px; }
+.game-tagline { font-size:clamp(1rem,4vw,1.3rem); color:#888; font-weight:800; margin-bottom:36px; }
+
+.level-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; width:100%; max-width:480px; margin-bottom:30px; }
+.lbtn { background:white; border:3px solid #F0F0F0; border-radius:20px; padding:14px 6px; cursor:pointer; transition:all 0.15s; display:flex; flex-direction:column; align-items:center; gap:4px; }
+.lbtn:not(.locked):hover,.lbtn:not(.locked):active { transform:scale(1.1); border-color:#FF4FA3; box-shadow:0 6px 20px rgba(255,79,163,0.25); }
+.lbtn.locked { opacity:0.4; cursor:not-allowed; }
+.lbtn-num { font-family:'Fredoka One',cursive; font-size:1.5rem; color:#FF4FA3; }
+.lbtn-stars { font-size:0.75rem; }
+.lbtn-name { font-size:0.6rem; color:#aaa; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; text-align:center; }
+
+.play-btn { background:linear-gradient(135deg,#FF4FA3,#FF8C42); color:white; border:none; padding:20px 56px; font-size:1.6rem; font-family:'Fredoka One',cursive; border-radius:60px; cursor:pointer; box-shadow:0 8px 24px rgba(255,79,163,0.45),0 0 0 6px rgba(255,79,163,0.12); transition:all 0.15s; letter-spacing:1px; }
+.play-btn:hover { transform:scale(1.06); }
+.play-btn:active { transform:scale(0.97); }
+
+/* SORT SCREEN */
+#sort-screen { background:linear-gradient(160deg,#FFF0F8 0%,#F0F8FF 100%); padding:0; }
+
+.top-bar { display:flex; align-items:center; gap:10px; padding:14px 16px 10px; background:white; border-bottom:3px solid #F5F5F5; position:sticky; top:0; z-index:100; flex-wrap:wrap; }
+.home-btn { background:#F5F5F5; border:none; border-radius:12px; padding:10px 14px; font-size:1.1rem; cursor:pointer; font-weight:800; color:#888; font-family:'Nunito',sans-serif; transition:all 0.15s; }
+.home-btn:active { transform:scale(0.93); }
+.tb-title { font-family:'Fredoka One',cursive; font-size:1.2rem; color:#FF4FA3; }
+.tb-lives { font-size:1.2rem; letter-spacing:2px; }
+.tb-score { font-family:'Fredoka One',cursive; font-size:1.1rem; color:#F97316; margin-left:auto; }
+.tb-progress { width:100%; height:12px; background:#F0F0F0; border-radius:20px; overflow:hidden; margin-top:2px; }
+.tb-progress-fill { height:100%; background:linear-gradient(90deg,#FF4FA3,#A855F7); border-radius:20px; transition:width 0.5s ease; }
+
+.instr-banner { margin:14px 14px 10px; background:linear-gradient(135deg,#FF4FA3,#A855F7); border-radius:20px; padding:14px 20px; color:white; font-size:clamp(0.95rem,3.5vw,1.15rem); font-weight:800; text-align:center; box-shadow:0 4px 16px rgba(255,79,163,0.3); }
+
+.clothes-section { padding:0 12px; }
+.section-label { font-family:'Fredoka One',cursive; font-size:1rem; color:#CCC; text-transform:uppercase; letter-spacing:2px; margin:10px 4px 8px; }
+.clothes-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:10px; padding-bottom:10px; }
+
+.cloth-card { background:white; border-radius:20px; padding:12px 8px 10px; display:flex; flex-direction:column; align-items:center; box-shadow:0 4px 14px rgba(0,0,0,0.09); cursor:pointer; border:4px solid transparent; transition:all 0.15s; position:relative; user-select:none; -webkit-user-select:none; }
+.cloth-card:active { transform:scale(0.93); }
+.cloth-card.selected { border-color:#A855F7; box-shadow:0 0 0 4px rgba(168,85,247,0.25),0 4px 14px rgba(0,0,0,0.12); transform:scale(1.07) rotate(-2deg); }
+.cloth-card.bounce-out { animation:bounceOut 0.35s ease forwards; }
+@keyframes bounceOut { 0%{transform:scale(1);opacity:1;} 50%{transform:scale(1.2);opacity:0.6;} 100%{transform:scale(0);opacity:0;} }
+.cloth-svg { display:flex; align-items:center; justify-content:center; width:72px; height:64px; }
+.cloth-svg svg { filter:drop-shadow(0 3px 6px rgba(0,0,0,0.15)); transition:transform 0.15s; }
+.cloth-card:hover .cloth-svg svg { transform:scale(1.1) rotate(-4deg); }
+.cloth-name { font-size:0.6rem; font-weight:800; color:#aaa; text-align:center; margin-top:5px; text-transform:uppercase; letter-spacing:0.5px; }
+.dirty-tag { position:absolute; top:-7px; left:-7px; background:#FF6B6B; color:white; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-weight:900; border:2px solid white; box-shadow:0 2px 6px rgba(0,0,0,0.15); }
+
+.boxes-section { padding:0 12px 20px; display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+.sort-box { border-radius:24px; padding:16px 12px 14px; display:flex; flex-direction:column; align-items:center; min-height:130px; cursor:pointer; border:5px dashed rgba(255,255,255,0.5); transition:all 0.18s; position:relative; }
+.sort-box.lit { transform:scale(1.04); border-color:white; box-shadow:0 0 0 5px rgba(255,255,255,0.6),0 8px 32px rgba(0,0,0,0.18); }
+.sort-box.pop { animation:boxPop 0.4s ease; }
+@keyframes boxPop { 0%{transform:scale(1);} 40%{transform:scale(1.1);} 70%{transform:scale(0.96);} 100%{transform:scale(1);} }
+
+.box-colored  { background:linear-gradient(145deg,#FF6B6B,#FF9F43); }
+.box-white    { background:linear-gradient(145deg,#6C93FF,#9DB5FF); }
+.box-delicate { background:linear-gradient(145deg,#C084FC,#818CF8); }
+.box-clean    { background:linear-gradient(145deg,#34D399,#10B981); }
+
+.box-big-icon { font-size:2.4rem; margin-bottom:4px; filter:drop-shadow(0 3px 6px rgba(0,0,0,0.2)); }
+.box-title-t { font-family:'Fredoka One',cursive; font-size:clamp(0.85rem,3vw,1.05rem); color:white; text-shadow:0 2px 6px rgba(0,0,0,0.2); text-align:center; margin-bottom:3px; }
+.box-sub-t { font-size:0.65rem; color:rgba(255,255,255,0.85); font-weight:800; text-align:center; }
+.box-badge { position:absolute; top:10px; right:10px; background:white; border-radius:12px; padding:2px 9px; font-family:'Fredoka One',cursive; font-size:0.85rem; color:#555; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
+.box-items-mini { display:flex; flex-wrap:wrap; gap:2px; justify-content:center; margin-top:6px; }
+.bmini { font-size:1rem; animation:popIn 0.2s ease; }
+@keyframes popIn { 0%{transform:scale(0) rotate(90deg);opacity:0;} 70%{transform:scale(1.25);} 100%{transform:scale(1);opacity:1;} }
+
+/* WASH SCREEN */
+#wash-screen { background:linear-gradient(160deg,#EEF2FF 0%,#FAF5FF 100%); align-items:center; padding:16px; gap:12px; }
+.wash-top { display:flex; align-items:center; gap:10px; width:100%; max-width:600px; }
+.wash-title-h { font-family:'Fredoka One',cursive; font-size:clamp(1.6rem,6vw,2.2rem); color:#7C3AED; text-align:center; width:100%; }
+.wash-tip { background:white; border-radius:16px; padding:12px 18px; text-align:center; font-weight:800; color:#888; font-size:0.9rem; box-shadow:0 3px 12px rgba(0,0,0,0.06); width:100%; max-width:600px; }
+
+.machine-wrap { position:relative; width:220px; height:250px; }
+.machine-body { width:220px; height:240px; background:linear-gradient(180deg,#F3F4F6,#D1D5DB); border-radius:28px; border:5px solid #9CA3AF; box-shadow:0 12px 36px rgba(0,0,0,0.18),inset 0 -10px 24px rgba(0,0,0,0.1); position:relative; overflow:hidden; }
+.machine-body::before { content:''; position:absolute; top:0; left:0; right:0; height:50%; background:linear-gradient(180deg,rgba(255,255,255,0.3),transparent); border-radius:28px 28px 0 0; pointer-events:none; }
+.machine-window { width:130px; height:130px; background:linear-gradient(135deg,#1E3A8A,#1D4ED8); border-radius:50%; position:absolute; top:50%; left:50%; transform:translate(-50%,-58%); border:10px solid #6B7280; overflow:hidden; box-shadow:inset 0 0 28px rgba(0,0,0,0.5),0 4px 12px rgba(0,0,0,0.2); }
+.window-shine { position:absolute; top:8px; left:8px; width:35px; height:22px; background:rgba(255,255,255,0.18); border-radius:50%; transform:rotate(-35deg); pointer-events:none; }
+.machine-emoji { font-size:1.8rem; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); transition:all 0.3s; }
+.machine-emoji.spin-anim { animation:fastSpin 0.4s linear infinite; }
+.machine-emoji.wash-anim { animation:wobbleW 0.35s ease infinite; }
+@keyframes fastSpin { to{transform:translate(-50%,-50%) rotate(360deg);} }
+@keyframes wobbleW { 0%,100%{transform:translate(-50%,-50%) scale(1);} 50%{transform:translate(-50%,-50%) scale(1.2);} }
+.machine-deco { position:absolute; bottom:16px; right:16px; font-size:1.5rem; opacity:0.7; }
+.machine-knob { position:absolute; top:18px; right:18px; width:28px; height:28px; background:#EF4444; border-radius:50%; border:4px solid #B91C1C; box-shadow:0 3px 8px rgba(0,0,0,0.2); }
+.machine-knob2 { position:absolute; top:18px; right:54px; width:20px; height:20px; background:#FCD34D; border-radius:50%; border:3px solid #D97706; box-shadow:0 2px 6px rgba(0,0,0,0.15); }
+.bubbles-wrap { position:absolute; bottom:-5px; left:0; right:0; display:flex; justify-content:center; gap:5px; pointer-events:none; }
+.bubbles-wrap .bub { font-size:1.1rem; opacity:0; }
+.bubbles-wrap.active .bub { animation:bubUp 1s ease infinite; }
+.bubbles-wrap.active .bub:nth-child(2){animation-delay:0.33s;}
+.bubbles-wrap.active .bub:nth-child(3){animation-delay:0.66s;}
+@keyframes bubUp { 0%{opacity:1;transform:translateY(0);} 100%{opacity:0;transform:translateY(-28px);} }
+
+.seq-wrap { background:white; border-radius:20px; padding:14px 16px; box-shadow:0 4px 16px rgba(0,0,0,0.07); width:100%; max-width:600px; }
+.seq-lbl { font-family:'Fredoka One',cursive; color:#7C3AED; font-size:1rem; margin-bottom:10px; }
+.seq-row { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.seq-slot { width:50px; height:50px; border-radius:14px; border:3px dashed #DDD; display:flex; align-items:center; justify-content:center; font-size:1.5rem; transition:all 0.25s; flex-shrink:0; }
+.seq-slot.has { border-color:#A855F7; background:linear-gradient(135deg,#F3E8FF,#EDE9FE); }
+.seq-slot.done { border-color:#10B981; background:linear-gradient(135deg,#ECFDF5,#D1FAE5); animation:popIn 0.3s ease; }
+.seq-arr { color:#DDD; font-weight:900; font-size:1rem; flex-shrink:0; }
+
+.steps-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(80px,1fr)); gap:8px; width:100%; max-width:600px; }
+.step-btn { background:white; border:3px solid #EEE; border-radius:18px; padding:12px 6px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:4px; transition:all 0.15s; font-family:'Nunito',sans-serif; font-weight:800; font-size:0.75rem; color:#555; }
+.step-btn:not(.used):not(.done):hover { transform:scale(1.1); border-color:#A855F7; box-shadow:0 4px 16px rgba(168,85,247,0.25); }
+.step-btn:active { transform:scale(0.92); }
+.step-btn .s-icon { font-size:1.9rem; }
+.step-btn.done { background:linear-gradient(135deg,#ECFDF5,#D1FAE5); border-color:#10B981; color:#047857; animation:popIn 0.3s ease; }
+.step-btn.wrong { animation:shakeBtn 0.4s ease; border-color:#FF6B6B; background:#FFF0F0; }
+.step-btn.used { opacity:0.35; cursor:not-allowed; }
+@keyframes shakeBtn { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-8px);} 75%{transform:translateX(8px);} }
+
+/* VICTORY */
+#victory-screen { background:linear-gradient(160deg,#FFF0F8,#F0F8FF,#F0FFF4); align-items:center; justify-content:center; text-align:center; padding:40px 20px; gap:16px; }
+.v-emoji { font-size:6rem; animation:bounceV 0.8s ease infinite; filter:drop-shadow(0 6px 12px rgba(0,0,0,0.15)); }
+@keyframes bounceV { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-18px);} }
+.v-title { font-family:'Fredoka One',cursive; font-size:clamp(2.2rem,9vw,3.5rem); color:#FF4FA3; text-shadow:0 4px 0 rgba(255,79,163,0.18); }
+.v-msg { font-size:1.1rem; color:#888; font-weight:800; max-width:340px; }
+.v-stars { font-size:3rem; letter-spacing:6px; animation:popIn 0.5s 0.3s ease both; }
+.v-btns { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:8px; }
+.vb { padding:16px 30px; font-size:1.1rem; font-family:'Fredoka One',cursive; border:none; border-radius:60px; cursor:pointer; transition:all 0.15s; letter-spacing:0.5px; }
+.vb:active{transform:scale(0.95);}
+.vb-next{background:linear-gradient(135deg,#FF4FA3,#A855F7);color:white;box-shadow:0 6px 20px rgba(255,79,163,0.4);}
+.vb-home{background:white;color:#aaa;border:2px solid #EEE;}
+
+/* TOAST */
+.toast { position:fixed; top:16px; left:50%; transform:translateX(-50%) translateY(-90px); padding:12px 24px; border-radius:30px; font-family:'Fredoka One',cursive; font-size:1.1rem; box-shadow:0 8px 28px rgba(0,0,0,0.16); z-index:9999; transition:transform 0.3s ease; white-space:nowrap; pointer-events:none; }
+.toast.on { transform:translateX(-50%) translateY(0); }
+.toast.ok { background:white; color:#10B981; border-left:5px solid #10B981; }
+.toast.no { background:white; color:#EF4444; border-left:5px solid #EF4444; }
+.toast.hint { background:white; color:#7C3AED; border-left:5px solid #7C3AED; }
+
+.cf { position:fixed; pointer-events:none; z-index:9998; border-radius:3px; animation:cfFall linear forwards; }
+@keyframes cfFall { to{transform:translateY(110vh) rotate(600deg);opacity:0;} }
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- WELCOME -->
+<div class="screen active" id="welcome">
+  <div class="game-logo">🧺</div>
+  <h1 class="game-title">Laundry Fun!</h1>
+  <p class="game-tagline">Sort clothes and wash them clean! 🫧</p>
+  <div class="level-grid" id="level-grid"></div>
+  <button class="play-btn" onclick="startLevel(1)">START PLAYING!</button>
+</div>
+
+<!-- SORT SCREEN -->
+<div class="screen" id="sort-screen">
+  <div class="top-bar">
+    <button class="home-btn" onclick="goHome()">🏠</button>
+    <span class="tb-title" id="tb-title">Level 1</span>
+    <span class="tb-lives" id="tb-lives">❤️❤️❤️</span>
+    <span class="tb-score">⭐<span id="tb-score-num">0</span></span>
+    <div class="tb-progress" style="flex-basis:100%">
+      <div class="tb-progress-fill" id="tb-prog" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="instr-banner" id="instr-banner">Tap a clothes item, then tap the right box!</div>
+
+  <div class="clothes-section">
+    <div class="section-label">Clothes Pile 🎽</div>
+    <div class="clothes-grid" id="clothes-grid"></div>
+  </div>
+
+  <div class="clothes-section" style="margin-top:8px;">
+    <div class="section-label">Sort Into Boxes 📦</div>
+  </div>
+  <div class="boxes-section">
+    <div class="sort-box box-colored" id="sbox-colored" onclick="tapBox('colored')">
+      <div class="box-badge" id="badge-colored">0</div>
+      <div class="box-big-icon">🌈</div>
+      <div class="box-title-t">Coloured Clothes</div>
+      <div class="box-sub-t">Red, pink, yellow, orange...</div>
+      <div class="box-items-mini" id="mini-colored"></div>
+    </div>
+    <div class="sort-box box-white" id="sbox-white" onclick="tapBox('white')">
+      <div class="box-badge" id="badge-white">0</div>
+      <div class="box-big-icon">🤍</div>
+      <div class="box-title-t">White Clothes</div>
+      <div class="box-sub-t">White and light colours</div>
+      <div class="box-items-mini" id="mini-white"></div>
+    </div>
+    <div class="sort-box box-delicate" id="sbox-delicate" onclick="tapBox('delicate')">
+      <div class="box-badge" id="badge-delicate">0</div>
+      <div class="box-big-icon">🌸</div>
+      <div class="box-title-t">Delicate Clothes</div>
+      <div class="box-sub-t">Gentle wash only!</div>
+      <div class="box-items-mini" id="mini-delicate"></div>
+    </div>
+    <div class="sort-box box-clean" id="sbox-clean" onclick="tapBox('clean')">
+      <div class="box-badge" id="badge-clean">0</div>
+      <div class="box-big-icon">✅</div>
+      <div class="box-title-t">Already Clean!</div>
+      <div class="box-sub-t">No washing needed!</div>
+      <div class="box-items-mini" id="mini-clean"></div>
+    </div>
+  </div>
+</div>
+
+<!-- WASH SCREEN -->
+<div class="screen" id="wash-screen">
+  <div class="wash-top">
+    <button class="home-btn" onclick="goHome()">🏠</button>
+    <div class="wash-title-h">Time to Wash! 🫧</div>
+  </div>
+  <div class="wash-tip" id="wash-tip">Tap the steps in the RIGHT ORDER!</div>
+
+  <div class="machine-wrap">
+    <div class="machine-body">
+      <div class="machine-knob"></div>
+      <div class="machine-knob2"></div>
+      <div class="machine-window">
+        <div class="window-shine"></div>
+        <div class="machine-emoji" id="mach-emoji">👕🧦</div>
+      </div>
+      <div class="machine-deco">🚪</div>
+    </div>
+    <div class="bubbles-wrap" id="bubbles">
+      <div class="bub">🫧</div><div class="bub">🫧</div><div class="bub">🫧</div>
+    </div>
+  </div>
+
+  <div class="seq-wrap">
+    <div class="seq-lbl">Your Washing Steps:</div>
+    <div class="seq-row" id="seq-row"></div>
+  </div>
+
+  <div class="steps-grid" id="steps-grid"></div>
+</div>
+
+<!-- VICTORY -->
+<div class="screen" id="victory-screen">
+  <div class="v-emoji" id="v-emoji">🎉</div>
+  <h2 class="v-title" id="v-title">Amazing!</h2>
+  <p class="v-msg" id="v-msg">You did it!</p>
+  <div class="v-stars" id="v-stars">⭐⭐⭐</div>
+  <div class="v-btns">
+    <button class="vb vb-home" onclick="goHome()">🏠 Home</button>
+    <button class="vb vb-next" id="v-next">Next Level ➡</button>
+  </div>
+</div>
+
+<script>
+// SVG illustrations for each clothing item — proper colours kids can clearly see
+function svgTshirt(c,shade){return`<svg viewBox="0 0 80 70" width="72" height="63"><polygon points="20,10 10,28 22,28 22,62 58,62 58,28 70,28 60,10 48,6 40,14 32,6" fill="${c}" stroke="${shade}" stroke-width="2.5" stroke-linejoin="round"/><polygon points="32,6 40,14 48,6 44,4 36,4" fill="${shade}" opacity="0.25"/></svg>`;}
+function svgDress(c,shade){return`<svg viewBox="0 0 80 80" width="68" height="68"><path d="M28,8 L20,28 L14,65 L66,65 L60,28 L52,8 Q40,18 28,8Z" fill="${c}" stroke="${shade}" stroke-width="2.5" stroke-linejoin="round"/><ellipse cx="40" cy="8" rx="12" ry="5" fill="${shade}" opacity="0.2"/><path d="M20,28 L14,65 L66,65 L60,28" fill="${shade}" opacity="0.08"/></svg>`;}
+function svgShorts(c,shade){return`<svg viewBox="0 0 80 60" width="68" height="52"><path d="M10,8 L10,38 Q25,48 40,36 Q55,48 70,38 L70,8 Z" fill="${c}" stroke="${shade}" stroke-width="2.5" stroke-linejoin="round"/><line x1="40" y1="8" x2="40" y2="38" stroke="${shade}" stroke-width="2" opacity="0.3"/><rect x="10" y="8" width="60" height="6" fill="${shade}" opacity="0.15" rx="2"/></svg>`;}
+function svgSweater(c,shade){return`<svg viewBox="0 0 80 72" width="70" height="63"><path d="M18,12 L6,30 L18,33 L18,64 L62,64 L62,33 L74,30 L62,12 L52,8 L40,16 L28,8 Z" fill="${c}" stroke="${shade}" stroke-width="2.5" stroke-linejoin="round"/><path d="M28,8 L40,16 L52,8 L48,5 L32,5 Z" fill="${shade}" opacity="0.25"/><line x1="18" y1="42" x2="62" y2="42" stroke="${shade}" stroke-width="1.5" opacity="0.2"/><line x1="18" y1="50" x2="62" y2="50" stroke="${shade}" stroke-width="1.5" opacity="0.2"/></svg>`;}
+function svgSocks(c,shade){return`<svg viewBox="0 0 80 70" width="68" height="60"><path d="M28,6 L28,42 Q28,58 50,62 Q68,62 68,48 L52,44 L52,6 Z" fill="${c}" stroke="${shade}" stroke-width="2.5" stroke-linejoin="round"/><rect x="28" y="6" width="24" height="10" fill="${shade}" opacity="0.2" rx="2"/></svg>`;}
+function svgCap(c,shade){return`<svg viewBox="0 0 80 65" width="70" height="57"><path d="M12,40 Q12,18 40,16 Q68,18 68,40 Z" fill="${c}" stroke="${shade}" stroke-width="2.5" stroke-linejoin="round"/><ellipse cx="40" cy="40" rx="28" ry="7" fill="${shade}" opacity="0.25"/><path d="M8,42 Q40,54 72,42" stroke="${shade}" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="40" cy="18" r="4" fill="${shade}" opacity="0.4"/></svg>`;}
+function svgPJ(c,shade){return`<svg viewBox="0 0 80 78" width="68" height="68"><polygon points="20,10 10,28 22,28 22,44 38,44 38,10" fill="${c}" stroke="${shade}" stroke-width="2.5" stroke-linejoin="round"/><polygon points="60,10 70,28 58,28 58,44 42,44 42,10" fill="${c}" stroke="${shade}" stroke-width="2.5" stroke-linejoin="round"/><rect x="22" y="44" width="16" height="26" fill="${c}" stroke="${shade}" stroke-width="2.5" rx="2"/><rect x="42" y="44" width="16" height="26" fill="${c}" stroke="${shade}" stroke-width="2.5" rx="2"/><circle cx="40" cy="26" r="3" fill="${shade}" opacity="0.4"/></svg>`;}
+function svgJeans(c,shade){return`<svg viewBox="0 0 80 78" width="68" height="68"><path d="M12,10 L12,44 Q26,56 40,44 Q54,56 68,44 L68,10 Z" fill="${c}" stroke="${shade}" stroke-width="2.5" stroke-linejoin="round"/><path d="M12,44 Q26,56 40,44 L40,72 L16,72 L12,44 Z" fill="${c}" stroke="${shade}" stroke-width="2.5" stroke-linejoin="round"/><path d="M68,44 Q54,56 40,44 L40,72 L64,72 L68,44 Z" fill="${c}" stroke="${shade}" stroke-width="2.5" stroke-linejoin="round"/><line x1="12" y1="18" x2="68" y2="18" stroke="${shade}" stroke-width="2" opacity="0.25"/></svg>`;}
+function svgTowel(c,shade){return`<svg viewBox="0 0 80 70" width="70" height="62"><rect x="10" y="10" width="60" height="50" fill="${c}" stroke="${shade}" stroke-width="2.5" rx="6"/><line x1="10" y1="22" x2="70" y2="22" stroke="${shade}" stroke-width="1.5" opacity="0.3"/><line x1="10" y1="34" x2="70" y2="34" stroke="${shade}" stroke-width="1.5" opacity="0.3"/><line x1="10" y1="46" x2="70" y2="46" stroke="${shade}" stroke-width="1.5" opacity="0.3"/><rect x="10" y="10" width="60" height="8" fill="${shade}" opacity="0.2" rx="4"/></svg>`;}
+function svgTutu(c,shade){return`<svg viewBox="0 0 80 72" width="70" height="63"><rect x="28" y="8" width="24" height="18" fill="${c}" stroke="${shade}" stroke-width="2" rx="4"/><path d="M14,26 Q20,50 40,54 Q60,50 66,26 Z" fill="${c}" stroke="${shade}" stroke-width="2.5" stroke-linejoin="round"/><path d="M14,26 Q22,36 30,30 Q36,44 40,30 Q44,44 50,30 Q58,36 66,26" stroke="${shade}" stroke-width="2" fill="none" opacity="0.4"/></svg>`;}
+function svgScarf(c,shade){return`<svg viewBox="0 0 80 70" width="70" height="62"><path d="M15,20 Q40,10 65,20 Q60,35 40,38 Q20,35 15,20Z" fill="${c}" stroke="${shade}" stroke-width="2.5" stroke-linejoin="round"/><path d="M40,38 Q35,55 30,65" stroke="${c}" stroke-width="10" stroke-linecap="round" fill="none"/><path d="M40,38 Q35,55 30,65" stroke="${shade}" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.4"/></svg>`;}
+function svgOnesie(c,shade){return`<svg viewBox="0 0 80 78" width="68" height="68"><path d="M22,10 L14,26 L24,28 L24,52 L38,52 L38,62 L42,62 L42,52 L56,52 L56,28 L66,26 L58,10 L48,7 L40,14 L32,7 Z" fill="${c}" stroke="${shade}" stroke-width="2.5" stroke-linejoin="round"/><path d="M32,7 L40,14 L48,7 L44,5 L36,5 Z" fill="${shade}" opacity="0.25"/><path d="M34,52 Q40,58 46,52" stroke="${shade}" stroke-width="2" fill="none" opacity="0.5"/></svg>`;}
+function svgMittens(c,shade){return`<svg viewBox="0 0 80 70" width="68" height="62"><path d="M16,30 Q14,10 28,10 Q36,10 36,22 L36,50 Q36,62 26,62 Q16,62 16,50 Z" fill="${c}" stroke="${shade}" stroke-width="2.5" stroke-linejoin="round"/><path d="M36,18 Q38,10 44,12 Q50,14 46,22 L36,28 Z" fill="${c}" stroke="${shade}" stroke-width="2" stroke-linejoin="round"/><path d="M44,30 Q42,10 56,10 Q66,10 66,22 L66,50 Q66,62 54,62 Q44,62 44,50 Z" fill="${c}" stroke="${shade}" stroke-width="2.5" stroke-linejoin="round"/></svg>`;}
+function svgCardigan(c,shade){return`<svg viewBox="0 0 80 72" width="70" height="63"><path d="M18,10 L6,30 L18,33 L18,64 L38,64 L40,50 L42,64 L62,64 L62,33 L74,30 L62,10 L50,7 L40,15 L30,7 Z" fill="${c}" stroke="${shade}" stroke-width="2.5" stroke-linejoin="round"/><line x1="40" y1="15" x2="40" y2="64" stroke="${shade}" stroke-width="2" opacity="0.3"/><circle cx="40" cy="30" r="3" fill="${shade}" opacity="0.5"/><circle cx="40" cy="42" r="3" fill="${shade}" opacity="0.5"/><circle cx="40" cy="54" r="3" fill="${shade}" opacity="0.5"/></svg>`;}
+function svgSwimsuit(c,shade){return`<svg viewBox="0 0 80 72" width="68" height="63"><path d="M22,8 L14,28 L28,28 L28,60 L52,60 L52,28 L66,28 L58,8 Q50,20 40,16 Q30,20 22,8Z" fill="${c}" stroke="${shade}" stroke-width="2.5" stroke-linejoin="round"/><path d="M28,28 L52,28 L52,38 L28,38 Z" fill="${shade}" opacity="0.15"/></svg>`;}
+function svgSchoolbag(c,shade){return`<svg viewBox="0 0 80 80" width="68" height="68"><rect x="14" y="22" width="52" height="48" fill="#F97316" stroke="#C2410C" stroke-width="2.5" rx="10"/><rect x="28" y="12" width="24" height="16" fill="#FB923C" stroke="#C2410C" stroke-width="2" rx="6"/><rect x="28" y="40" width="24" height="18" fill="#FFF7ED" stroke="#C2410C" stroke-width="2" rx="4"/><circle cx="40" cy="49" r="4" fill="#C2410C"/></svg>`;}
+function svgTeddy(c,shade){return`<svg viewBox="0 0 80 80" width="68" height="68"><circle cx="40" cy="44" r="22" fill="#D97706" stroke="#92400E" stroke-width="2"/><circle cx="40" cy="26" r="15" fill="#D97706" stroke="#92400E" stroke-width="2"/><circle cx="28" cy="18" r="8" fill="#F59E0B" stroke="#92400E" stroke-width="2"/><circle cx="52" cy="18" r="8" fill="#F59E0B" stroke="#92400E" stroke-width="2"/><circle cx="35" cy="25" r="3" fill="#1C1917"/><circle cx="45" cy="25" r="3" fill="#1C1917"/><ellipse cx="40" cy="30" rx="6" ry="4" fill="#F59E0B" stroke="#92400E" stroke-width="1.5"/><circle cx="40" cy="29" r="2" fill="#1C1917"/></svg>`;}
+function svgCrown(c,shade){return`<svg viewBox="0 0 80 65" width="68" height="57"><path d="M8,52 L8,28 L24,40 L40,12 L56,40 L72,28 L72,52 Z" fill="#F5C518" stroke="#D97706" stroke-width="2.5" stroke-linejoin="round"/><rect x="8" y="52" width="64" height="10" fill="#F5C518" stroke="#D97706" stroke-width="2" rx="3"/><circle cx="40" cy="20" r="5" fill="#EF4444"/><circle cx="18" cy="36" r="4" fill="#3B82F6"/><circle cx="62" cy="36" r="4" fill="#10B981"/></svg>`;}
+function svgSneakers(c,shade){return`<svg viewBox="0 0 80 60" width="70" height="53"><path d="M8,42 Q8,28 24,26 L60,26 Q72,26 72,36 L72,44 Q60,50 8,48 Z" fill="#F1F5F9" stroke="#94A3B8" stroke-width="2.5" stroke-linejoin="round"/><path d="M24,26 L30,12 L44,12 L44,26" fill="#CBD5E1" stroke="#94A3B8" stroke-width="2" stroke-linejoin="round"/><path d="M8,42 L72,42" stroke="#94A3B8" stroke-width="2" opacity="0.4"/><path d="M32,20 L42,20 M34,16 L40,16" stroke="#64748B" stroke-width="2" stroke-linecap="round" opacity="0.6"/></svg>`;}
+function svgRaincoat(c,shade){return`<svg viewBox="0 0 80 72" width="68" height="63"><path d="M18,12 L6,30 L18,33 L18,64 L62,64 L62,33 L74,30 L62,12 L52,8 L40,16 L28,8 Z" fill="#60A5FA" stroke="#2563EB" stroke-width="2.5" stroke-linejoin="round"/><path d="M28,8 L40,16 L52,8 L48,5 L32,5 Z" fill="#2563EB" opacity="0.3"/><line x1="40" y1="16" x2="40" y2="64" stroke="#2563EB" stroke-width="2" opacity="0.3"/><circle cx="40" cy="35" r="3" fill="#2563EB" opacity="0.6"/><circle cx="40" cy="46" r="3" fill="#2563EB" opacity="0.6"/></svg>`;}
+
+// SVG map per item key
+const SVG_MAP = {
+  'red-tshirt':    ()=>svgTshirt('#EF4444','#B91C1C'),
+  'pink-dress':    ()=>svgDress('#FF69B4','#BE185D'),
+  'orange-shorts': ()=>svgShorts('#F97316','#C2410C'),
+  'red-sweater':   ()=>svgSweater('#EF4444','#991B1B'),
+  'yellow-shirt':  ()=>svgTshirt('#EAB308','#A16207'),
+  'pink-socks':    ()=>svgSocks('#FF69B4','#BE185D'),
+  'red-cap':       ()=>svgCap('#EF4444','#B91C1C'),
+  'orange-pj':     ()=>svgPJ('#F97316','#C2410C'),
+  'purple-shirt':  ()=>svgTshirt('#9333EA','#6B21A8'),
+  'blue-jeans':    ()=>svgJeans('#2563EB','#1D4ED8'),
+  'white-shirt':   ()=>svgTshirt('#F1F5F9','#94A3B8'),
+  'white-socks':   ()=>svgSocks('#F1F5F9','#94A3B8'),
+  'white-undies':  ()=>svgShorts('#F1F5F9','#94A3B8'),
+  'light-shorts':  ()=>svgShorts('#FEF9C3','#CA8A04'),
+  'white-pj':      ()=>svgPJ('#F1F5F9','#94A3B8'),
+  'white-towel':   ()=>svgTowel('#F1F5F9','#94A3B8'),
+  'ballet-tutu':   ()=>svgTutu('#FBCFE8','#DB2777'),
+  'silk-scarf':    ()=>svgScarf('#C4B5FD','#7C3AED'),
+  'baby-onesie':   ()=>svgOnesie('#FDE68A','#D97706'),
+  'mittens':       ()=>svgMittens('#FBCFE8','#DB2777'),
+  'woolly-card':   ()=>svgCardigan('#DDD6FE','#7C3AED'),
+  'swimsuit':      ()=>svgSwimsuit('#FBCFE8','#DB2777'),
+  'school-bag':    ()=>svgSchoolbag('',''),
+  'teddy':         ()=>svgTeddy('',''),
+  'crown':         ()=>svgCrown('',''),
+  'sneakers':      ()=>svgSneakers('',''),
+  'raincoat':      ()=>svgRaincoat('',''),
+};
+
+const ITEMS = {
+  'red-tshirt':    {name:'Red T-Shirt',     cat:'colored',  dirty:true},
+  'pink-dress':    {name:'Pink Dress',       cat:'colored',  dirty:true},
+  'orange-shorts': {name:'Orange Shorts',    cat:'colored',  dirty:true},
+  'red-sweater':   {name:'Red Sweater',      cat:'colored',  dirty:true},
+  'yellow-shirt':  {name:'Yellow Shirt',     cat:'colored',  dirty:true},
+  'pink-socks':    {name:'Pink Socks',       cat:'colored',  dirty:true},
+  'red-cap':       {name:'Red Cap',          cat:'colored',  dirty:true},
+  'orange-pj':     {name:'Orange PJs',       cat:'colored',  dirty:true},
+  'purple-shirt':  {name:'Purple Shirt',     cat:'colored',  dirty:true},
+  'blue-jeans':    {name:'Blue Jeans',       cat:'colored',  dirty:true},
+  'white-shirt':   {name:'White Shirt',      cat:'white',    dirty:true},
+  'white-socks':   {name:'White Socks',      cat:'white',    dirty:true},
+  'white-undies':  {name:'White Undies',     cat:'white',    dirty:true},
+  'light-shorts':  {name:'Cream Shorts',     cat:'white',    dirty:true},
+  'white-pj':      {name:'White PJs',        cat:'white',    dirty:true},
+  'white-towel':   {name:'White Towel',      cat:'white',    dirty:true},
+  'ballet-tutu':   {name:'Ballet Tutu',      cat:'delicate', dirty:true},
+  'silk-scarf':    {name:'Silk Scarf',       cat:'delicate', dirty:true},
+  'baby-onesie':   {name:'Baby Onesie',      cat:'delicate', dirty:true},
+  'mittens':       {name:'Lace Mittens',     cat:'delicate', dirty:true},
+  'woolly-card':   {name:'Woolly Cardigan',  cat:'delicate', dirty:true},
+  'swimsuit':      {name:'Swimsuit',         cat:'delicate', dirty:true},
+  'school-bag':    {name:'School Bag',       cat:'clean',    dirty:false},
+  'teddy':         {name:'Teddy Bear',       cat:'clean',    dirty:false},
+  'crown':         {name:'Princess Crown',   cat:'clean',    dirty:false},
+  'sneakers':      {name:'Clean Sneakers',   cat:'clean',    dirty:false},
+  'raincoat':      {name:'Raincoat',         cat:'clean',    dirty:false},
+};
+
+// SIMPLIFIED: Sort → Detergent → Machine Wash → Dry in Sun → Fold
+const WASH_STEPS = {
+  'sort':      {i:'🗂️', l:'Sort Clothes'},
+  'detergent': {i:'🧴',  l:'Add Detergent'},
+  'machine':   {i:'🌀',  l:'Machine Wash'},
+  'sun-dry':   {i:'☀️',  l:'Dry in Sun'},
+  'fold':      {i:'👐',  l:'Fold Clothes'},
+  'check':     {i:'🔍',  l:'Check Pockets'},
+  'inside-out':{i:'🔄',  l:'Turn Inside Out'},
+  'zip-up':    {i:'🤐',  l:'Zip Up Zips'},
+  'hang':      {i:'🪝',  l:'Hang to Dry'},
+  'iron':      {i:'♨️',  l:'Iron Clothes'},
+};
+
+const LEVELS = [
+  {name:'Beginner',     emoji:'😊', items:['red-tshirt','white-shirt','ballet-tutu','school-bag','pink-socks','white-socks'],
+   washOrder:['sort','detergent','machine','sun-dry'],
+   tip:'Look at the colour of each item and sort into the right box!'},
+  {name:'Getting Good', emoji:'🌟', items:['pink-dress','white-undies','silk-scarf','teddy','orange-shorts','white-towel','red-cap'],
+   washOrder:['sort','check','detergent','machine','sun-dry'],
+   tip:'Pink dress is PINK — Coloured box! Silk scarf is delicate 🌸'},
+  {name:'Laundry Pro!', emoji:'💪', items:['yellow-shirt','white-socks','baby-onesie','crown','red-sweater','light-shorts','mittens','sneakers'],
+   washOrder:['sort','check','inside-out','detergent','machine','sun-dry'],
+   tip:'Baby onesies need the DELICATE box — gentle wash! 🍼'},
+  {name:'Super Helper!',emoji:'🦸', items:['red-tshirt','white-pj','swimsuit','school-bag','orange-pj','white-undies','woolly-card','pink-socks','teddy'],
+   washOrder:['sort','check','inside-out','zip-up','detergent','machine','hang','fold'],
+   tip:'Swimsuits and wooly things go in the DELICATE box! 👙'},
+  {name:'Expert! 🏆',   emoji:'👑', items:['pink-dress','white-towel','ballet-tutu','crown','red-sweater','white-shirt','woolly-card','blue-jeans','baby-onesie','light-shorts','raincoat'],
+   washOrder:['sort','check','inside-out','zip-up','detergent','machine','hang','sun-dry','iron','fold'],
+   tip:'You know all the rules now — sort like a pro! 🏆'},
+];
+
+let curLevel=0,score=0,lives=3,selectedCard=null;
+let sortedBoxes={colored:[],white:[],delicate:[],clean:[]};
+let totalItems=0,doneItems=0;
+let washCorrect=[],washDone=0;
+let unlockedLvls=parseInt(localStorage.getItem('uLvls')||'1');
+let lvlScores=JSON.parse(localStorage.getItem('lScores')||'{}');
+
+function initWelcome(){
+  const g=document.getElementById('level-grid');
+  g.innerHTML='';
+  LEVELS.forEach((lv,i)=>{
+    const n=i+1,locked=n>unlockedLvls,s=lvlScores[n]||0;
+    g.innerHTML+=`<div class="lbtn${locked?' locked':''}" onclick="${locked?'':('startLevel('+n+')')}" style="cursor:${locked?'not-allowed':'pointer'}">
+      <div class="lbtn-num">${lv.emoji}</div>
+      <div class="lbtn-stars">${'⭐'.repeat(s)+'☆'.repeat(3-s)}</div>
+      <div class="lbtn-name">Lv${n}</div>
+      ${locked?'<div>🔒</div>':''}
+    </div>`;
+  });
+}
+
+function startLevel(n){
+  curLevel=n; score=0; lives=3;
+  sortedBoxes={colored:[],white:[],delicate:[],clean:[]};
+  selectedCard=null;
+  const lv=LEVELS[n-1];
+  totalItems=lv.items.length; doneItems=0;
+  document.getElementById('tb-title').textContent='Level '+n+' — '+lv.name;
+  document.getElementById('tb-score-num').textContent='0';
+  updateLives(); updateProg();
+  document.getElementById('instr-banner').textContent='👆 '+lv.tip;
+  ['colored','white','delicate','clean'].forEach(b=>{
+    document.getElementById('badge-'+b).textContent='0';
+    document.getElementById('mini-'+b).innerHTML='';
+    document.getElementById('sbox-'+b).classList.remove('lit','pop');
+  });
+  renderClothes(lv.items);
+  showScreen('sort-screen');
+}
+
+function renderClothes(keys){
+  const grid=document.getElementById('clothes-grid');
+  grid.innerHTML='';
+  const shuffled=[...keys].sort(()=>Math.random()-0.5);
+  shuffled.forEach(k=>{
+    const d=ITEMS[k];
+    const svg=SVG_MAP[k]?SVG_MAP[k]():'';
+    grid.innerHTML+=`<div class="cloth-card" id="card-${k}" onclick="tapCard('${k}')">
+      ${d.dirty?'<div class="dirty-tag">💩</div>':''}
+      <div class="cloth-svg">${svg}</div>
+      <span class="cloth-name">${d.name}</span>
+    </div>`;
+  });
+}
+
+function tapCard(key){
+  if(selectedCard){const p=document.getElementById('card-'+selectedCard);if(p)p.classList.remove('selected');}
+  if(selectedCard===key){selectedCard=null;return;}
+  selectedCard=key;
+  const el=document.getElementById('card-'+key);
+  if(el)el.classList.add('selected');
+  showToast('hint','Now tap the right box below! 👇');
+}
+
+function tapBox(boxType){
+  if(!selectedCard){showToast('hint','👆 First tap a clothes item!');return;}
+  const key=selectedCard,d=ITEMS[key];
+  if(boxType===d.cat){
+    score+=10; doneItems++;
+    sortedBoxes[boxType].push(d.e);
+    document.getElementById('badge-'+boxType).textContent=sortedBoxes[boxType].length;
+    const mini=document.createElement('div'); mini.className='bmini'; mini.textContent=d.e;
+    document.getElementById('mini-'+boxType).appendChild(mini);
+    const box=document.getElementById('sbox-'+boxType);
+    box.classList.add('pop'); setTimeout(()=>box.classList.remove('pop'),450);
+    const card=document.getElementById('card-'+key);
+    if(card){card.classList.add('bounce-out');setTimeout(()=>card.remove(),340);}
+    document.getElementById('tb-score-num').textContent=score;
+    updateProg(); selectedCard=null;
+    showToast('ok',['Great! ✅','Correct! 🎉','Yay! ⭐','Super! 🌟','Well done! 💪','Perfect! 😍'][Math.floor(Math.random()*6)]);
+    if(doneItems>=totalItems) setTimeout(()=>startWash(),700);
+  } else {
+    lives=Math.max(0,lives-1); updateLives();
+    const card=document.getElementById('card-'+key);
+    if(card){card.style.animation='shakeBtn 0.4s ease';setTimeout(()=>card.style.animation='',500);}
+    showToast('no',getHint(d.cat));
+    if(lives===0){lives=3;updateLives();showToast('hint','No worries, keep going! 💪');}
+  }
+}
+
+function getHint(cat){return{colored:'🌈 Goes in COLOURED box!',white:'🤍 Goes in WHITE box!',delicate:'🌸 Goes in DELICATE box!',clean:'✅ This one is already CLEAN!'}[cat];}
+function updateLives(){document.getElementById('tb-lives').textContent='❤️'.repeat(lives)+'🖤'.repeat(3-lives);}
+function updateProg(){const pct=totalItems>0?(doneItems/totalItems*100):0;document.getElementById('tb-prog').style.width=pct+'%';}
+
+function startWash(){
+  const lv=LEVELS[curLevel-1];
+  washCorrect=lv.washOrder; washDone=0;
+  document.getElementById('wash-tip').textContent=`Tap the ${washCorrect.length} steps in the RIGHT ORDER! 👇`;
+  const allS=[...sortedBoxes.colored,...sortedBoxes.white,...sortedBoxes.delicate];
+  document.getElementById('mach-emoji').textContent=(allS.slice(0,2).join('')||'👕🧦');
+  document.getElementById('mach-emoji').className='machine-emoji';
+  document.getElementById('bubbles').classList.remove('active');
+  renderSeqSlots(); renderStepBtns();
+  showScreen('wash-screen');
+}
+
+function renderSeqSlots(){
+  const row=document.getElementById('seq-row'); row.innerHTML='';
+  washCorrect.forEach((s,i)=>{
+    const div=document.createElement('div'); div.className='seq-slot'; div.id='ss-'+i;
+    row.appendChild(div);
+    if(i<washCorrect.length-1){const a=document.createElement('div');a.className='seq-arr';a.textContent='→';row.appendChild(a);}
+  });
+}
+
+function renderStepBtns(){
+  const grid=document.getElementById('steps-grid'); grid.innerHTML='';
+  const shuffled=[...washCorrect].sort(()=>Math.random()-0.5);
+  shuffled.forEach(s=>{
+    const d=WASH_STEPS[s];
+    grid.innerHTML+=`<button class="step-btn" id="sbtn-${s}" onclick="tapStep('${s}')">
+      <span class="s-icon">${d.i}</span>${d.l}
+    </button>`;
+  });
+}
+
+function tapStep(s){
+  const btn=document.getElementById('sbtn-'+s);
+  if(!btn||btn.classList.contains('used'))return;
+  if(s===washCorrect[washDone]){
+    const slot=document.getElementById('ss-'+washDone);
+    slot.textContent=WASH_STEPS[s].i; slot.classList.add('has','done');
+    btn.classList.add('done','used'); washDone++;
+    animateMachine(s);
+    showToast('ok',['Correct step! 🎉','Right! ✨','Great! 🌟','Yes! 💪','Perfect! ⭐'][Math.floor(Math.random()*5)]);
+    if(washDone>=washCorrect.length) setTimeout(finishGame,1000);
+  } else {
+    btn.classList.add('wrong');
+    setTimeout(()=>btn.classList.remove('wrong'),450);
+    showToast('no','Hmm, not yet! Try a different step 🤔');
+  }
+}
+
+function animateMachine(s){
+  const me=document.getElementById('mach-emoji'),bub=document.getElementById('bubbles');
+  me.className='machine-emoji';
+  if(s==='machine'){me.classList.add('spin-anim');bub.classList.add('active');setTimeout(()=>{me.className='machine-emoji';bub.classList.remove('active');},1000);}
+  else if(s==='detergent'){me.classList.add('wash-anim');bub.classList.add('active');setTimeout(()=>{me.className='machine-emoji';bub.classList.remove('active');},800);}
+  else if(s==='sun-dry'||s==='hang'){me.textContent='☀️👕';setTimeout(()=>{me.textContent='✨👕';},700);}
+  else if(s==='fold'){me.textContent='👐';setTimeout(()=>{me.textContent='🎉';},600);}
+  else if(s==='iron'){me.textContent='♨️👕';setTimeout(()=>{me.textContent='✨👔';},600);}
+  else if(s==='sort'){me.textContent='🗂️';setTimeout(()=>{me.textContent='👕🧦';},500);}
+  else if(s==='check'){me.textContent='🔍';setTimeout(()=>{me.textContent='👕';},500);}
+  else if(s==='inside-out'){me.textContent='🔄';setTimeout(()=>{me.textContent='👕';},500);}
+  else if(s==='zip-up'){me.textContent='🤐';setTimeout(()=>{me.textContent='🤐✅';},500);}
+}
+
+function finishGame(){
+  const stars=lives===3?3:lives===2?2:1;
+  lvlScores[curLevel]=Math.max(lvlScores[curLevel]||0,stars);
+  if(curLevel>=unlockedLvls) unlockedLvls=Math.min(5,curLevel+1);
+  localStorage.setItem('uLvls',unlockedLvls);
+  localStorage.setItem('lScores',JSON.stringify(lvlScores));
+  const titles=['Woohoo! 🎊','Amazing! 🏆','Super Star! ⭐','Awesome! 🦸','CHAMPION! 👑'];
+  const msgs=['You sorted all the laundry! 🧺','All clothes are sparkling clean! ✨','Laundry hero — you rocked it! 🦸','Super job! The clothes are fresh! 🌿','You are a Laundry CHAMPION! 👑🎉'];
+  document.getElementById('v-emoji').textContent=['🎉','🏆','⭐','🌈','👑'][curLevel-1];
+  document.getElementById('v-title').textContent=titles[curLevel-1];
+  document.getElementById('v-msg').textContent=msgs[curLevel-1];
+  document.getElementById('v-stars').textContent='⭐'.repeat(stars)+'☆'.repeat(3-stars);
+  const nb=document.getElementById('v-next');
+  if(curLevel>=5){nb.textContent='Play Again 🔄';nb.onclick=()=>startLevel(1);}
+  else{nb.textContent='Level '+(curLevel+1)+' ➡';nb.onclick=nextLevel;}
+  showScreen('victory-screen');
+  spawnConfetti();
+}
+
+function nextLevel(){if(curLevel<5)startLevel(curLevel+1);else goHome();}
+function goHome(){showScreen('welcome');initWelcome();}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+let toastTmr;
+function showToast(type,msg){
+  clearTimeout(toastTmr);
+  const t=document.getElementById('toast');
+  t.className='toast '+type+' on';
+  t.textContent=msg;
+  toastTmr=setTimeout(()=>t.classList.remove('on'),2200);
+}
+
+function spawnConfetti(){
+  const cols=['#FF6B9D','#4ECDC4','#FFE66D','#A855F7','#FF9F43','#55EFC4','#FF6B6B','#60A5FA'];
+  for(let i=0;i<70;i++) setTimeout(()=>{
+    const c=document.createElement('div'); c.className='cf';
+    c.style.cssText=`left:${Math.random()*100}vw;top:-16px;width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;background:${cols[Math.floor(Math.random()*cols.length)]};animation-duration:${1.5+Math.random()*2}s;`;
+    document.body.appendChild(c); setTimeout(()=>c.remove(),3500);
+  },i*35);
+}
+
+initWelcome();
+</script>
+</body>
+</html>

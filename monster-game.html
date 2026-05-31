@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Monster Weather Game! 🌈</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sky-sun:  #87CEEB;
+  --sky-rain: #607D8B;
+  --yellow:   #FFD93D;
+  --orange:   #FF8C42;
+  --pink:     #FF6B9D;
+  --green:    #3DD68C;
+  --purple:   #A855F7;
+  --navy:     #1B3A6B;
+  --white:    #FFFFFF;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--sky-sun);
+  transition: background 1s ease;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-start;
+  min-height: 100vh;
+  overflow-y: auto;
+}
+body.rainy { background: linear-gradient(180deg, #546E7A 0%, #607D8B 100%); }
+body.sunny { background: linear-gradient(180deg, #87CEEB 0%, #B3E5FC 100%); }
+
+/* ── SCREENS ── */
+.screen { display: none; width: 100%; min-height: 100vh; flex-direction: column; align-items: center; justify-content: center; padding: 16px; }
+.screen.active { display: flex; }
+
+/* ══════════════════════════════════
+   WELCOME SCREEN
+══════════════════════════════════ */
+#welcome {
+  background: linear-gradient(160deg, #FFF8E1 0%, #FCE4EC 50%, #E3F2FD 100%);
+  text-align: center; gap: 0;
+}
+.welcome-clouds { position: absolute; top: 0; left: 0; right: 0; height: 120px; overflow: hidden; pointer-events: none; }
+.cloud { position: absolute; background: white; border-radius: 50px; opacity: 0.85; }
+.cloud::before, .cloud::after { content: ''; position: absolute; background: white; border-radius: 50%; }
+.c1 { width: 100px; height: 40px; top: 20px; left: -20px; animation: cloudDrift 18s linear infinite; }
+.c1::before { width: 50px; height: 50px; top: -25px; left: 15px; }
+.c1::after  { width: 35px; height: 35px; top: -18px; left: 45px; }
+.c2 { width: 80px; height: 32px; top: 50px; left: 40%; animation: cloudDrift 24s 4s linear infinite; }
+.c2::before { width: 40px; height: 40px; top: -20px; left: 10px; }
+.c2::after  { width: 28px; height: 28px; top: -14px; left: 36px; }
+.c3 { width: 110px; height: 44px; top: 10px; right: -30px; animation: cloudDrift 20s 8s linear infinite; }
+.c3::before { width: 55px; height: 55px; top: -28px; left: 18px; }
+.c3::after  { width: 38px; height: 38px; top: -20px; left: 52px; }
+@keyframes cloudDrift { 0%{transform:translateX(-140px);} 100%{transform:translateX(calc(100vw + 140px));} }
+
+.welcome-emoji-row { display: flex; gap: 16px; justify-content: center; margin-bottom: 8px; margin-top: 60px; }
+.we { font-size: clamp(3rem, 12vw, 5rem); animation: weBounce 1.8s ease infinite; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.15)); }
+.we:nth-child(2){ animation-delay: 0.3s; }
+.we:nth-child(3){ animation-delay: 0.6s; }
+@keyframes weBounce { 0%,100%{transform:translateY(0) rotate(-5deg);} 50%{transform:translateY(-18px) rotate(5deg);} }
+
+.welcome-title { font-family: 'Fredoka One', cursive; font-size: clamp(2.2rem, 9vw, 4rem); color: var(--navy); line-height: 1.05; margin-bottom: 6px; text-shadow: 0 3px 0 rgba(27,58,107,0.12); }
+.welcome-title .yl { color: #FF8C42; }
+.welcome-title .pk { color: var(--pink); }
+.welcome-sub { font-size: clamp(0.95rem, 3.5vw, 1.2rem); color: #666; font-weight: 800; margin-bottom: 28px; }
+
+.code-preview {
+  background: var(--navy); border-radius: 20px; padding: 16px 24px;
+  margin-bottom: 28px; box-shadow: 0 8px 28px rgba(27,58,107,0.3);
+  max-width: 380px; width: 100%;
+}
+.code-line { font-family: 'Fredoka One', cursive; font-size: clamp(0.9rem, 3vw, 1.05rem); line-height: 1.9; }
+.kw  { color: #FF79C6; }
+.cond{ color: var(--yellow); }
+.act { color: var(--green); }
+.els { color: #BD93F9; }
+
+.start-btn {
+  background: linear-gradient(135deg, var(--orange), var(--pink));
+  color: white; border: none; padding: 18px 52px;
+  font-family: 'Fredoka One', cursive; font-size: 1.5rem;
+  border-radius: 60px; cursor: pointer;
+  box-shadow: 0 8px 28px rgba(255,107,157,0.45), 0 0 0 0 rgba(255,107,157,0.3);
+  animation: startPulse 2s ease infinite; transition: transform 0.15s;
+  letter-spacing: 1px;
+}
+.start-btn:hover { transform: scale(1.07); }
+.start-btn:active { transform: scale(0.95); }
+@keyframes startPulse {
+  0%,100%{ box-shadow: 0 8px 28px rgba(255,107,157,0.45), 0 0 0 0 rgba(255,107,157,0.2); }
+  50%    { box-shadow: 0 8px 28px rgba(255,107,157,0.45), 0 0 0 14px rgba(255,107,157,0); }
+}
+.thinklab-tag { margin-top: 20px; font-family: 'Fredoka One', cursive; font-size: 0.85rem; color: #aaa; letter-spacing: 1px; }
+.thinklab-tag span { color: var(--navy); }
+
+/* ══════════════════════════════════
+   GAME SCREEN
+══════════════════════════════════ */
+#game { padding: 0; justify-content: flex-start; min-height: 100vh; position: relative; overflow: hidden; }
+
+/* Sky layers */
+.sky-bg {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  transition: all 1.2s ease;
+}
+.sky-sunny  { background: linear-gradient(180deg, #87CEEB 0%, #B3E5FC 60%, #E8F5E9 100%); }
+.sky-rainy  { background: linear-gradient(180deg, #455A64 0%, #607D8B 60%, #78909C 100%); }
+
+/* Rain */
+.rain-container { position: fixed; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; opacity: 0; transition: opacity 0.8s; }
+.rain-container.show { opacity: 1; }
+.raindrop { position: absolute; top: -20px; width: 2px; border-radius: 2px; background: rgba(180,220,255,0.7); animation: rainFall linear infinite; }
+@keyframes rainFall { to { transform: translateY(110vh); } }
+
+/* Sun */
+.sun {
+  position: fixed; top: 30px; right: 40px; z-index: 2;
+  width: 80px; height: 80px;
+  background: var(--yellow); border-radius: 50%;
+  box-shadow: 0 0 0 12px rgba(255,217,61,0.25), 0 0 0 24px rgba(255,217,61,0.12);
+  animation: sunSpin 20s linear infinite;
+  transition: opacity 0.8s, transform 0.8s;
+}
+.sun.hide { opacity: 0; transform: scale(0.5); }
+.sun-ray { position: absolute; background: var(--yellow); border-radius: 4px; }
+@keyframes sunSpin { to { transform: rotate(360deg); } }
+
+/* Clouds in game */
+.game-clouds { position: fixed; top: 0; left: 0; right: 0; z-index: 2; pointer-events: none; }
+.gc { position: absolute; background: white; border-radius: 50px; transition: opacity 0.8s; }
+.gc::before, .gc::after { content: ''; position: absolute; background: white; border-radius: 50%; }
+.gc.dark { background: #B0BEC5; }
+.gc.dark::before { background: #B0BEC5; }
+.gc.dark::after  { background: #B0BEC5; }
+.gc1 { width: 120px; height: 48px; top: 25px; left: 10%; }
+.gc1::before { width: 60px; height: 60px; top: -30px; left: 18px; }
+.gc1::after  { width: 42px; height: 42px; top: -22px; left: 56px; }
+.gc2 { width: 90px; height: 36px; top: 60px; left: 35%; }
+.gc2::before { width: 45px; height: 45px; top: -22px; left: 14px; }
+.gc2::after  { width: 32px; height: 32px; top: -16px; left: 42px; }
+.gc3 { width: 100px; height: 40px; top: 20px; right: 140px; }
+.gc3::before { width: 50px; height: 50px; top: -25px; left: 16px; }
+.gc3::after  { width: 36px; height: 36px; top: -18px; left: 48px; }
+
+/* Ground */
+.ground {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 2;
+  height: 90px; pointer-events: none;
+}
+.grass { position: absolute; bottom: 0; left: 0; right: 0; height: 60px; background: #66BB6A; border-radius: 40px 40px 0 0; }
+.grass.wet { background: #388E3C; }
+.grass::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 18px; background: #81C784; border-radius: 40px 40px 0 0; }
+.mud { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 120px; height: 18px; background: #6D4C41; border-radius: 50%; opacity: 0; transition: opacity 0.8s; }
+.mud.show { opacity: 0.6; }
+/* Flowers */
+.flower { position: absolute; bottom: 52px; font-size: 1.4rem; transition: opacity 0.8s; }
+.fl1 { left: 8%; } .fl2 { left: 18%; } .fl3 { right: 8%; } .fl4 { right: 18%; }
+.flower.hide { opacity: 0; }
+/* Puddles */
+.puddle { position: absolute; bottom: 44px; border-radius: 50%; background: rgba(100,181,246,0.45); border: 2px solid rgba(100,181,246,0.3); opacity: 0; transition: opacity 0.8s; }
+.p1 { width: 60px; height: 20px; left: 12%; }
+.p2 { width: 44px; height: 14px; right: 14%; }
+.puddle.show { opacity: 1; }
+
+/* ── GAME CONTENT ── */
+.game-content { position: relative; z-index: 10; width: 100%; max-width: 520px; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; padding-bottom: 110px; padding-top: 14px; }
+
+/* TOP BAR */
+.top-bar { display: flex; align-items: center; gap: 10px; width: 100%; }
+.home-btn { background: rgba(255,255,255,0.85); border: none; border-radius: 14px; padding: 9px 14px; font-size: 1.1rem; cursor: pointer; font-weight: 800; color: var(--navy); backdrop-filter: blur(6px); transition: transform 0.15s; }
+.home-btn:active { transform: scale(0.9); }
+.level-pill { background: rgba(255,255,255,0.85); border-radius: 20px; padding: 6px 16px; font-family: 'Fredoka One', cursive; font-size: 1rem; color: var(--navy); backdrop-filter: blur(6px); }
+.score-pill { background: linear-gradient(135deg, var(--yellow), var(--orange)); border-radius: 20px; padding: 6px 16px; font-family: 'Fredoka One', cursive; font-size: 1rem; color: white; margin-left: auto; box-shadow: 0 3px 10px rgba(255,140,66,0.4); }
+.lives-pill { background: rgba(255,255,255,0.85); border-radius: 20px; padding: 6px 12px; font-size: 1rem; letter-spacing: 2px; backdrop-filter: blur(6px); }
+
+/* IF-ELSE BANNER */
+.code-banner {
+  background: rgba(27,58,107,0.88);
+  border-radius: 18px; padding: 12px 18px;
+  width: 100%; backdrop-filter: blur(8px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  text-align: center;
+}
+.cb-line { font-family: 'Fredoka One', cursive; font-size: clamp(0.82rem, 2.8vw, 1rem); line-height: 1.9; }
+
+/* WEATHER CARD */
+.weather-card {
+  background: rgba(255,255,255,0.88); border-radius: 28px;
+  padding: 20px 24px; width: 100%;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  text-align: center; backdrop-filter: blur(8px);
+  border: 3px solid rgba(255,255,255,0.6);
+  animation: cardIn 0.4s ease;
+}
+@keyframes cardIn { from{transform:scale(0.85) translateY(-20px);opacity:0;} to{transform:scale(1);opacity:1;} }
+.weather-label { font-family: 'Fredoka One', cursive; font-size: 0.85rem; color: #888; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+.weather-icon  { font-size: clamp(3.5rem, 14vw, 5.5rem); line-height: 1; display: block; margin-bottom: 6px; animation: weatherPop 0.5s cubic-bezier(0.34,1.56,0.64,1); filter: drop-shadow(0 6px 12px rgba(0,0,0,0.15)); }
+@keyframes weatherPop { from{transform:scale(0.3) rotate(-20deg);opacity:0;} to{transform:scale(1) rotate(0);opacity:1;} }
+.weather-text  { font-family: 'Fredoka One', cursive; font-size: clamp(1.4rem, 6vw, 2rem); color: var(--navy); }
+.weather-text.rain-text { color: #1565C0; }
+.weather-text.sun-text  { color: #F57F17; }
+
+/* MONSTER */
+.monster-card {
+  background: rgba(255,255,255,0.88); border-radius: 28px;
+  padding: 16px; width: 100%;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  text-align: center; backdrop-filter: blur(8px);
+  border: 3px solid rgba(255,255,255,0.6);
+  position: relative;
+}
+.monster-name-tag {
+  display: inline-block; background: var(--purple);
+  color: white; border-radius: 20px; padding: 4px 16px;
+  font-family: 'Fredoka One', cursive; font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+.monster-svg-wrap { position: relative; display: inline-block; }
+.monster-svg-wrap svg { display: block; transition: all 0.4s; }
+.monster-item { position: absolute; font-size: 2rem; transition: all 0.5s cubic-bezier(0.34,1.56,0.64,1); opacity: 0; }
+.monster-item.show { opacity: 1; }
+.monster-speech {
+  position: absolute; background: white; border-radius: 16px 16px 16px 4px;
+  padding: 7px 12px; font-family: 'Fredoka One', cursive; font-size: 0.85rem;
+  color: var(--navy); box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+  top: -10px; right: -20px; white-space: nowrap;
+  opacity: 0; transform: scale(0.7); transition: all 0.3s 0.2s;
+  z-index: 5;
+}
+.monster-speech.show { opacity: 1; transform: scale(1); }
+
+/* CHOICE BUTTONS */
+.choice-section { width: 100%; }
+.choice-label { font-family: 'Fredoka One', cursive; font-size: 0.9rem; color: rgba(255,255,255,0.9); text-align: center; margin-bottom: 10px; text-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+.choices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.choice-btn {
+  background: white; border: 4px solid transparent;
+  border-radius: 22px; padding: 14px 10px;
+  cursor: pointer; transition: all 0.18s;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.choice-btn:active { transform: scale(0.93); }
+.choice-btn:hover  { transform: scale(1.05); box-shadow: 0 10px 28px rgba(0,0,0,0.18); }
+.choice-icon { font-size: clamp(2rem, 8vw, 2.8rem); line-height: 1; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.12)); }
+.choice-text { font-family: 'Fredoka One', cursive; font-size: clamp(0.8rem, 3vw, 1rem); color: var(--navy); text-align: center; }
+.choice-btn.correct { border-color: var(--green); background: #F0FFF4; animation: correctPop 0.5s ease; }
+.choice-btn.wrong   { border-color: #EF4444; background: #FFF0F0; animation: wrongShake 0.4s ease; }
+.choice-btn.correct .choice-icon { animation: iconSpin 0.5s ease; }
+@keyframes correctPop  { 0%{transform:scale(1);} 40%{transform:scale(1.12);} 100%{transform:scale(1);} }
+@keyframes wrongShake  { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-8px);} 75%{transform:translateX(8px);} }
+@keyframes iconSpin    { 0%{transform:rotate(0) scale(1);} 50%{transform:rotate(20deg) scale(1.2);} 100%{transform:rotate(0) scale(1);} }
+
+/* PROGRESS */
+.progress-row { display: flex; align-items: center; gap: 10px; width: 100%; }
+.progress-bg { flex: 1; height: 14px; background: rgba(255,255,255,0.35); border-radius: 20px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--green), #00E676); border-radius: 20px; transition: width 0.5s ease; }
+.progress-txt { font-family: 'Fredoka One', cursive; font-size: 0.85rem; color: rgba(255,255,255,0.9); white-space: nowrap; }
+
+/* TOAST */
+.toast {
+  position: fixed; top: 14px; left: 50%; transform: translateX(-50%) translateY(-80px);
+  background: white; border-radius: 30px; padding: 11px 22px;
+  font-family: 'Fredoka One', cursive; font-size: 1.05rem;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.18); z-index: 9999;
+  transition: transform 0.3s ease; white-space: nowrap; pointer-events: none;
+}
+.toast.on  { transform: translateX(-50%) translateY(0); }
+.toast.ok  { color: #10B981; border-left: 5px solid #10B981; }
+.toast.bad { color: #EF4444; border-left: 5px solid #EF4444; }
+
+/* CONFETTI */
+.cf { position: fixed; pointer-events: none; z-index: 9998; border-radius: 3px; animation: cfFall linear forwards; }
+@keyframes cfFall { to { transform: translateY(110vh) rotate(600deg); opacity: 0; } }
+
+/* ══════════════════════════════════
+   VICTORY SCREEN
+══════════════════════════════════ */
+#victory {
+  background: linear-gradient(160deg, #FFF8E1, #FCE4EC, #E3F2FD);
+  text-align: center; gap: 14px;
+}
+.v-monster { font-size: 6rem; display: block; animation: vBounce 0.9s ease infinite; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.15)); }
+@keyframes vBounce { 0%,100%{transform:translateY(0) rotate(-5deg);} 50%{transform:translateY(-20px) rotate(5deg);} }
+.v-title { font-family: 'Fredoka One', cursive; font-size: clamp(2.2rem,9vw,3.5rem); color: var(--navy); }
+.v-msg   { font-size: 1.05rem; color: #666; font-weight: 800; max-width: 320px; }
+.v-stars { font-size: 2.8rem; letter-spacing: 5px; }
+.v-score-box { background: var(--navy); border-radius: 24px; padding: 16px 36px; }
+.v-score-num { font-family: 'Fredoka One', cursive; font-size: 2.8rem; color: var(--yellow); display: block; }
+.v-score-lbl { font-size: 0.85rem; color: rgba(255,255,255,0.6); font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+.v-code-recap {
+  background: var(--navy); border-radius: 20px; padding: 14px 22px;
+  max-width: 340px; width: 100%;
+  box-shadow: 0 8px 24px rgba(27,58,107,0.3);
+}
+.vcr-title { font-family: 'Fredoka One', cursive; font-size: 0.85rem; color: rgba(255,255,255,0.5); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+.v-btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.vbtn { padding: 15px 28px; font-family: 'Fredoka One', cursive; font-size: 1.05rem; border: none; border-radius: 50px; cursor: pointer; transition: transform 0.15s; }
+.vbtn:active { transform: scale(0.94); }
+.vbtn-play { background: linear-gradient(135deg, var(--orange), var(--pink)); color: white; box-shadow: 0 6px 20px rgba(255,107,157,0.4); }
+.vbtn-home { background: white; color: #aaa; border: 2px solid #EEE; }
+.thinklab-footer { font-family: 'Fredoka One', cursive; font-size: 0.82rem; color: #bbb; letter-spacing: 1px; }
+.thinklab-footer span { color: var(--navy); }
+</style>
+</head>
+<body class="sunny">
+
+<div class="toast" id="toast"></div>
+
+<!-- ══ WELCOME ══ -->
+<div class="screen active" id="welcome">
+  <div class="welcome-clouds">
+    <div class="cloud c1"></div>
+    <div class="cloud c2"></div>
+    <div class="cloud c3"></div>
+  </div>
+
+  <div class="welcome-emoji-row">
+    <span class="we">👾</span>
+    <span class="we">🌦️</span>
+    <span class="we">👾</span>
+  </div>
+
+  <h1 class="welcome-title">Monster<br><span class="yl">Weather</span><br><span class="pk">Game!</span></h1>
+  <p class="welcome-sub">Help the monsters decide what to do! ☔🌞</p>
+
+  <div class="code-preview">
+    <div class="code-line"><span class="kw">IF</span> <span class="cond">it is raining</span> <span class="kw">THEN</span></div>
+    <div class="code-line">&nbsp;&nbsp;<span class="act">☂️ use umbrella!</span></div>
+    <div class="code-line"><span class="els">ELSE</span></div>
+    <div class="code-line">&nbsp;&nbsp;<span class="act">🌞 play outside!</span></div>
+  </div>
+
+  <button class="start-btn" onclick="startGame()">▶ Let's Play!</button>
+  <div class="thinklab-tag">by <span>ThinkLab</span> — Raising smart thinkers!</div>
+</div>
+
+<!-- ══ GAME ══ -->
+<div class="screen" id="game">
+  <!-- Sky -->
+  <div class="sky-bg sky-sunny" id="sky-bg"></div>
+
+  <!-- Rain -->
+  <div class="rain-container" id="rain-container"></div>
+
+  <!-- Sun -->
+  <div class="sun" id="sun"></div>
+
+  <!-- Clouds -->
+  <div class="game-clouds">
+    <div class="gc gc1" id="gc1"></div>
+    <div class="gc gc2" id="gc2"></div>
+    <div class="gc gc3" id="gc3"></div>
+  </div>
+
+  <!-- Ground -->
+  <div class="ground">
+    <div class="grass" id="grass"></div>
+    <div class="mud"   id="mud"></div>
+    <div class="flower fl1" id="fl1">🌸</div>
+    <div class="flower fl2" id="fl2">🌼</div>
+    <div class="flower fl3" id="fl3">🌺</div>
+    <div class="flower fl4" id="fl4">🌻</div>
+    <div class="puddle p1" id="p1"></div>
+    <div class="puddle p2" id="p2"></div>
+  </div>
+
+  <!-- Content -->
+  <div class="game-content">
+    <div class="top-bar">
+      <button class="home-btn" onclick="goHome()">🏠</button>
+      <div class="level-pill" id="level-pill">Round 1</div>
+      <div class="lives-pill" id="lives-pill">❤️❤️❤️</div>
+      <div class="score-pill">⭐<span id="score-num">0</span></div>
+    </div>
+
+    <div class="progress-row">
+      <div class="progress-bg"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+      <div class="progress-txt" id="prog-txt">0 / 8</div>
+    </div>
+
+    <!-- Code Banner -->
+    <div class="code-banner" id="code-banner">
+      <div class="cb-line"><span class="kw">IF</span> <span class="cond" id="cb-cond">???</span> <span class="kw">THEN</span></div>
+      <div class="cb-line">&nbsp;&nbsp;<span class="act" id="cb-then">???</span></div>
+      <div class="cb-line"><span class="els">ELSE</span></div>
+      <div class="cb-line">&nbsp;&nbsp;<span class="act" id="cb-else">???</span></div>
+    </div>
+
+    <!-- Weather Card -->
+    <div class="weather-card" id="weather-card">
+      <div class="weather-label">TODAY'S WEATHER</div>
+      <span class="weather-icon" id="weather-icon">🌞</span>
+      <div class="weather-text" id="weather-text">Sunny Day!</div>
+    </div>
+
+    <!-- Monster Card -->
+    <div class="monster-card" id="monster-card">
+      <div class="monster-name-tag" id="monster-name">Blobby</div>
+      <div class="monster-svg-wrap" id="monster-wrap">
+        <svg id="monster-svg" width="150" height="150" viewBox="0 0 150 150"></svg>
+        <div class="monster-item" id="monster-item" style="bottom:10px; right:-10px;">☂️</div>
+        <div class="monster-speech" id="monster-speech">Hmm...</div>
+      </div>
+    </div>
+
+    <!-- Choices -->
+    <div class="choice-section">
+      <div class="choice-label" id="choice-label">What should the monster do? 🤔</div>
+      <div class="choices">
+        <button class="choice-btn" id="btn-a" onclick="choose('a')">
+          <span class="choice-icon" id="icon-a">☂️</span>
+          <span class="choice-text" id="text-a">Use Umbrella</span>
+        </button>
+        <button class="choice-btn" id="btn-b" onclick="choose('b')">
+          <span class="choice-icon" id="icon-b">🌞</span>
+          <span class="choice-text" id="text-b">Play Outside</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ VICTORY ══ -->
+<div class="screen" id="victory">
+  <span class="v-monster" id="v-monster">👾</span>
+  <h2 class="v-title" id="v-title">Amazing!</h2>
+  <p class="v-msg"  id="v-msg">You helped all the monsters!</p>
+  <div class="v-stars" id="v-stars">⭐⭐⭐</div>
+  <div class="v-score-box">
+    <span class="v-score-num" id="v-score-num">0</span>
+    <span class="v-score-lbl">Points Earned</span>
+  </div>
+  <div class="v-code-recap">
+    <div class="vcr-title">You learned:</div>
+    <div class="code-line"><span class="kw">IF</span> <span class="cond">it is raining</span> <span class="kw">THEN</span></div>
+    <div class="code-line">&nbsp;&nbsp;<span class="act">☂️ use umbrella!</span></div>
+    <div class="code-line"><span class="els">ELSE</span></div>
+    <div class="code-line">&nbsp;&nbsp;<span class="act">🌞 play outside!</span></div>
+  </div>
+  <div class="v-btns">
+    <button class="vbtn vbtn-home" onclick="goHome()">🏠 Home</button>
+    <button class="vbtn vbtn-play" onclick="startGame()">▶ Play Again</button>
+  </div>
+  <div class="thinklab-footer">by <span>ThinkLab</span> — Raising smart thinkers!</div>
+</div>
+
+<script>
+// ── MONSTERS ──────────────────────────────────────────────────────────────
+var MONSTERS = [
+  { name:'Blobby',  color:'#A855F7', eye:'#fff', pupil:'#1B3A6B', mouth:'happy', spots:['#C084FC','#7C3AED'] },
+  { name:'Chompy',  color:'#FF6B9D', eye:'#fff', pupil:'#1B3A6B', mouth:'big',   spots:['#FFB3CC','#E91E8C'] },
+  { name:'Squiggle',color:'#3DD68C', eye:'#fff', pupil:'#1B3A6B', mouth:'smile', spots:['#6EE7B7','#059669'] },
+  { name:'Zappy',   color:'#FF8C42', eye:'#fff', pupil:'#1B3A6B', mouth:'happy', spots:['#FFBA80','#E65100'] },
+  { name:'Bumble',  color:'#4A90D9', eye:'#fff', pupil:'#1B3A6B', mouth:'smile', spots:['#90CAF9','#1565C0'] },
+  { name:'Wobbly',  color:'#FFD93D', eye:'#fff', pupil:'#1B3A6B', mouth:'big',   spots:['#FFF176','#F9A825'] },
+  { name:'Grumble', color:'#FF5252', eye:'#fff', pupil:'#1B3A6B', mouth:'smile', spots:['#FF8A80','#B71C1C'] },
+  { name:'Pudding', color:'#26C6DA', eye:'#fff', pupil:'#1B3A6B', mouth:'happy', spots:['#80DEEA','#00838F'] },
+];
+
+// ── ROUNDS ────────────────────────────────────────────────────────────────
+// weather: 'rain' | 'sun'  correct: 'a'|'b'  btnA=umbrella btnB=outside always
+var ROUNDS = [
+  { weather:'rain', wx:'🌧️', wt:'It is Raining!', wc:'rain-text' },
+  { weather:'sun',  wx:'☀️', wt:'Sunny Day!',      wc:'sun-text'  },
+  { weather:'rain', wx:'⛈️', wt:'Thunderstorm!',   wc:'rain-text' },
+  { weather:'sun',  wx:'🌤️', wt:'Partly Cloudy!',  wc:'sun-text'  },
+  { weather:'rain', wx:'🌦️', wt:'Drizzle Time!',   wc:'rain-text' },
+  { weather:'sun',  wx:'😎', wt:'Bright and Hot!', wc:'sun-text'  },
+  { weather:'rain', wx:'🌀', wt:'Windy Rain!',      wc:'rain-text' },
+  { weather:'sun',  wx:'🌈', wt:'Rainbow Day!',    wc:'sun-text'  },
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+var curRound = 0, score = 0, lives = 3, answered = false;
+var shuffledRounds = [];
+
+// ── SVG MONSTER DRAWING ───────────────────────────────────────────────────
+function drawMonster(m) {
+  var svg = document.getElementById('monster-svg');
+  var c = m.color, s1 = m.spots[0], s2 = m.spots[1];
+  var mouthPath = '';
+  if (m.mouth === 'happy') mouthPath = 'M 52 85 Q 75 105 98 85';
+  else if (m.mouth === 'big') mouthPath = 'M 48 82 Q 75 112 102 82';
+  else mouthPath = 'M 55 88 Q 75 100 95 88';
+
+  svg.innerHTML = [
+    // shadow
+    '<ellipse cx="75" cy="148" rx="42" ry="8" fill="rgba(0,0,0,0.12)"/>',
+    // body
+    '<ellipse cx="75" cy="85" rx="52" ry="58" fill="' + c + '"/>',
+    // spots
+    '<circle cx="48" cy="72" r="10" fill="' + s1 + '" opacity="0.6"/>',
+    '<circle cx="105" cy="68" r="8"  fill="' + s2 + '" opacity="0.5"/>',
+    '<circle cx="62"  cy="110" r="7" fill="' + s1 + '" opacity="0.4"/>',
+    // arms
+    '<ellipse cx="22"  cy="90" rx="14" ry="10" fill="' + c + '" transform="rotate(-30 22 90)"/>',
+    '<ellipse cx="128" cy="90" rx="14" ry="10" fill="' + c + '" transform="rotate(30 128 90)"/>',
+    // legs
+    '<ellipse cx="57"  cy="142" rx="12" ry="9" fill="' + c + '"/>',
+    '<ellipse cx="93"  cy="142" rx="12" ry="9" fill="' + c + '"/>',
+    // feet
+    '<ellipse cx="52"  cy="149" rx="15" ry="7" fill="' + s2 + '"/>',
+    '<ellipse cx="98"  cy="149" rx="15" ry="7" fill="' + s2 + '"/>',
+    // horns
+    '<path d="M 58 28 L 48 4  L 64 20" fill="' + s2 + '"/>',
+    '<path d="M 92 28 L 102 4 L 86 20" fill="' + s2 + '"/>',
+    // eyes whites
+    '<circle cx="60" cy="65" r="16" fill="white"/>',
+    '<circle cx="90" cy="65" r="16" fill="white"/>',
+    // pupils
+    '<circle cx="62" cy="67" r="9"  fill="' + m.pupil + '"/>',
+    '<circle cx="92" cy="67" r="9"  fill="' + m.pupil + '"/>',
+    // eye shine
+    '<circle cx="65" cy="63" r="4"  fill="white"/>',
+    '<circle cx="95" cy="63" r="4"  fill="white"/>',
+    // eyebrows
+    '<path d="M 46 50 Q 60 44 72 50" stroke="' + s2 + '" stroke-width="3.5" fill="none" stroke-linecap="round"/>',
+    '<path d="M 78 50 Q 90 44 104 50" stroke="' + s2 + '" stroke-width="3.5" fill="none" stroke-linecap="round"/>',
+    // nose
+    '<ellipse cx="75" cy="78" rx="6" ry="4" fill="' + s2 + '" opacity="0.7"/>',
+    // mouth
+    '<path d="' + mouthPath + '" stroke="' + s2 + '" stroke-width="4" fill="none" stroke-linecap="round"/>',
+    // blush
+    '<circle cx="47" cy="82" r="9" fill="#FF8A80" opacity="0.35"/>',
+    '<circle cx="103" cy="82" r="9" fill="#FF8A80" opacity="0.35"/>',
+  ].join('');
+}
+
+// ── WEATHER ENVIRONMENT ───────────────────────────────────────────────────
+function setWeather(type) {
+  var isRain = type === 'rain';
+  var skyBg = document.getElementById('sky-bg');
+  var rain   = document.getElementById('rain-container');
+  var sun    = document.getElementById('sun');
+  var grass  = document.getElementById('grass');
+  var mud    = document.getElementById('mud');
+  var p1     = document.getElementById('p1');
+  var p2     = document.getElementById('p2');
+  var clouds = [document.getElementById('gc1'), document.getElementById('gc2'), document.getElementById('gc3')];
+  var flowers = ['fl1','fl2','fl3','fl4'].map(function(id){ return document.getElementById(id); });
+
+  if (isRain) {
+    skyBg.className = 'sky-bg sky-rainy';
+    document.body.className = 'rainy';
+    rain.classList.add('show');
+    sun.classList.add('hide');
+    grass.classList.add('wet');
+    mud.classList.add('show');
+    p1.classList.add('show'); p2.classList.add('show');
+    clouds.forEach(function(cl){ cl.classList.add('dark'); });
+    flowers.forEach(function(fl){ fl.classList.add('hide'); });
+    buildRain();
+  } else {
+    skyBg.className = 'sky-bg sky-sunny';
+    document.body.className = 'sunny';
+    rain.classList.remove('show');
+    sun.classList.remove('hide');
+    grass.classList.remove('wet');
+    mud.classList.remove('show');
+    p1.classList.remove('show'); p2.classList.remove('show');
+    clouds.forEach(function(cl){ cl.classList.remove('dark'); });
+    flowers.forEach(function(fl){ fl.classList.remove('hide'); });
+  }
+}
+
+function buildRain() {
+  var container = document.getElementById('rain-container');
+  if (container.children.length > 5) return;
+  container.innerHTML = '';
+  for (var i = 0; i < 60; i++) {
+    var drop = document.createElement('div');
+    drop.className = 'raindrop';
+    var h = 8 + Math.random() * 14;
+    drop.style.cssText = [
+      'left:' + (Math.random() * 100) + 'vw',
+      'height:' + h + 'px',
+      'animation-duration:' + (0.5 + Math.random() * 0.6) + 's',
+      'animation-delay:' + (Math.random() * 1.5) + 's',
+      'opacity:' + (0.4 + Math.random() * 0.4)
+    ].join(';');
+    container.appendChild(drop);
+  }
+}
+
+// ── LOAD ROUND ────────────────────────────────────────────────────────────
+function loadRound() {
+  if (curRound >= shuffledRounds.length) { showVictory(); return; }
+
+  answered = false;
+  var round   = shuffledRounds[curRound];
+  var monster = MONSTERS[curRound % MONSTERS.length];
+  var isRain  = round.weather === 'rain';
+
+  // Update UI
+  document.getElementById('level-pill').textContent = 'Round ' + (curRound + 1);
+  document.getElementById('prog-fill').style.width = (curRound / shuffledRounds.length * 100) + '%';
+  document.getElementById('prog-txt').textContent  = curRound + ' / ' + shuffledRounds.length;
+  document.getElementById('score-num').textContent  = score;
+  updateLives();
+
+  // Code banner
+  document.getElementById('cb-cond').textContent = 'it is raining';
+  document.getElementById('cb-then').textContent = '☂️ use umbrella!';
+  document.getElementById('cb-else').textContent = '🌞 play outside!';
+
+  // Weather card
+  var wi = document.getElementById('weather-icon');
+  var wt = document.getElementById('weather-text');
+  wi.textContent = round.wx;
+  wi.className   = 'weather-icon';
+  void wi.offsetWidth; // reflow for animation
+  wi.className   = 'weather-icon';
+  wt.textContent = round.wt;
+  wt.className   = 'weather-text ' + round.wc;
+
+  // Monster
+  document.getElementById('monster-name').textContent = monster.name;
+  drawMonster(monster);
+
+  // Reset item & speech
+  var item   = document.getElementById('monster-item');
+  var speech = document.getElementById('monster-speech');
+  item.classList.remove('show');
+  speech.classList.remove('show');
+  item.textContent   = '';
+  speech.textContent = '';
+
+  // Weather environment
+  setWeather(round.weather);
+
+  // Reset buttons
+  var btnA = document.getElementById('btn-a');
+  var btnB = document.getElementById('btn-b');
+  btnA.className = 'choice-btn';
+  btnB.className = 'choice-btn';
+  btnA.disabled  = false;
+  btnB.disabled  = false;
+
+  // Choices — A=umbrella, B=outside always
+  document.getElementById('icon-a').textContent = '☂️';
+  document.getElementById('text-a').textContent = 'Use Umbrella';
+  document.getElementById('icon-b').textContent = '🏃';
+  document.getElementById('text-b').textContent = 'Play Outside';
+
+  document.getElementById('choice-label').textContent = 'What should ' + monster.name + ' do? 🤔';
+}
+
+// ── ANSWER ────────────────────────────────────────────────────────────────
+function choose(btn) {
+  if (answered) return;
+  answered = true;
+
+  var round   = shuffledRounds[curRound];
+  var isRain  = round.weather === 'rain';
+  var correct = isRain ? 'a' : 'b';  // a=umbrella for rain, b=outside for sun
+  var isRight = btn === correct;
+
+  var btnEl   = document.getElementById('btn-' + btn);
+  var item    = document.getElementById('monster-item');
+  var speech  = document.getElementById('monster-speech');
+
+  if (isRight) {
+    score += 10;
+    btnEl.className = 'choice-btn correct';
+    // Show monster item
+    item.textContent = isRain ? '☂️' : '🌞';
+    item.style.bottom = '10px';
+    item.style.right  = '-10px';
+    item.classList.add('show');
+    speech.textContent = isRain ? 'Staying dry! ☂️' : 'Let\'s play! 🌞';
+    speech.classList.add('show');
+    document.getElementById('score-num').textContent = score;
+    showToast('ok', ['Correct! ⭐', 'Great thinking! 🎉', 'Yes! Perfect! ✅', 'Awesome! 🌟', 'Well done! 💪'][Math.floor(Math.random()*5)]);
+    confetti();
+  } else {
+    lives = Math.max(0, lives - 1);
+    btnEl.className = 'choice-btn wrong';
+    speech.textContent = isRain ? 'I need an umbrella! 😅' : 'It\'s sunny outside! 😄';
+    speech.classList.add('show');
+    updateLives();
+    showToast('bad', isRain ? '🌧️ It\'s raining — use the umbrella!' : '☀️ It\'s sunny — play outside!');
+  }
+
+  setTimeout(function() {
+    curRound++;
+    loadRound();
+  }, isRight ? 1400 : 1800);
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────
+function updateLives() {
+  document.getElementById('lives-pill').textContent = '❤️'.repeat(lives) + '🖤'.repeat(3 - lives);
+}
+
+var toastTimer;
+function showToast(type, msg) {
+  clearTimeout(toastTimer);
+  var t = document.getElementById('toast');
+  t.className = 'toast ' + type + ' on';
+  t.textContent = msg;
+  toastTimer = setTimeout(function(){ t.classList.remove('on'); }, 2000);
+}
+
+function confetti() {
+  var cols = ['#FFD93D','#FF6B9D','#3DD68C','#A855F7','#FF8C42','#4A90D9'];
+  for (var i = 0; i < 40; i++) {
+    (function(i){
+      setTimeout(function() {
+        var el = document.createElement('div');
+        el.className = 'cf';
+        el.style.cssText = [
+          'left:' + (Math.random()*100) + 'vw',
+          'top:-12px',
+          'width:' + (6+Math.random()*7) + 'px',
+          'height:' + (6+Math.random()*7) + 'px',
+          'background:' + cols[Math.floor(Math.random()*cols.length)],
+          'animation-duration:' + (1.2+Math.random()*1.6) + 's'
+        ].join(';');
+        document.body.appendChild(el);
+        setTimeout(function(){ el.remove(); }, 3000);
+      }, i * 30);
+    })(i);
+  }
+}
+
+function shuffleArray(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+  }
+  return a;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ── START / HOME / VICTORY ─────────────────────────────────────────────────
+function startGame() {
+  curRound = 0; score = 0; lives = 3;
+  shuffledRounds = shuffleArray(ROUNDS);
+  showScreen('game');
+  loadRound();
+}
+
+function goHome() {
+  setWeather('sun');
+  showScreen('welcome');
+}
+
+function showVictory() {
+  var stars = lives === 3 ? '⭐⭐⭐' : lives === 2 ? '⭐⭐☆' : '⭐☆☆';
+  var titles = ['You Did It! 🎉', 'Amazing! 🏆', 'Super Star! 🌟', 'Monster Expert! 👾'];
+  var emojis = ['👾', '🌈', '🎉', '🦄', '⭐'];
+  document.getElementById('v-monster').textContent  = emojis[Math.floor(Math.random()*emojis.length)];
+  document.getElementById('v-title').textContent    = titles[Math.floor(Math.random()*titles.length)];
+  document.getElementById('v-stars').textContent    = stars;
+  document.getElementById('v-score-num').textContent = score;
+  setWeather('sun');
+  showScreen('victory');
+  confetti(); confetti();
+}
+</script>
+</body>
+</html>
