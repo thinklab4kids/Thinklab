@@ -108,6 +108,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:999;background:var(--navy);heigh
 .cs-num{display:block;font-family:'Fredoka One',cursive;font-size:1.6rem;color:var(--yellow);}
 .cs-lbl{font-size:0.7rem;color:rgba(255,255,255,0.55);font-weight:800;text-transform:uppercase;letter-spacing:1px;}
 
+.play-picker{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px;}
+.pp-btn{background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.2);border-radius:50px;padding:10px 22px;font-family:'Fredoka One',cursive;font-size:0.95rem;color:rgba(255,255,255,0.7);cursor:pointer;transition:all 0.2s;}
+.pp-btn:hover{background:rgba(255,255,255,0.18);color:#fff;border-color:rgba(255,255,255,0.4);}
+.pp-btn.active{background:var(--yellow);color:var(--navy);border-color:var(--yellow);box-shadow:0 4px 16px rgba(245,197,24,0.4);}
 #play{background:var(--navy);padding:80px 24px;}
 .play-inner{max-width:1100px;margin:0 auto;}
 .play-header{text-align:center;margin-bottom:38px;}
@@ -260,7 +264,7 @@ footer{background:var(--navy);padding:44px 24px 28px;}
       <div class="card"><div class="card-thumb ct-ws1"><span class="thumb-e">&#129530;</span><div class="badge-free">FREE PDF</div></div><div class="card-body"><div class="card-title">Laundry Sorting Sheet</div><div class="card-desc">Draw lines matching clothes to the right basket. Includes a sequencing bonus activity!</div><div class="card-age">&#9999; Ages 4&#8211;8</div></div><button class="card-btn cb-dl" onclick="dlPDF('ThinkLab_Worksheet_Pack.pdf')">&#128229; Download PDF</button></div>
       <div class="card"><div class="card-thumb ct-ws2"><span class="thumb-e">&#128126;</span><div class="badge-free">FREE PDF</div></div><div class="card-body"><div class="card-title">Monster Weather Sheet</div><div class="card-desc">Match monsters to the right weather action! Draw lines and colour your own monster!</div><div class="card-age">&#9999; Ages 4&#8211;8</div></div><button class="card-btn cb-dl" onclick="dlPDF('ThinkLab_Monster_Worksheet.pdf')">&#128229; Download PDF</button></div>
       <div class="card"><div class="card-thumb ct-ws3"><span class="thumb-e">&#127775;</span><div class="badge-free">FREE PDF</div></div><div class="card-body"><div class="card-title">Color Coding!</div><div class="card-desc">Identify the colour sequence in the bullseye. Teaches how computers use numbers for colours!</div><div class="card-age">&#9999; Ages 4&#8211;9</div></div><button class="card-btn cb-dl" onclick="dlPDF('ThinkLab_ColorCoding_Worksheet.pdf')">&#128229; Download PDF</button></div>
-      <div class="card"><div class="card-thumb ct-ws4"><span class="thumb-e">&#129513;</span><div class="badge-soon">Coming Soon</div></div><div class="card-body"><div class="card-title">Logic Puzzles</div><div class="card-desc">Simple if-then puzzles that introduce coding logic through everyday scenarios kids love!</div><div class="card-age">&#9999; Ages 6&#8211;12</div></div><button class="card-btn cb-soon">&#128274; Coming Soon</button></div>
+      <div class="card"><div class="card-thumb" style="background:linear-gradient(135deg,#E8F4FF,#F0FFF4);"><span class="thumb-e">&#128305;</span><div class="badge-free">FREE PDF</div></div><div class="card-body"><div class="card-title">Shapes Matching Sheet</div><div class="card-desc">Draw lines to match each shape card to its correct outer shape. Includes colour activity and answer key!</div><div class="card-age">&#9999; Ages 4&#8211;7</div></div><button class="card-btn cb-dl" onclick="dlPDF('ThinkLab_Shapes_Worksheet.pdf')">&#128229; Download PDF</button></div>
     </div>
   </div>
 
@@ -279,8 +283,7 @@ footer{background:var(--navy);padding:44px 24px 28px;}
     </div>
     <div class="cards-grid">
       <div class="card" style="border-color:var(--orange);"><div class="card-thumb" style="background:linear-gradient(135deg,#FEF9C3,#FFF0E8);"><span class="thumb-e">&#127775;</span><div class="badge-new">&#9889; LIVE NOW</div></div><div class="card-body"><div class="card-title">Color Coding Challenge</div><div class="card-desc">Look at the bullseye and pick the correct colour sequence from outside ring to inside ring!</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;"><div class="card-age">&#9889; Ages 4&#8211;9</div><div class="card-age" style="background:rgba(255,107,157,0.1);color:var(--pink);">&#128336; 5 mins</div></div></div><button class="card-btn cb-challenge" onclick="openModal('color-coding-quiz.html')">&#9889; Start Challenge!</button></div>
-      <div class="card"><div class="card-thumb" style="background:linear-gradient(135deg,#EDE9FE,#FCE7F3);"><span class="thumb-e">&#128126;</span><div class="badge-soon">Coming Soon</div></div><div class="card-body"><div class="card-title">Monster Logic Challenge</div><div class="card-desc">Test your if-else skills! What should the monster do in each weather situation?</div><div class="card-age">&#9889; Ages 4&#8211;8</div></div><button class="card-btn cb-soon">&#128274; Coming Soon</button></div>
-      <div class="card"><div class="card-thumb" style="background:linear-gradient(135deg,#FFF3E0,#FFF8E1);"><span class="thumb-e">&#127859;</span><div class="badge-soon">Coming Soon</div></div><div class="card-body"><div class="card-title">Kitchen Sequence Challenge</div><div class="card-desc">Put the cooking steps in the right order! Tests your sequencing and logic skills!</div><div class="card-age">&#9889; Ages 4&#8211;9</div></div><button class="card-btn cb-soon">&#128274; Coming Soon</button></div>
+      <div class="card" style="border-color:var(--blue);"><div class="card-thumb" style="background:linear-gradient(135deg,#E8F4FF,#F0FFF4);"><span class="thumb-e">&#128305;</span><div class="badge-new">&#9889; LIVE NOW</div></div><div class="card-body"><div class="card-title">Shapes Matching!</div><div class="card-desc">Look at the shape card and find the option with the same shapes and colours! Pure visual thinking!</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;"><div class="card-age">&#9889; Ages 4&#8211;7</div><div class="card-age" style="background:rgba(74,144,217,0.1);color:var(--blue);">&#128336; 5 mins</div></div></div><button class="card-btn cb-challenge" onclick="openModal('shapes-quiz.html')" style="background:linear-gradient(135deg,var(--blue),var(--purple));">&#9889; Start Challenge!</button></div>
     </div>
   </div>
 </section>
@@ -288,13 +291,18 @@ footer{background:var(--navy);padding:44px 24px 28px;}
 <section id="play">
   <div class="play-inner">
     <div class="play-header">
-      <div class="sec-tag">&#129530; Play Right Now</div>
-      <h2 class="sec-title">Laundry Fun!</h2>
-      <p class="sec-sub">Sort the clothes, then run the washing machine. No login needed!</p>
+      <div class="sec-tag">&#9654; Play Right Now</div>
+      <h2 class="sec-title">Pick a Game!</h2>
+      <p class="sec-sub">Choose a game below and play instantly &#8212; no download needed!</p>
+      <div class="play-picker">
+        <button class="pp-btn active" id="pp-laundry" onclick="switchGame('laundry-game.html', this)">&#129530; Laundry Fun</button>
+        <button class="pp-btn" id="pp-monster" onclick="switchGame('monster-game.html', this)">&#128126; Monster Weather</button>
+        <button class="pp-btn" id="pp-kitchen" onclick="switchGame('kitchen-game.html', this)">&#127859; Kitchen Helper</button>
+      </div>
     </div>
     <div class="frame-shell">
-      <div class="frame-bar"><div class="fd fd-r"></div><div class="fd fd-y"></div><div class="fd fd-g"></div><div class="frame-url">&#128274; thinklab.pages.dev/laundry-game.html</div></div>
-      <iframe id="game-iframe" src="laundry-game.html" title="Laundry Fun" allow="autoplay"></iframe>
+      <div class="frame-bar"><div class="fd fd-r"></div><div class="fd fd-y"></div><div class="fd fd-g"></div><div class="frame-url" id="frame-url">&#128274; thinklab.pages.dev/laundry-game.html</div></div>
+      <iframe id="game-iframe" src="laundry-game.html" title="ThinkLab Game" allow="autoplay"></iframe>
     </div>
   </div>
 </section>
@@ -389,12 +397,16 @@ footer{background:var(--navy);padding:44px 24px 28px;}
 
 <script>
 function dlPDF(filename) {
-  var a = document.createElement('a');
-  a.href = filename;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  // Open PDF directly as separate file — works on ALL browsers and Instagram
+  window.open(filename, '_blank');
+}
+
+
+function switchGame(src, btn) {
+  document.getElementById('game-iframe').src = src;
+  document.getElementById('frame-url').textContent = '🔒 thinklab.pages.dev/' + src;
+  document.querySelectorAll('.pp-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
 }
 
 function openModal(src) {
