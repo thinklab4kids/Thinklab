@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Market Day! 🛒</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1B3A6B;--yellow:#F5C518;--orange:#FF8C42;--green:#3DD68C;--blue:#4A90D9;--pink:#FF6B9D;--purple:#A855F7;--red:#EF4444;--cream:#FFF8F0;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;min-height:100vh;overflow-x:hidden;}
+body{font-family:'Nunito',sans-serif;background:var(--cream);touch-action:pan-y;}
+.screen{display:none;min-height:100vh;flex-direction:column;align-items:center;}
+.screen.active{display:flex;}
+
+/* WELCOME */
+#welcome{background:linear-gradient(160deg,#FFF8E1 0%,#F0FFF4 50%,#FFF0E8 100%);justify-content:center;align-items:center;text-align:center;padding:28px 20px;gap:10px;position:relative;overflow:hidden;}
+.w-bg-items{position:absolute;inset:0;pointer-events:none;}
+.w-bg-item{position:absolute;font-size:2rem;opacity:0.08;animation:bgFloat 5s ease-in-out infinite;}
+.bi1{top:8%;left:5%;animation-delay:0s;}.bi2{top:12%;right:8%;animation-delay:1s;}.bi3{top:35%;left:3%;animation-delay:2s;}.bi4{bottom:25%;right:6%;animation-delay:0.5s;}.bi5{bottom:18%;left:8%;animation-delay:1.5s;}.bi6{top:55%;right:4%;animation-delay:2.5s;}
+@keyframes bgFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-14px) rotate(10deg);}}
+.w-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,140,66,0.15);border:2px solid rgba(255,140,66,0.4);border-radius:30px;padding:5px 14px;font-size:0.76rem;font-weight:800;color:var(--orange);letter-spacing:1.2px;text-transform:uppercase;position:relative;z-index:1;}
+.w-title{font-family:'Fredoka One',cursive;font-size:clamp(2rem,9vw,3.6rem);color:var(--navy);line-height:1.05;position:relative;z-index:1;}
+.w-title .or{color:var(--orange);}.w-title .gr{color:var(--green);}
+.w-sub{font-size:clamp(0.88rem,3.5vw,1.05rem);color:#888;font-weight:800;max-width:360px;position:relative;z-index:1;}
+.levels-preview{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1;}
+.lp-card{background:white;border-radius:16px;padding:12px 16px;box-shadow:0 3px 12px rgba(0,0,0,0.08);text-align:center;min-width:130px;}
+.lp-num{font-family:'Fredoka One',cursive;font-size:0.72rem;color:#aaa;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
+.lp-icon{font-size:2rem;display:block;margin-bottom:4px;}
+.lp-name{font-family:'Fredoka One',cursive;font-size:0.88rem;color:var(--navy);}
+.lp-desc{font-size:0.7rem;color:#aaa;font-weight:700;}
+.start-btn{background:linear-gradient(135deg,var(--orange),var(--pink));color:white;border:none;padding:18px 52px;font-family:'Fredoka One',cursive;font-size:1.45rem;border-radius:60px;cursor:pointer;box-shadow:0 8px 28px rgba(255,140,66,0.45);animation:sPulse 2s ease infinite;transition:transform 0.15s;position:relative;z-index:1;}
+.start-btn:hover{transform:scale(1.06);}.start-btn:active{transform:scale(0.95);}
+@keyframes sPulse{0%,100%{box-shadow:0 8px 28px rgba(255,140,66,0.45),0 0 0 0 rgba(255,140,66,0.25);}50%{box-shadow:0 8px 28px rgba(255,140,66,0.45),0 0 0 14px rgba(255,140,66,0);}}
+.tl-tag{font-family:'Fredoka One',cursive;font-size:0.8rem;color:#bbb;letter-spacing:1px;position:relative;z-index:1;}
+.tl-tag span{color:var(--navy);}
+
+/* GAME */
+#game{background:linear-gradient(160deg,#FFF8E1 0%,#FFF3E0 100%);padding:0;justify-content:flex-start;}
+.market-scene{width:100%;height:100px;background:linear-gradient(180deg,#87CEEB 0%,#87CEEB 58%,#8BC34A 58%,#689F38 100%);position:relative;overflow:hidden;flex-shrink:0;}
+.sun-sm{position:absolute;top:8px;right:18px;width:34px;height:34px;background:var(--yellow);border-radius:50%;box-shadow:0 0 0 6px rgba(255,217,61,0.2);}
+.cloud-sm{position:absolute;top:10px;left:14px;width:56px;height:20px;background:white;border-radius:30px;opacity:0.85;}
+.cloud-sm::before{content:'';position:absolute;top:-9px;left:9px;width:26px;height:26px;background:white;border-radius:50%;}
+.stall{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:180px;}
+.stall-roof{height:26px;background:linear-gradient(135deg,#FF6B9D,#FF8C42);clip-path:polygon(0 100%,100% 100%,92% 0%,8% 0%);}
+.stall-body{height:38px;background:#8D6E63;border-radius:4px 4px 0 0;}
+.stall-body::before{content:'';display:block;height:7px;background:#6D4C41;border-radius:4px 4px 0 0;}
+.stall-sign{position:absolute;top:4px;left:50%;transform:translateX(-50%);background:var(--yellow);border-radius:6px;padding:2px 8px;font-family:'Fredoka One',cursive;font-size:0.65rem;color:var(--navy);white-space:nowrap;}
+.g-topbar{display:flex;align-items:center;gap:8px;padding:10px 14px 8px;background:white;border-bottom:3px solid #F5F5F5;position:sticky;top:0;z-index:100;flex-wrap:wrap;box-shadow:0 2px 12px rgba(0,0,0,0.06);}
+.home-btn{background:#F5F5F5;border:none;border-radius:12px;padding:8px 12px;font-size:1rem;cursor:pointer;font-weight:800;color:#888;}
+.g-title{font-family:'Fredoka One',cursive;font-size:0.88rem;color:var(--navy);flex:1;}
+.g-score{background:linear-gradient(135deg,var(--yellow),var(--orange));color:var(--navy);font-family:'Fredoka One',cursive;font-size:0.92rem;padding:5px 12px;border-radius:18px;}
+.g-lives{font-size:1rem;letter-spacing:2px;}
+.g-prog-wrap{flex-basis:100%;display:flex;align-items:center;gap:8px;margin-top:2px;}
+.g-prog-bar{flex:1;height:10px;background:#F0F0F0;border-radius:20px;overflow:hidden;}
+.g-prog-fill{height:100%;border-radius:20px;transition:width 0.5s ease;}
+.g-prog-fill.l1{background:linear-gradient(90deg,var(--orange),var(--pink));}
+.g-prog-fill.l2{background:linear-gradient(90deg,var(--purple),var(--blue));}
+.g-prog-txt{font-family:'Fredoka One',cursive;font-size:0.78rem;color:#aaa;white-space:nowrap;}
+.g-content{width:100%;max-width:520px;padding:12px 14px;display:flex;flex-direction:column;gap:12px;padding-bottom:28px;}
+
+/* phase header */
+.phase-card{border-radius:18px;padding:12px 16px;text-align:center;}
+.phase-card.lv1{background:linear-gradient(135deg,#1B3A6B,#2B5CA6);}
+.phase-card.lv2{background:linear-gradient(135deg,#6D28D9,#A855F7);}
+.ph-tag{font-family:'Fredoka One',cursive;font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;opacity:0.6;color:white;margin-bottom:3px;}
+.ph-txt{font-family:'Fredoka One',cursive;font-size:clamp(0.88rem,3.5vw,1.05rem);color:white;line-height:1.3;}
+.ph-txt .hl{color:var(--yellow);}
+
+/* LEVEL 1 SHADOW */
+.shadow-card{background:white;border-radius:22px;padding:20px;box-shadow:0 6px 22px rgba(0,0,0,0.08);display:flex;flex-direction:column;align-items:center;gap:10px;border:3px solid rgba(255,140,66,0.15);animation:cardIn 0.4s ease;}
+@keyframes cardIn{from{transform:scale(0.88) translateY(12px);opacity:0;}to{transform:scale(1);opacity:1;}}
+
+/* Shadow via CSS filter */
+.shadow-wrap{background:linear-gradient(135deg,#1a1a2e,#0d0d1a);border-radius:16px;padding:20px 14px;display:flex;align-items:center;justify-content:center;min-height:160px;box-shadow:inset 0 4px 20px rgba(0,0,0,0.5);}
+.shadow-emoji-css{font-size:clamp(5rem,22vw,8rem);line-height:1;filter:brightness(0) contrast(1) drop-shadow(0 0 20px rgba(138,43,226,0.9)) drop-shadow(0 0 8px rgba(168,85,247,0.7));animation:shadowBreath 2.5s ease-in-out infinite;}
+@keyframes shadowBreath{0%,100%{filter:brightness(0) contrast(1) drop-shadow(0 0 18px rgba(138,43,226,0.8));}50%{filter:brightness(0) contrast(1) drop-shadow(0 0 30px rgba(168,85,247,1)) drop-shadow(0 0 14px rgba(200,100,255,0.9));}}
+.shadow-hint{font-family:'Fredoka One',cursive;font-size:0.82rem;color:#aaa;text-align:center;}
+.shadow-hint .hl2{color:var(--orange);}
+
+/* reveal overlay */
+.reveal-overlay{position:relative;display:inline-block;}
+.reveal-emoji{font-size:5rem;display:none;animation:revealPop 0.5s cubic-bezier(0.34,1.56,0.64,1);}
+.reveal-emoji.show{display:block;}
+@keyframes revealPop{from{transform:scale(0) rotate(-20deg);opacity:0;}to{transform:scale(1) rotate(0);opacity:1;}}
+
+.baskets-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.basket-btn{background:white;border:3px solid #EEE;border-radius:20px;padding:12px 8px;cursor:pointer;transition:all 0.18s;display:flex;flex-direction:column;align-items:center;gap:5px;box-shadow:0 3px 12px rgba(0,0,0,0.06);}
+.basket-btn:not(.disabled):hover{transform:scale(1.05);}
+.basket-btn:active{transform:scale(0.94);}
+.basket-icon{font-size:2rem;}
+.basket-name{font-family:'Fredoka One',cursive;font-size:0.82rem;color:var(--navy);}
+.basket-btn.correct{border-color:var(--green);background:#F0FFF4;animation:bPop 0.4s ease;}
+.basket-btn.wrong{border-color:var(--red);background:#FFF0F0;animation:bShake 0.4s ease;}
+.basket-btn.show-correct{border-color:var(--green);background:#F0FFF4;}
+.basket-btn.disabled{cursor:not-allowed;opacity:0.65;}
+@keyframes bPop{0%{transform:scale(1);}40%{transform:scale(1.1);}100%{transform:scale(1);}}
+@keyframes bShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-8px);}75%{transform:translateX(8px);}}
+
+/* LEVEL 2 RECIPE MEMORY */
+/* Memorise phase */
+.memorise-card{background:white;border-radius:22px;padding:18px;box-shadow:0 6px 22px rgba(0,0,0,0.08);border:3px solid rgba(168,85,247,0.2);animation:cardIn 0.4s ease;}
+.monster-row{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;}
+.monster-big{font-size:3.2rem;flex-shrink:0;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.12));}
+.speech-bubble{background:linear-gradient(135deg,#6D28D9,#A855F7);border-radius:12px 12px 12px 4px;padding:10px 14px;}
+.speech-txt{font-family:'Fredoka One',cursive;font-size:0.88rem;color:white;line-height:1.4;}
+
+/* Ingredients to memorise */
+.ingr-show{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:12px;}
+.ingr-item{display:flex;flex-direction:column;align-items:center;gap:4px;background:#F3E8FF;border-radius:16px;padding:10px 14px;border:2px solid #C4B5FD;}
+.ingr-emoji{font-size:2.2rem;}
+.ingr-name{font-family:'Fredoka One',cursive;font-size:0.72rem;color:#4C1D95;}
+
+/* Timer countdown */
+.timer-wrap{text-align:center;margin-bottom:8px;}
+.timer-bar-bg{height:12px;background:#EDE9FE;border-radius:20px;overflow:hidden;margin-bottom:6px;}
+.timer-bar-fill{height:100%;background:linear-gradient(90deg,#A855F7,#6D28D9);border-radius:20px;transition:width 0.1s linear;}
+.timer-txt{font-family:'Fredoka One',cursive;font-size:1rem;color:var(--purple);}
+
+/* Find phase */
+.find-instr{background:linear-gradient(135deg,#6D28D9,#A855F7);border-radius:16px;padding:12px 16px;text-align:center;}
+.find-instr-txt{font-family:'Fredoka One',cursive;font-size:0.95rem;color:white;}
+.find-instr-txt .hl{color:var(--yellow);}
+.memory-blanks{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:4px;}
+.mem-blank{width:52px;height:52px;border-radius:12px;border:3px dashed #C4B5FD;background:#F3E8FF;display:flex;align-items:center;justify-content:center;font-size:1.6rem;transition:all 0.3s;}
+.mem-blank.filled{border-style:solid;border-color:var(--green);background:#DCFCE7;animation:bPop 0.3s ease;}
+.memory-blanks-lbl{font-family:'Fredoka One',cursive;font-size:0.72rem;color:#aaa;text-align:center;margin-bottom:10px;}
+
+.market-shelf-lbl{font-family:'Fredoka One',cursive;font-size:0.88rem;color:var(--navy);text-align:center;margin-bottom:8px;}
+.market-shelf{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.shelf-item{background:white;border:3px solid #EEE;border-radius:16px;padding:10px 6px;cursor:pointer;transition:all 0.18s;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 3px 10px rgba(0,0,0,0.06);}
+.shelf-item:not(.disabled):not(.picked):hover{border-color:var(--purple);transform:scale(1.08);}
+.shelf-item:active{transform:scale(0.93);}
+.shelf-item-emoji{font-size:1.8rem;}
+.shelf-item-name{font-family:'Fredoka One',cursive;font-size:0.62rem;color:#888;text-align:center;}
+.shelf-item.picked{background:#DCFCE7;border-color:var(--green);animation:bPop 0.3s ease;}
+.shelf-item.wrong-pick{animation:bShake 0.4s ease;border-color:var(--red);background:#FFF0F0;}
+.shelf-item.disabled{cursor:not-allowed;opacity:0.5;}
+
+.g-feedback{border-radius:16px;padding:12px 16px;font-family:'Fredoka One',cursive;font-size:0.95rem;text-align:center;display:none;}
+.g-feedback.show{display:block;animation:fadeIn 0.3s ease;}
+.g-feedback.ok{background:#F0FFF4;color:#14532D;border:2px solid var(--green);}
+.g-feedback.bad{background:#FFF0F0;color:var(--red);border:2px solid var(--red);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.g-next-btn{width:100%;padding:14px;font-family:'Fredoka One',cursive;font-size:1.05rem;background:linear-gradient(135deg,var(--navy),var(--blue));color:white;border:none;border-radius:16px;cursor:pointer;display:none;box-shadow:0 4px 16px rgba(27,58,107,0.3);}
+.g-next-btn.show{display:block;animation:fadeIn 0.3s ease;}
+
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-80px);background:white;border-radius:28px;padding:10px 20px;font-family:'Fredoka One',cursive;font-size:1rem;box-shadow:0 8px 28px rgba(0,0,0,0.15);z-index:9999;transition:transform 0.3s ease;white-space:nowrap;pointer-events:none;}
+.toast.on{transform:translateX(-50%) translateY(0);}
+.toast.ok{color:#10B981;border-left:5px solid #10B981;}
+.toast.bad{color:#EF4444;border-left:5px solid #EF4444;}
+.cf{position:fixed;pointer-events:none;z-index:9998;border-radius:3px;animation:cfFall linear forwards;}
+@keyframes cfFall{to{transform:translateY(110vh) rotate(600deg);opacity:0;}}
+
+#results{background:linear-gradient(160deg,#FFF8E1,#FFF3E0,#FFFBF0);justify-content:center;align-items:center;text-align:center;padding:40px 20px;gap:14px;}
+.r-emoji{font-size:5.5rem;display:block;animation:rB 0.9s ease infinite;}
+@keyframes rB{0%,100%{transform:translateY(0) rotate(-5deg);}50%{transform:translateY(-18px) rotate(5deg);}}
+.r-title{font-family:'Fredoka One',cursive;font-size:clamp(2rem,8vw,3.2rem);color:var(--navy);}
+.r-sub{font-size:1rem;color:#888;font-weight:800;max-width:320px;}
+.r-stars{font-size:2.6rem;letter-spacing:5px;}
+.r-score-box{background:var(--navy);border-radius:22px;padding:14px 40px;}
+.r-score-num{font-family:'Fredoka One',cursive;font-size:2.8rem;color:var(--yellow);display:block;}
+.r-score-lbl{font-size:0.8rem;color:rgba(255,255,255,0.55);font-weight:800;letter-spacing:1px;text-transform:uppercase;}
+.r-breakdown{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:280px;width:100%;}
+.r-box{border-radius:16px;padding:16px;}
+.rb-c{background:#F0FFF4;border:2px solid var(--green);}
+.rb-w{background:#FFF0F0;border:2px solid #FCA5A5;}
+.r-box-num{font-family:'Fredoka One',cursive;font-size:2rem;}
+.r-box-lbl{font-size:0.72rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:1px;}
+.r-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+.rbtn{padding:14px 26px;font-family:'Fredoka One',cursive;font-size:1rem;border:none;border-radius:50px;cursor:pointer;transition:transform 0.15s;}
+.rbtn:active{transform:scale(0.94);}
+.rbtn-retry{background:linear-gradient(135deg,var(--orange),var(--pink));color:white;}
+.rbtn-home{background:white;color:#aaa;border:2px solid #EEE;}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<!-- WELCOME -->
+<div class="screen active" id="welcome">
+  <div class="w-bg-items">
+    <span class="w-bg-item bi1">🍎</span><span class="w-bg-item bi2">🥕</span>
+    <span class="w-bg-item bi3">🥛</span><span class="w-bg-item bi4">🍫</span>
+    <span class="w-bg-item bi5">🛒</span><span class="w-bg-item bi6">🧀</span>
+  </div>
+  <div class="w-badge">🛒 Ages 5–8</div>
+  <h1 class="w-title"><span class="or">Market</span><br><span class="gr">Day!</span></h1>
+  <p class="w-sub">Spot the shadows AND remember the recipe! 🧠🛒</p>
+  <div class="levels-preview">
+    <div class="lp-card">
+      <div class="lp-num">LEVEL 1</div>
+      <span class="lp-icon">🌑</span>
+      <div class="lp-name">Shadow Sort</div>
+      <div class="lp-desc">Guess item from shadow then sort it!</div>
+    </div>
+    <div class="lp-card">
+      <div class="lp-num">LEVEL 2</div>
+      <span class="lp-icon">🧠</span>
+      <div class="lp-name">Memory Recipe</div>
+      <div class="lp-desc">Remember 3 items — then find them!</div>
+    </div>
+  </div>
+  <button class="start-btn" onclick="startGame()">🛒 Start Shopping!</button>
+  <div class="tl-tag">by <span>ThinkLab</span> — Raising smart thinkers!</div>
+</div>
+
+<!-- GAME -->
+<div class="screen" id="game">
+  <div class="market-scene">
+    <div class="sun-sm"></div><div class="cloud-sm"></div>
+    <div class="stall">
+      <div class="stall-roof"></div><div class="stall-body"></div>
+      <div class="stall-sign">🛒 ThinkLab Market</div>
+    </div>
+  </div>
+  <div class="g-topbar">
+    <button class="home-btn" onclick="goHome()">🏠</button>
+    <span class="g-title" id="g-title">🌑 Level 1 — Shadow Sort</span>
+    <span class="g-lives" id="g-lives">❤️❤️❤️</span>
+    <span class="g-score">⭐ <span id="g-score">0</span></span>
+    <div class="g-prog-wrap">
+      <div class="g-prog-bar"><div class="g-prog-fill l1" id="g-prog" style="width:0%"></div></div>
+      <span class="g-prog-txt" id="g-prog-txt">1/8</span>
+    </div>
+  </div>
+  <div class="g-content" id="g-content"></div>
+</div>
+
+<!-- RESULTS -->
+<div class="screen" id="results">
+  <span class="r-emoji" id="r-emoji">🏆</span>
+  <h2 class="r-title" id="r-title">Market Hero!</h2>
+  <p class="r-sub" id="r-sub">Amazing shadows and memory!</p>
+  <div class="r-stars" id="r-stars">⭐⭐⭐</div>
+  <div class="r-score-box">
+    <span class="r-score-num" id="r-score-num">0</span>
+    <span class="r-score-lbl">Points Earned</span>
+  </div>
+  <div class="r-breakdown">
+    <div class="r-box rb-c"><div class="r-box-num" id="r-correct" style="color:#14532D;">0</div><div class="r-box-lbl">Correct ✓</div></div>
+    <div class="r-box rb-w"><div class="r-box-num" id="r-wrong" style="color:#EF4444;">0</div><div class="r-box-lbl">Wrong ✗</div></div>
+  </div>
+  <div class="r-btns">
+    <button class="rbtn rbtn-home" onclick="goHome()">🏠 Home</button>
+    <button class="rbtn rbtn-retry" onclick="startGame()">🛒 Shop Again!</button>
+  </div>
+  <div class="tl-tag" style="color:#bbb;font-family:'Fredoka One',cursive;font-size:0.8rem;letter-spacing:1px;">by <span style="color:#1B3A6B">ThinkLab</span></div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────
+var CATS = [
+  {id:'fruits',  name:'Fruits',     emoji:'🍎', color:'#EF4444', bg:'#FEF2F2'},
+  {id:'veggies', name:'Vegetables', emoji:'🥕', color:'#F97316', bg:'#FFF7ED'},
+  {id:'dairy',   name:'Dairy',      emoji:'🥛', color:'#60A5FA', bg:'#EFF6FF'},
+  {id:'snacks',  name:'Snacks',     emoji:'🍫', color:'#A855F7', bg:'#FAF5FF'},
+];
+
+// Only clear distinct shadow shapes — no peanuts or cookies
+var ALL_ITEMS = [
+  {emoji:'🍎', name:'Apple',      cat:'fruits'},
+  {emoji:'🍌', name:'Banana',     cat:'fruits'},
+  {emoji:'🍊', name:'Orange',     cat:'fruits'},
+  {emoji:'🍇', name:'Grapes',     cat:'fruits'},
+  {emoji:'🍓', name:'Strawberry', cat:'fruits'},
+  {emoji:'🍋', name:'Lemon',      cat:'fruits'},
+  {emoji:'🥕', name:'Carrot',     cat:'veggies'},
+  {emoji:'🥦', name:'Broccoli',   cat:'veggies'},
+  {emoji:'🍅', name:'Tomato',     cat:'veggies'},
+  {emoji:'🥔', name:'Potato',     cat:'veggies'},
+  {emoji:'🌽', name:'Corn',       cat:'veggies'},
+  {emoji:'🧅', name:'Onion',      cat:'veggies'},
+  {emoji:'🥛', name:'Milk',       cat:'dairy'},
+  {emoji:'🧀', name:'Cheese',     cat:'dairy'},
+  {emoji:'🥚', name:'Egg',        cat:'dairy'},
+  {emoji:'🧈', name:'Butter',     cat:'dairy'},
+  {emoji:'🍫', name:'Chocolate',  cat:'snacks'},
+  {emoji:'🍿', name:'Popcorn',    cat:'snacks'},
+  {emoji:'🧃', name:'Juice Box',  cat:'snacks'},
+  {emoji:'🍭', name:'Lollipop',   cat:'snacks'},
+];
+
+var RECIPES = [
+  {monster:'👨‍🍳', meal:'Fruit Salad 🥗',   speech:'Remember these 4 fruits! I need them for my salad!',           items:['🍎','🍌','🍓','🍊']},
+  {monster:'🧑‍🍳', meal:'Veggie Soup 🍲',   speech:'Soup time! Remember ALL 4 vegetables I need!',                  items:['🥕','🥦','🍅','🌽']},
+  {monster:'👾',  meal:'Big Breakfast 🍳',  speech:'Big breakfast! Remember all 4 ingredients!',                    items:['🥚','🧀','🧈','🥛']},
+  {monster:'🦄',  meal:'Snack Box 🎉',      speech:'Party snack box! Remember ALL 4 snacks!',                       items:['🍫','🍿','🍭','🧃']},
+  {monster:'🐸',  meal:'Mixed Bag 🌈',      speech:'1 fruit, 1 veggie, 1 dairy, 1 snack — can you remember all 4?', items:['🍋','🧅','🥚','🍫']},
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────
+var level=1, score=0, lives=3, numCorrect=0, numWrong=0;
+var shadowItems=[], shadowIdx=0;
+var recipes=[], recipeIdx=0;
+var foundInRecipe=[], recipeAnswered=false;
+var timerInterval=null;
+
+// ── HELPERS ───────────────────────────────────────────────────────────
+function shuffle(a){var b=a.slice();for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t;}return b;}
+function showScreen(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+var toastTmr;
+function showToast(type,msg){clearTimeout(toastTmr);var t=document.getElementById('toast');t.className='toast '+type+' on';t.textContent=msg;toastTmr=setTimeout(function(){t.classList.remove('on');},2400);}
+function confetti(){var c=['#F5C518','#FF8C42','#3DD68C','#FF6B9D','#4A90D9','#A855F7'];for(var i=0;i<40;i++){(function(i){setTimeout(function(){var e=document.createElement('div');e.className='cf';e.style.cssText='left:'+Math.random()*100+'vw;top:-12px;width:'+(6+Math.random()*7)+'px;height:'+(6+Math.random()*7)+'px;background:'+c[Math.floor(Math.random()*c.length)]+';animation-duration:'+(1.2+Math.random()*1.4)+'s;';document.body.appendChild(e);setTimeout(function(){e.remove();},3000);},i*28);})(i);}}
+function updateTopBar(){
+  document.getElementById('g-score').textContent=score;
+  document.getElementById('g-lives').textContent='❤️'.repeat(lives)+'🖤'.repeat(3-lives);
+  var prog=document.getElementById('g-prog');
+  if(level===1){
+    prog.className='g-prog-fill l1';
+    document.getElementById('g-prog-txt').textContent='Shadow '+(shadowIdx+1)+'/'+shadowItems.length;
+    prog.style.width=((shadowIdx/shadowItems.length)*100)+'%';
+    document.getElementById('g-title').textContent='🌑 Level 1 — Shadow Sort';
+  } else {
+    prog.className='g-prog-fill l2';
+    document.getElementById('g-prog-txt').textContent='Recipe '+(recipeIdx+1)+'/'+recipes.length;
+    prog.style.width=((recipeIdx/recipes.length)*100)+'%';
+    document.getElementById('g-title').textContent='🧠 Level 2 — Memory Recipe';
+  }
+}
+
+// Shadow rendered via CSS filter - no canvas needed
+
+// ══════════════════════════════════════════════════════════════════
+// LEVEL 1 — SHADOW SORT
+// ══════════════════════════════════════════════════════════════════
+function loadShadow(){
+  updateTopBar();
+  var item=shadowItems[shadowIdx];
+  var content=document.getElementById('g-content');
+  content.innerHTML='';
+  var shadowAnswered=false;
+
+  // header
+  var ph=document.createElement('div'); ph.className='phase-card lv1';
+  ph.innerHTML='<div class="ph-tag">LEVEL 1 — SHADOW SORT</div><div class="ph-txt">What is this <span class="hl">shadow</span>? Sort it into the right basket!</div>';
+  content.appendChild(ph);
+
+  // shadow card
+  var sc=document.createElement('div'); sc.className='shadow-card';
+  var shadowDiv=document.createElement('div'); shadowDiv.className='shadow-wrap';
+  var shadowEl=document.createElement('div'); shadowEl.className='shadow-emoji-css'; shadowEl.textContent=item.emoji;
+  shadowDiv.appendChild(shadowEl);
+  var hint=document.createElement('div'); hint.className='shadow-hint';
+  hint.innerHTML='🌑 Look at the <span class="hl2">shape of the shadow</span> — which basket does it belong to?';
+  sc.appendChild(shadowDiv); sc.appendChild(hint);
+
+  // reveal section (hidden until answer)
+  var revealDiv=document.createElement('div'); revealDiv.id='reveal-div'; revealDiv.style.display='none';
+  revealDiv.style.textAlign='center';
+  var revEmoji=document.createElement('div'); revEmoji.className='reveal-emoji'; revEmoji.id='reveal-emoji'; revEmoji.textContent=item.emoji;
+  var revName=document.createElement('div'); revName.style.cssText='font-family:Fredoka One,cursive;font-size:1rem;color:#1B3A6B;margin-top:4px;'; revName.textContent='It\'s a '+item.name+'!';
+  revealDiv.appendChild(revEmoji); revealDiv.appendChild(revName);
+  sc.appendChild(revealDiv);
+  content.appendChild(sc);
+
+  // baskets
+  var bg=document.createElement('div'); bg.className='baskets-grid';
+  shuffle(CATS).forEach(function(cat){
+    var btn=document.createElement('button'); btn.className='basket-btn'; btn.id='basket-'+cat.id;
+    btn.style.borderColor=cat.color+'44'; btn.style.background=cat.bg;
+    btn.innerHTML='<span class="basket-icon">'+cat.emoji+'</span><span class="basket-name">'+cat.name+'</span>';
+    btn.onclick=function(){
+      if(shadowAnswered) return;
+      shadowAnswered=true;
+      document.querySelectorAll('.basket-btn').forEach(function(b){b.classList.add('disabled');});
+      // Reveal item
+      document.getElementById('reveal-div').style.display='block';
+      var rEl=document.getElementById('reveal-emoji'); if(rEl) rEl.classList.add('show');
+      if(cat.id===item.cat){
+        score+=10; numCorrect++;
+        btn.classList.add('correct');
+        document.getElementById('g-score').textContent=score;
+        showFb('ok',['Correct! You read the shadow! 🌟','Yes! Great shadow skills! ✨','Perfect! ⭐','Brilliant! 🏆'][Math.floor(Math.random()*4)]);
+        showToast('ok','✅ '+item.name+'! Correct basket! +10');
+        confetti();
+      } else {
+        lives=Math.max(0,lives-1); numWrong++;
+        btn.classList.add('wrong');
+        var cc=CATS.find(function(c){return c.id===item.cat;});
+        document.getElementById('basket-'+item.cat).classList.add('show-correct');
+        document.getElementById('g-lives').textContent='❤️'.repeat(lives)+'🖤'.repeat(3-lives);
+        showFb('bad','It was '+item.emoji+' '+item.name+'! Goes in '+cc.emoji+' '+cc.name+'!');
+        showToast('bad','❌ It was '+item.emoji+' '+item.name+'!');
+      }
+      document.getElementById('g-next-btn').className='g-next-btn show';
+    };
+    bg.appendChild(btn);
+  });
+  content.appendChild(bg);
+
+  var fb=document.createElement('div'); fb.className='g-feedback'; fb.id='g-feedback'; content.appendChild(fb);
+  var nb=document.createElement('button'); nb.className='g-next-btn'; nb.id='g-next-btn';
+  nb.textContent=shadowIdx+1>=shadowItems.length?'Level 2! 🧠':'Next Shadow →';
+  nb.onclick=function(){shadowIdx++;if(shadowIdx>=shadowItems.length){level=2;loadRecipeMemory();}else{loadShadow();}};
+  content.appendChild(nb);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// LEVEL 2 — MEMORY RECIPE (show 3 items → hide → find)
+// ══════════════════════════════════════════════════════════════════
+function loadRecipeMemory(){
+  clearInterval(timerInterval);
+  updateTopBar();
+  var recipe=recipes[recipeIdx];
+  foundInRecipe=[];
+  recipeAnswered=false;
+  var content=document.getElementById('g-content');
+  content.innerHTML='';
+
+  // Phase header
+  var ph=document.createElement('div'); ph.className='phase-card lv2';
+  ph.innerHTML='<div class="ph-tag">LEVEL 2 — MEMORY RECIPE</div><div class="ph-txt">👀 <span class="hl">Memorise</span> the 3 ingredients — they will disappear!</div>';
+  content.appendChild(ph);
+
+  // Monster + speech
+  var mc=document.createElement('div'); mc.className='memorise-card';
+  mc.innerHTML='<div class="monster-row">'+
+    '<span class="monster-big">'+recipe.monster+'</span>'+
+    '<div class="speech-bubble"><div class="speech-txt">'+recipe.speech+'</div></div>'+
+    '</div>';
+
+  // Show ingredients
+  var ingrRow=document.createElement('div'); ingrRow.className='ingr-show'; ingrRow.id='ingr-show';
+  recipe.items.forEach(function(em){
+    var itm=ALL_ITEMS.find(function(i){return i.emoji===em;})||{emoji:em,name:em};
+    var div=document.createElement('div'); div.className='ingr-item';
+    div.innerHTML='<span class="ingr-emoji">'+em+'</span><span class="ingr-name">'+itm.name+'</span>';
+    ingrRow.appendChild(div);
+  });
+  mc.appendChild(ingrRow);
+
+  // Timer bar
+  var timerWrap=document.createElement('div'); timerWrap.className='timer-wrap'; timerWrap.id='timer-wrap';
+  timerWrap.innerHTML='<div class="timer-bar-bg"><div class="timer-bar-fill" id="timer-bar" style="width:100%"></div></div>'+
+    '<div class="timer-txt" id="timer-txt">⏱️ Memorise! 4 seconds...</div>';
+  mc.appendChild(timerWrap);
+  content.appendChild(mc);
+
+  // Countdown then switch to find phase
+  var timeLeft=5000; var total=5000;
+  timerInterval=setInterval(function(){
+    timeLeft-=100;
+    var pct=Math.max(0,timeLeft/total*100);
+    var bar=document.getElementById('timer-bar');
+    var txt=document.getElementById('timer-txt');
+    if(bar) bar.style.width=pct+'%';
+    if(txt) txt.textContent='⏱️ Memorise! '+Math.ceil(timeLeft/1000)+' second'+(Math.ceil(timeLeft/1000)!==1?'s':'')+'...';
+    if(timeLeft<=0){
+      clearInterval(timerInterval);
+      showFindPhase(recipe, content, mc);
+    }
+  },100);
+}
+
+function showFindPhase(recipe, content, mc){
+  // Hide ingredients, show memory blanks
+  var ingrShow=document.getElementById('ingr-show');
+  if(ingrShow) ingrShow.style.display='none';
+  var timerWrap=document.getElementById('timer-wrap');
+  if(timerWrap) timerWrap.innerHTML='<div class="timer-txt" style="color:#EF4444;">🙈 They\'re hidden now! Can you remember?</div>';
+
+  // Show blank slots
+  var blanksWrap=document.createElement('div');
+  var blanks='<div class="memory-blanks" id="memory-blanks">';
+  for(var i=0;i<recipe.items.length;i++) blanks+='<div class="mem-blank" id="memblank-'+i+'">?</div>';
+  blanks+='</div><div class="memory-blanks-lbl">Find all '+recipe.items.length+' items!</div>';
+  blanksWrap.innerHTML=blanks;
+  mc.appendChild(blanksWrap);
+
+  // find instruction
+  var fi=document.createElement('div'); fi.className='find-instr';
+  fi.innerHTML='<div class="find-instr-txt">Now find the <span class="hl">'+recipe.items.length+' items</span> you memorised! Tap them below 👇</div>';
+  content.appendChild(fi);
+
+  // shelf
+  var needed=recipe.items;
+  var distractors=shuffle(ALL_ITEMS.filter(function(i){return needed.indexOf(i.emoji)===-1;})).slice(0,8-needed.length);
+  var shelfItems=shuffle(needed.map(function(em){return ALL_ITEMS.find(function(i){return i.emoji===em;})||{emoji:em,name:em,cat:'?'};}).concat(distractors));
+
+  var slbl=document.createElement('div'); slbl.className='market-shelf-lbl';
+  slbl.textContent='Tap the '+recipe.items.length+' items from memory:';
+  content.appendChild(slbl);
+
+  var shelf=document.createElement('div'); shelf.className='market-shelf';
+  shelfItems.forEach(function(item){
+    var btn=document.createElement('button'); btn.className='shelf-item'; btn.id='shelf-'+item.emoji.codePointAt(0);
+    btn.innerHTML='<span class="shelf-item-emoji">'+item.emoji+'</span><span class="shelf-item-name">'+item.name+'</span>';
+    btn.onclick=function(){tapMemoryItem(item,needed);};
+    shelf.appendChild(btn);
+  });
+  content.appendChild(shelf);
+
+  var fb=document.createElement('div'); fb.className='g-feedback'; fb.id='g-feedback'; content.appendChild(fb);
+  var nb=document.createElement('button'); nb.className='g-next-btn'; nb.id='g-next-btn';
+  nb.textContent=recipeIdx+1>=recipes.length?'See Results! 🏆':'Next Recipe →';
+  nb.onclick=function(){recipeIdx++;if(recipeIdx>=recipes.length){showResults();}else{loadRecipeMemory();}};
+  content.appendChild(nb);
+}
+
+function tapMemoryItem(item,needed){
+  if(recipeAnswered) return;
+  var btn=document.getElementById('shelf-'+item.emoji.codePointAt(0));
+  if(!btn||btn.classList.contains('picked')||btn.classList.contains('disabled')) return;
+
+  if(needed.indexOf(item.emoji)!==-1 && foundInRecipe.indexOf(item.emoji)===-1){
+    foundInRecipe.push(item.emoji);
+    btn.classList.add('picked');
+    score+=5; document.getElementById('g-score').textContent=score;
+    // fill next blank
+    var blankIdx=foundInRecipe.length-1;
+    var blank=document.getElementById('memblank-'+blankIdx);
+    if(blank){blank.textContent=item.emoji; blank.classList.add('filled');}
+    showToast('ok','✅ Yes! '+item.emoji+' '+item.name+'!');
+    confetti();
+    if(foundInRecipe.length===needed.length){
+      recipeAnswered=true;
+      score+=15; numCorrect++;
+      document.getElementById('g-score').textContent=score;
+      document.querySelectorAll('.shelf-item').forEach(function(b){b.classList.add('disabled');});
+      showFb('ok','🧠 Amazing memory! You found all '+needed.length+' items! +15 bonus!');
+      document.getElementById('g-next-btn').className='g-next-btn show';
+    }
+  } else if(needed.indexOf(item.emoji)===-1){
+    lives=Math.max(0,lives-1); numWrong++;
+    document.getElementById('g-lives').textContent='❤️'.repeat(lives)+'🖤'.repeat(3-lives);
+    btn.classList.add('wrong-pick');
+    setTimeout(function(){btn.classList.remove('wrong-pick');btn.classList.add('disabled');},450);
+    showToast('bad','❌ '+item.emoji+' was not in the recipe!');
+    if(lives<=0){
+      recipeAnswered=true;
+      document.querySelectorAll('.shelf-item').forEach(function(b){b.classList.add('disabled');});
+      showFb('bad','No lives left! The items were: '+needed.join(' '));
+      document.getElementById('g-next-btn').className='g-next-btn show';
+    }
+  }
+}
+
+function showFb(type,msg){var fb=document.getElementById('g-feedback');if(!fb)return;fb.className='g-feedback '+type+' show';fb.textContent=msg;}
+
+function startGame(){
+  clearInterval(timerInterval);
+  level=1; score=0; lives=3; numCorrect=0; numWrong=0;
+  shadowIdx=0; recipeIdx=0;
+  var sel=[];
+  CATS.forEach(function(cat){
+    var pool=shuffle(ALL_ITEMS.filter(function(i){return i.cat===cat.id;}));
+    sel=sel.concat(pool.slice(0,2));
+  });
+  shadowItems=shuffle(sel);
+  recipes=shuffle(RECIPES).slice(0,3);
+  showScreen('game');
+  loadShadow();
+}
+
+function goHome(){clearInterval(timerInterval);showScreen('welcome');}
+
+function showResults(){
+  var total=shadowItems.length+recipes.length;
+  var pct=numCorrect/total;
+  document.getElementById('r-emoji').textContent=pct>=0.7?'🏆':pct>=0.4?'⭐':'💪';
+  document.getElementById('r-title').textContent=pct>=0.7?'Market Hero! 🏆':pct>=0.4?'Great Job! ⭐':'Keep Trying! 💪';
+  document.getElementById('r-sub').textContent='Spotted '+shadowItems.length+' shadows + remembered '+recipes.length+' recipes!';
+  document.getElementById('r-stars').textContent=pct>=0.7?'⭐⭐⭐':pct>=0.4?'⭐⭐☆':'⭐☆☆';
+  document.getElementById('r-score-num').textContent=score;
+  document.getElementById('r-correct').textContent=numCorrect;
+  document.getElementById('r-wrong').textContent=numWrong;
+  showScreen('results'); confetti(); confetti();
+}
+</script>
+</body>
+</html>
