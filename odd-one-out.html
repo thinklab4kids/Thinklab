@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Odd One Out! 🎯</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1B3A6B;--yellow:#F5C518;--orange:#FF8C42;--pink:#FF6B9D;--green:#3DD68C;--blue:#4A90D9;--purple:#A855F7;--red:#EF4444;--cream:#FFF8F0;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;min-height:100vh;overflow-x:hidden;}
+body{font-family:'Nunito',sans-serif;background:var(--cream);touch-action:pan-y;}
+.screen{display:none;min-height:100vh;flex-direction:column;align-items:center;}
+.screen.active{display:flex;}
+
+#welcome{background:linear-gradient(160deg,#FFF8E1 0%,#FFF0F8 50%,#F0FFF4 100%);justify-content:center;align-items:center;text-align:center;padding:28px 20px;gap:10px;position:relative;overflow:hidden;}
+.w-bg{position:absolute;inset:0;pointer-events:none;}
+.wbi{position:absolute;font-size:2rem;opacity:0.08;animation:wbF 5s ease-in-out infinite;}
+.wbi1{top:8%;left:5%;}.wbi2{top:12%;right:8%;animation-delay:1s;}.wbi3{top:40%;left:3%;animation-delay:2s;}.wbi4{bottom:20%;right:6%;animation-delay:0.5s;}.wbi5{bottom:15%;left:8%;animation-delay:1.5s;}
+@keyframes wbF{0%,100%{transform:translateY(0);}50%{transform:translateY(-14px) rotate(10deg);}}
+.w-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(239,68,68,0.12);border:2px solid rgba(239,68,68,0.35);border-radius:30px;padding:5px 14px;font-size:0.76rem;font-weight:800;color:var(--red);letter-spacing:1.2px;text-transform:uppercase;position:relative;z-index:1;}
+.w-title{font-family:'Fredoka One',cursive;font-size:clamp(2rem,9vw,3.6rem);color:var(--navy);line-height:1.05;position:relative;z-index:1;}
+.w-title .rd{color:var(--red);}.w-title .or{color:var(--orange);}
+.w-sub{font-size:clamp(0.88rem,3.5vw,1.05rem);color:#888;font-weight:800;max-width:340px;position:relative;z-index:1;}
+
+/* example preview */
+.w-example{background:white;border-radius:20px;padding:16px 18px;box-shadow:0 4px 16px rgba(0,0,0,0.08);max-width:360px;width:100%;position:relative;z-index:1;}
+.ex-title{font-family:'Fredoka One',cursive;font-size:0.78rem;color:#ccc;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
+.ex-items{display:flex;gap:10px;justify-content:center;}
+.ex-item{width:64px;height:64px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:2rem;border:3px solid #EEE;background:#F9FAFB;}
+.ex-item.odd{border-color:var(--red);background:#FEF2F2;animation:oddPulse 1.5s ease infinite;}
+@keyframes oddPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.3);}50%{box-shadow:0 0 0 8px rgba(239,68,68,0);}}
+
+.how-box{background:white;border-radius:20px;padding:14px 18px;box-shadow:0 4px 16px rgba(0,0,0,0.08);max-width:360px;width:100%;position:relative;z-index:1;}
+.how-title{font-family:'Fredoka One',cursive;font-size:0.78rem;color:#ccc;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.how-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:7px;font-size:0.85rem;font-weight:800;color:#555;}
+.how-num{width:22px;height:22px;border-radius:50%;background:var(--navy);color:var(--yellow);font-family:'Fredoka One',cursive;font-size:0.75rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.start-btn{background:linear-gradient(135deg,var(--red),var(--orange));color:white;border:none;padding:18px 52px;font-family:'Fredoka One',cursive;font-size:1.45rem;border-radius:60px;cursor:pointer;box-shadow:0 8px 28px rgba(239,68,68,0.4);animation:sPulse 2s ease infinite;transition:transform 0.15s;position:relative;z-index:1;}
+.start-btn:hover{transform:scale(1.06);}.start-btn:active{transform:scale(0.95);}
+@keyframes sPulse{0%,100%{box-shadow:0 8px 28px rgba(239,68,68,0.4),0 0 0 0 rgba(239,68,68,0.2);}50%{box-shadow:0 8px 28px rgba(239,68,68,0.4),0 0 0 14px rgba(239,68,68,0);}}
+.tl-tag{font-family:'Fredoka One',cursive;font-size:0.8rem;color:#bbb;letter-spacing:1px;position:relative;z-index:1;}
+.tl-tag span{color:var(--navy);}
+
+/* QUIZ */
+#quiz{background:linear-gradient(160deg,#FFF8E1,#FFF0F8);padding:0;justify-content:flex-start;}
+.q-topbar{display:flex;align-items:center;gap:8px;padding:10px 14px 8px;background:white;border-bottom:3px solid #F0F0F0;position:sticky;top:0;z-index:100;flex-wrap:wrap;box-shadow:0 2px 12px rgba(0,0,0,0.06);}
+.home-btn{background:#F5F5F5;border:none;border-radius:12px;padding:8px 12px;font-size:1rem;cursor:pointer;font-weight:800;color:#888;}
+.q-title-lbl{font-family:'Fredoka One',cursive;font-size:0.88rem;color:var(--navy);flex:1;}
+.q-score-badge{background:linear-gradient(135deg,var(--yellow),var(--orange));color:var(--navy);font-family:'Fredoka One',cursive;font-size:0.92rem;padding:5px 12px;border-radius:18px;}
+.q-lives{font-size:1rem;letter-spacing:2px;}
+.q-prog-wrap{flex-basis:100%;display:flex;align-items:center;gap:8px;margin-top:2px;}
+.q-prog-bar{flex:1;height:10px;background:#F0F0F0;border-radius:20px;overflow:hidden;}
+.q-prog-fill{height:100%;border-radius:20px;transition:width 0.5s ease;}
+.q-prog-txt{font-family:'Fredoka One',cursive;font-size:0.78rem;color:#aaa;white-space:nowrap;}
+.q-content{width:100%;max-width:520px;padding:12px 14px;display:flex;flex-direction:column;gap:12px;padding-bottom:28px;}
+
+/* level header */
+.q-header{border-radius:18px;padding:12px 16px;text-align:center;}
+.lv1h{background:linear-gradient(135deg,#065F46,#059669);}
+.lv2h{background:linear-gradient(135deg,#1E40AF,#2563EB);}
+.lv3h{background:linear-gradient(135deg,#92400E,#D97706);}
+.lv4h{background:linear-gradient(135deg,#4C1D95,#7C3AED);}
+.q-round-lbl{font-family:'Fredoka One',cursive;font-size:0.7rem;color:rgba(255,255,255,0.5);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
+.q-instr{font-family:'Fredoka One',cursive;font-size:clamp(0.9rem,3.5vw,1.1rem);color:white;line-height:1.3;}
+.q-instr .hl{color:var(--yellow);}
+.q-reason-lbl{font-family:'Fredoka One',cursive;font-size:0.75rem;color:rgba(255,255,255,0.6);margin-top:4px;}
+
+/* ITEMS GRID */
+.items-card{background:white;border-radius:22px;padding:18px;box-shadow:0 6px 22px rgba(0,0,0,0.08);border:3px solid rgba(239,68,68,0.12);animation:cardIn 0.4s ease;}
+@keyframes cardIn{from{transform:scale(0.9) translateY(12px);opacity:0;}to{transform:scale(1);opacity:1;}}
+.items-grid{display:grid;gap:10px;}
+.item-btn{background:white;border:3px solid #EEE;border-radius:20px;padding:14px 10px;cursor:pointer;transition:all 0.18s;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 3px 12px rgba(0,0,0,0.06);}
+.item-btn:not(.disabled):hover{border-color:var(--red);transform:scale(1.05);}
+.item-btn:active{transform:scale(0.95);}
+.item-emoji{font-size:clamp(2rem,8vw,2.8rem);}
+.item-name{font-family:'Fredoka One',cursive;font-size:0.75rem;color:#aaa;}
+.item-btn.correct-odd{border-color:var(--red);background:#FEF2F2;animation:oddWin 0.5s ease;}
+.item-btn.wrong-tap{border-color:var(--green);background:#F0FFF4;animation:wrongTap 0.4s ease;}
+.item-btn.show-odd{border-color:var(--red);background:#FEF2F2;}
+.item-btn.disabled{cursor:not-allowed;opacity:0.6;}
+@keyframes oddWin{0%{transform:scale(1);}30%{transform:scale(1.15) rotate(-5deg);}60%{transform:scale(1.1) rotate(5deg);}100%{transform:scale(1);}}
+@keyframes wrongTap{0%,100%{transform:translateX(0);}25%{transform:translateX(-8px);}75%{transform:translateX(8px);}}
+
+/* category tag */
+.category-tag{display:inline-flex;align-items:center;gap:6px;border-radius:20px;padding:5px 14px;font-family:'Fredoka One',cursive;font-size:0.78rem;color:var(--navy);background:#FFF8E1;border:2px solid var(--yellow);align-self:center;}
+
+.q-feedback{border-radius:16px;padding:12px 16px;font-family:'Fredoka One',cursive;font-size:0.95rem;text-align:center;display:none;}
+.q-feedback.show{display:block;animation:fadeIn 0.3s ease;}
+.q-feedback.ok{background:#F0FFF4;color:#14532D;border:2px solid var(--green);}
+.q-feedback.bad{background:#FEF2F2;color:var(--red);border:2px solid var(--red);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.q-next-btn{width:100%;padding:14px;font-family:'Fredoka One',cursive;font-size:1.05rem;background:linear-gradient(135deg,var(--navy),var(--red));color:white;border:none;border-radius:16px;cursor:pointer;display:none;}
+.q-next-btn.show{display:block;animation:fadeIn 0.3s ease;}
+
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-80px);background:white;border-radius:28px;padding:10px 20px;font-family:'Fredoka One',cursive;font-size:1rem;box-shadow:0 8px 28px rgba(0,0,0,0.15);z-index:9999;transition:transform 0.3s ease;white-space:nowrap;pointer-events:none;}
+.toast.on{transform:translateX(-50%) translateY(0);}
+.toast.ok{color:#10B981;border-left:5px solid #10B981;}
+.toast.bad{color:#EF4444;border-left:5px solid #EF4444;}
+.cf{position:fixed;pointer-events:none;z-index:9998;border-radius:3px;animation:cfFall linear forwards;}
+@keyframes cfFall{to{transform:translateY(110vh) rotate(600deg);opacity:0;}}
+
+#results{background:linear-gradient(160deg,#FFF8E1,#FFF0F8,#F0FFF4);justify-content:center;align-items:center;text-align:center;padding:40px 20px;gap:14px;}
+.r-emoji{font-size:5.5rem;display:block;animation:rB 0.9s ease infinite;}
+@keyframes rB{0%,100%{transform:translateY(0) rotate(-5deg);}50%{transform:translateY(-18px) rotate(5deg);}}
+.r-title{font-family:'Fredoka One',cursive;font-size:clamp(2rem,8vw,3.2rem);color:var(--navy);}
+.r-sub{font-size:1rem;color:#888;font-weight:800;max-width:320px;}
+.r-stars{font-size:2.6rem;letter-spacing:5px;}
+.r-score-box{background:var(--navy);border-radius:22px;padding:14px 40px;}
+.r-score-num{font-family:'Fredoka One',cursive;font-size:2.8rem;color:var(--yellow);display:block;}
+.r-score-lbl{font-size:0.8rem;color:rgba(255,255,255,0.55);font-weight:800;letter-spacing:1px;text-transform:uppercase;}
+.r-breakdown{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:280px;width:100%;}
+.r-box{border-radius:16px;padding:16px;}
+.rb-c{background:#F0FFF4;border:2px solid var(--green);}
+.rb-w{background:#FFF0F0;border:2px solid #FCA5A5;}
+.r-box-num{font-family:'Fredoka One',cursive;font-size:2rem;}
+.r-box-lbl{font-size:0.72rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:1px;}
+.r-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+.rbtn{padding:14px 26px;font-family:'Fredoka One',cursive;font-size:1rem;border:none;border-radius:50px;cursor:pointer;}
+.rbtn-retry{background:linear-gradient(135deg,var(--red),var(--orange));color:white;}
+.rbtn-home{background:white;color:#aaa;border:2px solid #EEE;}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<!-- WELCOME -->
+<div class="screen active" id="welcome">
+  <div class="w-bg">
+    <span class="wbi wbi1">🎯</span><span class="wbi wbi2">🍎</span>
+    <span class="wbi wbi3">🐶</span><span class="wbi wbi4">⭐</span><span class="wbi wbi5">🏆</span>
+  </div>
+  <div class="w-badge">🎯 5-Min Challenge</div>
+  <h1 class="w-title"><span class="rd">Odd</span><br><span class="or">One Out!</span></h1>
+  <p class="w-sub">Three belong together — one doesn't! Can you spot it? 🔍</p>
+
+  <div class="w-example">
+    <div class="ex-title">EXAMPLE — Which is the odd one out?</div>
+    <div class="ex-items">
+      <div class="ex-item">🍎</div>
+      <div class="ex-item">🍌</div>
+      <div class="ex-item odd">🐶</div>
+      <div class="ex-item">🍊</div>
+    </div>
+    <div style="font-family:'Fredoka One',cursive;font-size:0.8rem;color:var(--red);margin-top:8px;">🐶 Dog doesn't belong — the others are all fruits!</div>
+  </div>
+
+  <div class="how-box">
+    <div class="how-title">HOW TO PLAY</div>
+    <div class="how-row"><div class="how-num">1</div>Look at the 4 items carefully</div>
+    <div class="how-row"><div class="how-num">2</div>3 items belong to the same group</div>
+    <div class="how-row"><div class="how-num">3</div>Tap the ONE that doesn't belong! 4 levels!</div>
+  </div>
+
+  <button class="start-btn" onclick="startQuiz()">🎯 Find the Odd One!</button>
+  <div class="tl-tag">by <span>ThinkLab</span> — Raising smart thinkers!</div>
+</div>
+
+<!-- QUIZ -->
+<div class="screen" id="quiz">
+  <div class="q-topbar">
+    <button class="home-btn" onclick="goHome()">🏠</button>
+    <span class="q-title-lbl" id="q-title-lbl">🎯 Odd One Out</span>
+    <span class="q-lives" id="q-lives">❤️❤️❤️</span>
+    <span class="q-score-badge">⭐ <span id="q-score">0</span></span>
+    <div class="q-prog-wrap">
+      <div class="q-prog-bar"><div class="q-prog-fill" id="q-prog" style="width:0%"></div></div>
+      <span class="q-prog-txt" id="q-prog-txt">1/12</span>
+    </div>
+  </div>
+  <div class="q-content">
+    <div class="q-header" id="q-header">
+      <div class="q-round-lbl" id="q-round-lbl">QUESTION 1</div>
+      <div class="q-instr">Which one <span class="hl">doesn't belong</span>?</div>
+      <div class="q-reason-lbl" id="q-reason-lbl"></div>
+    </div>
+    <div class="items-card">
+      <div class="items-grid" id="items-grid"></div>
+    </div>
+    <div class="q-feedback" id="q-feedback"></div>
+    <button class="q-next-btn" id="q-next-btn" onclick="nextQ()">Next Question →</button>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="screen" id="results">
+  <span class="r-emoji" id="r-emoji">🏆</span>
+  <h2 class="r-title" id="r-title">Super Spotter!</h2>
+  <p class="r-sub" id="r-sub">Amazing spotting!</p>
+  <div class="r-stars" id="r-stars">⭐⭐⭐</div>
+  <div class="r-score-box">
+    <span class="r-score-num" id="r-score-num">0</span>
+    <span class="r-score-lbl">Points Earned</span>
+  </div>
+  <div class="r-breakdown">
+    <div class="r-box rb-c"><div class="r-box-num" id="r-correct" style="color:#14532D;">0</div><div class="r-box-lbl">Correct ✓</div></div>
+    <div class="r-box rb-w"><div class="r-box-num" id="r-wrong" style="color:#EF4444;">0</div><div class="r-box-lbl">Wrong ✗</div></div>
+  </div>
+  <div class="r-btns">
+    <button class="rbtn rbtn-home" onclick="goHome()">🏠 Home</button>
+    <button class="rbtn rbtn-retry" onclick="startQuiz()">🎯 Play Again!</button>
+  </div>
+  <div class="tl-tag" style="color:#bbb;font-family:'Fredoka One',cursive;font-size:0.8rem;letter-spacing:1px;margin-top:8px;">by <span style="color:#1B3A6B">ThinkLab</span></div>
+</div>
+
+<script>
+// ── QUESTIONS by LEVEL ─────────────────────────────────────────────────
+// items: all 4 items shown, oddIdx: which is the odd one (0-3)
+// reason: why the odd one is different, category: what the 3 share
+
+var ALL_QUESTIONS = [
+  // LEVEL 1 — Easy, obvious categories
+  {lv:1, items:[{e:'🍎',n:'Apple'},{e:'🍌',n:'Banana'},{e:'🐶',n:'Dog'},{e:'🍊',n:'Orange'}],    oddIdx:2, category:'Fruits',    reason:'Dog is an animal, not a fruit!',           lvClass:'lv1h', pts:10},
+  {lv:1, items:[{e:'🔴',n:'Circle'},{e:'🔵',n:'Circle'},{e:'🟡',n:'Circle'},{e:'🐱',n:'Cat'}],   oddIdx:3, category:'Colours',   reason:'Cat is an animal, not a colour!',          lvClass:'lv1h', pts:10},
+  {lv:1, items:[{e:'🐶',n:'Dog'},{e:'🐱',n:'Cat'},{e:'🐭',n:'Mouse'},{e:'🍎',n:'Apple'}],        oddIdx:3, category:'Animals',   reason:'Apple is a fruit, not an animal!',         lvClass:'lv1h', pts:10},
+  {lv:1, items:[{e:'🚗',n:'Car'},{e:'🚌',n:'Bus'},{e:'✈️',n:'Plane'},{e:'🍕',n:'Pizza'}],       oddIdx:3, category:'Transport', reason:'Pizza is food, not transport!',            lvClass:'lv1h', pts:10},
+
+  // LEVEL 2 — Medium, think a bit harder
+  {lv:2, items:[{e:'🍎',n:'Apple'},{e:'🍌',n:'Banana'},{e:'🍅',n:'Tomato'},{e:'🍊',n:'Orange'}], oddIdx:2, category:'Fruits',    reason:'Tomato is technically a vegetable here!',  lvClass:'lv2h', pts:15},
+  {lv:2, items:[{e:'🐶',n:'Dog'},{e:'🐱',n:'Cat'},{e:'🐟',n:'Fish'},{e:'🐠',n:'Clownfish'}],     oddIdx:0, category:'Sea pets',  reason:'Dog lives on land, not in water!',         lvClass:'lv2h', pts:15},
+  {lv:2, items:[{e:'⚽',n:'Football'},{e:'🏀',n:'Basketball'},{e:'🎾',n:'Tennis'},{e:'🏊',n:'Swim'}], oddIdx:3, category:'Ball sports', reason:'Swimming has no ball!',            lvClass:'lv2h', pts:15},
+  {lv:2, items:[{e:'🌞',n:'Sun'},{e:'🌙',n:'Moon'},{e:'⭐',n:'Star'},{e:'🌊',n:'Wave'}],         oddIdx:3, category:'Sky things', reason:'Wave is in the sea, not the sky!',        lvClass:'lv2h', pts:15},
+
+  // LEVEL 3 — Hard, tricky reasoning
+  {lv:3, items:[{e:'2️⃣',n:'Two'},{e:'4️⃣',n:'Four'},{e:'3️⃣',n:'Three'},{e:'6️⃣',n:'Six'}],   oddIdx:2, category:'Even numbers', reason:'3 is odd — 2, 4, 6 are all even!',       lvClass:'lv3h', pts:20},
+  {lv:3, items:[{e:'🍎',n:'Apple'},{e:'🍓',n:'Strawberry'},{e:'🍒',n:'Cherry'},{e:'🍌',n:'Banana'}], oddIdx:3, category:'Red fruits', reason:'Banana is yellow — others are red!', lvClass:'lv3h', pts:20},
+  {lv:3, items:[{e:'🐠',n:'Fish'},{e:'🐸',n:'Frog'},{e:'🐙',n:'Octopus'},{e:'🐬',n:'Dolphin'}], oddIdx:1, category:'Sea animals', reason:'Frog lives on land and water — not sea!', lvClass:'lv3h', pts:20},
+  {lv:3, items:[{e:'🌹',n:'Rose'},{e:'🌷',n:'Tulip'},{e:'🌻',n:'Sunflower'},{e:'🌵',n:'Cactus'}],oddIdx:3, category:'Flowers',   reason:'Cactus is a plant, not a flower!',        lvClass:'lv3h', pts:20},
+
+  // LEVEL 4 — Expert, very tricky!
+  {lv:4, items:[{e:'🦁',n:'Lion'},{e:'🐯',n:'Tiger'},{e:'🐆',n:'Leopard'},{e:'🐻',n:'Bear'}],   oddIdx:3, category:'Big cats',  reason:'Bear is not a big cat — others are!',      lvClass:'lv4h', pts:25},
+  {lv:4, items:[{e:'🌍',n:'Earth'},{e:'🌙',n:'Moon'},{e:'⭐',n:'Star'},{e:'🪐',n:'Saturn'}],     oddIdx:1, category:'In space',  reason:'Moon orbits Earth — others are bigger space bodies!', lvClass:'lv4h', pts:25},
+  {lv:4, items:[{e:'🎹',n:'Piano'},{e:'🎸',n:'Guitar'},{e:'🎺',n:'Trumpet'},{e:'🥁',n:'Drums'}], oddIdx:2, category:'Stringed', reason:'Trumpet is a wind instrument — others have strings!', lvClass:'lv4h', pts:25},
+  {lv:4, items:[{e:'🦅',n:'Eagle'},{e:'🦜',n:'Parrot'},{e:'🐧',n:'Penguin'},{e:'🦆',n:'Duck'}],  oddIdx:2, category:'Flying birds', reason:'Penguin cannot fly — others can!',    lvClass:'lv4h', pts:25},
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────
+var qIdx=0, score=0, lives=3, numCorrect=0, numWrong=0;
+var questions=[], answered=false;
+
+// ── HELPERS ───────────────────────────────────────────────────────────
+function shuffle(a){var b=a.slice();for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t;}return b;}
+function showScreen(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+var toastTmr;
+function showToast(type,msg){clearTimeout(toastTmr);var t=document.getElementById('toast');t.className='toast '+type+' on';t.textContent=msg;toastTmr=setTimeout(function(){t.classList.remove('on');},2400);}
+function confetti(){var c=['#F5C518','#FF8C42','#3DD68C','#FF6B9D','#4A90D9','#A855F7','#EF4444'];for(var i=0;i<40;i++){(function(i){setTimeout(function(){var e=document.createElement('div');e.className='cf';e.style.cssText='left:'+Math.random()*100+'vw;top:-12px;width:'+(6+Math.random()*7)+'px;height:'+(6+Math.random()*7)+'px;background:'+c[Math.floor(Math.random()*c.length)]+';animation-duration:'+(1.2+Math.random()*1.4)+'s;';document.body.appendChild(e);setTimeout(function(){e.remove();},3000);},i*28);})(i);}}
+
+// ── LOAD QUESTION ─────────────────────────────────────────────────────
+function loadQ(){
+  answered=false;
+  var q=questions[qIdx];
+  var total=questions.length;
+
+  document.getElementById('q-round-lbl').textContent='LEVEL '+q.lv+' — QUESTION '+(qIdx+1)+' OF '+total;
+  document.getElementById('q-prog').style.width=((qIdx/total)*100)+'%';
+  document.getElementById('q-prog-txt').textContent=(qIdx+1)+'/'+total;
+  document.getElementById('q-score').textContent=score;
+  document.getElementById('q-lives').textContent='❤️'.repeat(lives)+'🖤'.repeat(3-lives);
+  document.getElementById('q-header').className='q-header '+q.lvClass;
+  document.getElementById('q-reason-lbl').textContent='💡 Category: '+q.category;
+  document.getElementById('q-feedback').className='q-feedback';
+  document.getElementById('q-next-btn').className='q-next-btn';
+
+  // Shuffle item positions but track new odd index
+  var indices=[0,1,2,3];
+  var shuffled=shuffle(indices);
+  var newOddIdx=shuffled.indexOf(q.oddIdx);
+
+  var grid=document.getElementById('items-grid');
+  grid.style.gridTemplateColumns='1fr 1fr';
+  grid.innerHTML='';
+  grid.dataset.oddIdx=newOddIdx;
+
+  shuffled.forEach(function(origIdx,newIdx){
+    var item=q.items[origIdx];
+    var btn=document.createElement('button');
+    btn.className='item-btn';
+    btn.id='item-'+newIdx;
+    btn.innerHTML='<span class="item-emoji">'+item.e+'</span><span class="item-name">'+item.n+'</span>';
+    btn.onclick=(function(ni,oi){return function(){tapItem(ni,oi,q);};})(newIdx,origIdx);
+    grid.appendChild(btn);
+  });
+}
+
+// ── TAP ───────────────────────────────────────────────────────────────
+function tapItem(newIdx, origIdx, q){
+  if(answered) return;
+  answered=true;
+  var correctNewIdx=parseInt(document.getElementById('items-grid').dataset.oddIdx);
+  document.querySelectorAll('.item-btn').forEach(function(b){b.classList.add('disabled');});
+
+  if(newIdx===correctNewIdx){
+    score+=q.pts; numCorrect++;
+    document.getElementById('item-'+newIdx).classList.add('correct-odd');
+    document.getElementById('q-score').textContent=score;
+    var msgs=['Correct! Great thinking! 🌟','Spot on! 🎯','Yes! You found it! ✨','Brilliant! 🏆','Super spotter! 🔍'];
+    showFb('ok',msgs[Math.floor(Math.random()*msgs.length)]+' '+q.reason+' +'+q.pts+' pts!');
+    showToast('ok','🎯 Correct! +'+q.pts+' pts');
+    confetti();
+  } else {
+    lives=Math.max(0,lives-1); numWrong++;
+    document.getElementById('item-'+newIdx).classList.add('wrong-tap');
+    document.getElementById('item-'+correctNewIdx).classList.add('show-odd');
+    document.getElementById('q-lives').textContent='❤️'.repeat(lives)+'🖤'.repeat(3-lives);
+    showFb('bad','Not quite! '+q.reason);
+    showToast('bad','❌ Think about the category!');
+  }
+
+  var nb=document.getElementById('q-next-btn');
+  nb.textContent=qIdx+1>=questions.length?'See Results! 🏆':'Next Question →';
+  nb.className='q-next-btn show';
+}
+
+function showFb(type,msg){var fb=document.getElementById('q-feedback');fb.className='q-feedback '+type+' show';fb.textContent=msg;}
+function nextQ(){qIdx++;if(qIdx>=questions.length){showResults();return;}loadQ();}
+
+function startQuiz(){
+  qIdx=0;score=0;lives=3;numCorrect=0;numWrong=0;
+  // 3 from each level = 12 questions
+  var byLevel=[[],[],[],[]];
+  ALL_QUESTIONS.forEach(function(q){byLevel[q.lv-1].push(q);});
+  questions=[];
+  byLevel.forEach(function(lqs){questions=questions.concat(shuffle(lqs).slice(0,3));});
+  showScreen('quiz');loadQ();
+}
+
+function goHome(){showScreen('welcome');}
+
+function showResults(){
+  var pct=numCorrect/questions.length;
+  document.getElementById('r-emoji').textContent=pct>=0.8?'🏆':pct>=0.5?'🎯':'💪';
+  document.getElementById('r-title').textContent=pct>=0.8?'Super Spotter! 🏆':pct>=0.5?'Sharp Eyes! 🎯':'Keep Looking! 💪';
+  document.getElementById('r-sub').textContent='You spotted '+numCorrect+'/'+questions.length+' odd ones out!';
+  document.getElementById('r-stars').textContent=pct>=0.8?'⭐⭐⭐':pct>=0.5?'⭐⭐☆':'⭐☆☆';
+  document.getElementById('r-score-num').textContent=score;
+  document.getElementById('r-correct').textContent=numCorrect;
+  document.getElementById('r-wrong').textContent=numWrong;
+  showScreen('results');confetti();confetti();
+}
+</script>
+</body>
+</html>

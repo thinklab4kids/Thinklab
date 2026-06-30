@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Coding Robot! 🤖</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1B3A6B;--yellow:#F5C518;--orange:#FF8C42;--pink:#FF6B9D;--green:#3DD68C;--blue:#4A90D9;--purple:#A855F7;--red:#EF4444;--cream:#FFF8F0;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;min-height:100vh;overflow-x:hidden;}
+body{font-family:'Nunito',sans-serif;background:var(--cream);touch-action:pan-y;}
+.screen{display:none;min-height:100vh;flex-direction:column;align-items:center;}
+.screen.active{display:flex;}
+
+/* WELCOME */
+#welcome{background:linear-gradient(160deg,#E0F2FE 0%,#EDE9FE 50%,#FFF8E1 100%);justify-content:center;align-items:center;text-align:center;padding:28px 20px;gap:10px;position:relative;overflow:hidden;}
+.w-bg{position:absolute;inset:0;pointer-events:none;}
+.wbi{position:absolute;font-size:2rem;opacity:0.08;animation:wbFloat 5s ease-in-out infinite;}
+.wbi1{top:8%;left:5%;}.wbi2{top:12%;right:8%;animation-delay:1s;}.wbi3{top:40%;left:3%;animation-delay:2s;}.wbi4{bottom:20%;right:6%;animation-delay:0.5s;}.wbi5{bottom:15%;left:8%;animation-delay:1.5s;}
+@keyframes wbFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-14px) rotate(10deg);}}
+.w-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(74,144,217,0.15);border:2px solid rgba(74,144,217,0.4);border-radius:30px;padding:5px 14px;font-size:0.76rem;font-weight:800;color:var(--blue);letter-spacing:1.2px;text-transform:uppercase;position:relative;z-index:1;}
+.w-title{font-family:'Fredoka One',cursive;font-size:clamp(2rem,9vw,3.6rem);color:var(--navy);line-height:1.05;position:relative;z-index:1;}
+.w-title .bl{color:var(--blue);}.w-title .gr{color:var(--green);}
+.w-sub{font-size:clamp(0.88rem,3.5vw,1.05rem);color:#888;font-weight:800;max-width:340px;position:relative;z-index:1;}
+.w-robot{font-size:5rem;animation:robotBob 1.5s ease-in-out infinite;filter:drop-shadow(0 8px 16px rgba(0,0,0,0.15));position:relative;z-index:1;}
+@keyframes robotBob{0%,100%{transform:translateY(0) rotate(-3deg);}50%{transform:translateY(-12px) rotate(3deg);}}
+.how-box{background:white;border-radius:20px;padding:14px 18px;box-shadow:0 4px 16px rgba(0,0,0,0.08);max-width:360px;width:100%;position:relative;z-index:1;}
+.how-title{font-family:'Fredoka One',cursive;font-size:0.78rem;color:#ccc;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.how-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:7px;font-size:0.85rem;font-weight:800;color:#555;}
+.how-num{width:22px;height:22px;border-radius:50%;background:var(--navy);color:var(--yellow);font-family:'Fredoka One',cursive;font-size:0.75rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.start-btn{background:linear-gradient(135deg,var(--blue),var(--purple));color:white;border:none;padding:18px 52px;font-family:'Fredoka One',cursive;font-size:1.45rem;border-radius:60px;cursor:pointer;box-shadow:0 8px 28px rgba(74,144,217,0.45);animation:sPulse 2s ease infinite;transition:transform 0.15s;position:relative;z-index:1;}
+.start-btn:hover{transform:scale(1.06);}.start-btn:active{transform:scale(0.95);}
+@keyframes sPulse{0%,100%{box-shadow:0 8px 28px rgba(74,144,217,0.45),0 0 0 0 rgba(74,144,217,0.25);}50%{box-shadow:0 8px 28px rgba(74,144,217,0.45),0 0 0 14px rgba(74,144,217,0);}}
+.tl-tag{font-family:'Fredoka One',cursive;font-size:0.8rem;color:#bbb;letter-spacing:1px;position:relative;z-index:1;}
+.tl-tag span{color:var(--navy);}
+
+/* GAME */
+#game{background:linear-gradient(160deg,#E0F2FE,#EDE9FE);padding:0;justify-content:flex-start;}
+.g-topbar{display:flex;align-items:center;gap:8px;padding:10px 14px 8px;background:white;border-bottom:3px solid #F0F0F0;position:sticky;top:0;z-index:100;flex-wrap:wrap;box-shadow:0 2px 12px rgba(0,0,0,0.06);}
+.home-btn{background:#F5F5F5;border:none;border-radius:12px;padding:8px 12px;font-size:1rem;cursor:pointer;font-weight:800;color:#888;}
+.g-title-lbl{font-family:'Fredoka One',cursive;font-size:0.88rem;color:var(--navy);flex:1;}
+.g-score-badge{background:linear-gradient(135deg,var(--yellow),var(--orange));color:var(--navy);font-family:'Fredoka One',cursive;font-size:0.92rem;padding:5px 12px;border-radius:18px;}
+.g-lives{font-size:1rem;letter-spacing:2px;}
+.g-prog-wrap{flex-basis:100%;display:flex;align-items:center;gap:8px;margin-top:2px;}
+.g-prog-bar{flex:1;height:10px;background:#F0F0F0;border-radius:20px;overflow:hidden;}
+.g-prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:20px;transition:width 0.5s ease;}
+.g-prog-txt{font-family:'Fredoka One',cursive;font-size:0.78rem;color:#aaa;white-space:nowrap;}
+.g-content{width:100%;max-width:520px;padding:12px 14px;display:flex;flex-direction:column;gap:12px;padding-bottom:28px;}
+
+/* level card */
+.level-card{border-radius:18px;padding:12px 16px;text-align:center;}
+.lc-easy{background:linear-gradient(135deg,#065F46,#059669);}
+.lc-medium{background:linear-gradient(135deg,#1E40AF,#2563EB);}
+.lc-hard{background:linear-gradient(135deg,#92400E,#D97706);}
+.lc-expert{background:linear-gradient(135deg,#4C1D95,#7C3AED);}
+.lc-tag{font-family:'Fredoka One',cursive;font-size:0.7rem;color:rgba(255,255,255,0.55);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
+.lc-instr{font-family:'Fredoka One',cursive;font-size:clamp(0.88rem,3.5vw,1.05rem);color:white;line-height:1.3;}
+.lc-instr .hl{color:var(--yellow);}
+
+/* GRID */
+.grid-wrap{background:white;border-radius:22px;padding:14px;box-shadow:0 6px 22px rgba(0,0,0,0.08);border:3px solid rgba(74,144,217,0.15);}
+.grid-info{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.grid-info-txt{font-family:'Fredoka One',cursive;font-size:0.82rem;color:#aaa;}
+.steps-counter{font-family:'Fredoka One',cursive;font-size:0.82rem;color:var(--blue);}
+.grid{display:grid;gap:3px;margin:0 auto;}
+.cell{border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:clamp(1.2rem,5vw,1.8rem);background:#F3F4F6;border:2px solid #E5E7EB;aspect-ratio:1;transition:all 0.3s;}
+.cell.path{background:#DBEAFE;border-color:#60A5FA;}
+.cell.wall{background:#374151;border-color:#1F2937;}
+.cell.star{background:linear-gradient(135deg,#FEF9C3,#FEF08A);border-color:var(--yellow);}
+.cell.robot-cell{background:linear-gradient(135deg,#DBEAFE,#EFF6FF);border-color:var(--blue);}
+.cell.success{background:linear-gradient(135deg,#DCFCE7,#BBF7D0);border-color:var(--green);animation:cellPop 0.4s ease;}
+.cell.wrong-cell{background:#FEE2E2;border-color:var(--red);animation:cellShake 0.4s ease;}
+@keyframes cellPop{0%{transform:scale(1);}40%{transform:scale(1.2);}100%{transform:scale(1);}}
+@keyframes cellShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-4px);}75%{transform:translateX(4px);}}
+
+/* PROGRAM AREA */
+.program-area{background:white;border-radius:18px;padding:14px;box-shadow:0 4px 16px rgba(0,0,0,0.06);}
+.prog-lbl{font-family:'Fredoka One',cursive;font-size:0.82rem;color:#aaa;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+.prog-slots{display:flex;gap:6px;flex-wrap:wrap;min-height:52px;background:#F9FAFB;border-radius:12px;padding:8px;border:2px dashed #E5E7EB;}
+.prog-slot{width:44px;height:44px;border-radius:10px;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:1.3rem;cursor:pointer;transition:all 0.2s;position:relative;border:2.5px solid rgba(255,255,255,0.2);}
+.prog-slot:hover{transform:scale(1.1);}
+.prog-slot:active{transform:scale(0.9);}
+.prog-slot::after{content:'×';position:absolute;top:-6px;right:-6px;width:16px;height:16px;background:var(--red);border-radius:50%;font-size:0.55rem;color:white;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;}
+.prog-empty{font-family:'Fredoka One',cursive;font-size:0.78rem;color:#CCC;align-self:center;padding:4px 8px;}
+
+/* CONTROL BUTTONS */
+.controls-lbl{font-family:'Fredoka One',cursive;font-size:0.82rem;color:#aaa;letter-spacing:1px;text-transform:uppercase;}
+.dir-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:200px;margin:8px auto 0;}
+.dir-btn{background:white;border:3px solid #E5E7EB;border-radius:16px;padding:12px;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;justify-content:center;font-size:1.4rem;box-shadow:0 3px 10px rgba(0,0,0,0.06);}
+.dir-btn:hover{border-color:var(--blue);transform:scale(1.08);background:#EFF6FF;}
+.dir-btn:active{transform:scale(0.92);}
+.dir-btn.empty{background:transparent;border:none;box-shadow:none;pointer-events:none;}
+
+/* ACTION BUTTONS */
+.action-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.run-btn{padding:14px;font-family:'Fredoka One',cursive;font-size:1.05rem;background:linear-gradient(135deg,var(--green),#059669);color:white;border:none;border-radius:16px;cursor:pointer;box-shadow:0 4px 16px rgba(61,214,140,0.4);transition:transform 0.15s;}
+.run-btn:hover{transform:scale(1.04);}.run-btn:active{transform:scale(0.95);}
+.clear-btn{padding:14px;font-family:'Fredoka One',cursive;font-size:1.05rem;background:white;color:#888;border:2.5px solid #E5E7EB;border-radius:16px;cursor:pointer;transition:transform 0.15s;}
+.clear-btn:active{transform:scale(0.95);}
+
+.g-feedback{border-radius:16px;padding:12px 16px;font-family:'Fredoka One',cursive;font-size:0.95rem;text-align:center;display:none;}
+.g-feedback.show{display:block;animation:fadeIn 0.3s ease;}
+.g-feedback.ok{background:#F0FFF4;color:#14532D;border:2px solid var(--green);}
+.g-feedback.bad{background:#FFF0F0;color:var(--red);border:2px solid var(--red);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.g-next-btn{width:100%;padding:14px;font-family:'Fredoka One',cursive;font-size:1.05rem;background:linear-gradient(135deg,var(--navy),var(--blue));color:white;border:none;border-radius:16px;cursor:pointer;display:none;box-shadow:0 4px 16px rgba(27,58,107,0.3);}
+.g-next-btn.show{display:block;animation:fadeIn 0.3s ease;}
+
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-80px);background:white;border-radius:28px;padding:10px 20px;font-family:'Fredoka One',cursive;font-size:1rem;box-shadow:0 8px 28px rgba(0,0,0,0.15);z-index:9999;transition:transform 0.3s ease;white-space:nowrap;pointer-events:none;}
+.toast.on{transform:translateX(-50%) translateY(0);}
+.toast.ok{color:#10B981;border-left:5px solid #10B981;}
+.toast.bad{color:#EF4444;border-left:5px solid #EF4444;}
+.cf{position:fixed;pointer-events:none;z-index:9998;border-radius:3px;animation:cfFall linear forwards;}
+@keyframes cfFall{to{transform:translateY(110vh) rotate(600deg);opacity:0;}}
+
+/* LEVEL UP */
+#level-up{background:linear-gradient(135deg,var(--navy),#2B5CA6);justify-content:center;align-items:center;text-align:center;padding:40px 20px;gap:16px;}
+.lu-emoji{font-size:5rem;animation:luPop 0.6s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes luPop{from{transform:scale(0) rotate(-20deg);}to{transform:scale(1) rotate(0);}}
+.lu-title{font-family:'Fredoka One',cursive;font-size:2.5rem;color:var(--yellow);}
+.lu-sub{font-family:'Fredoka One',cursive;font-size:1.1rem;color:rgba(255,255,255,0.8);max-width:300px;}
+.lu-badge{background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.3);border-radius:20px;padding:12px 24px;font-family:'Fredoka One',cursive;font-size:1rem;color:white;}
+.lu-btn{background:var(--yellow);color:var(--navy);border:none;padding:16px 40px;font-family:'Fredoka One',cursive;font-size:1.2rem;border-radius:50px;cursor:pointer;}
+
+/* RESULTS */
+#results{background:linear-gradient(160deg,#E0F2FE,#EDE9FE,#FFF8E1);justify-content:center;align-items:center;text-align:center;padding:40px 20px;gap:14px;}
+.r-emoji{font-size:5.5rem;display:block;animation:rB 0.9s ease infinite;}
+@keyframes rB{0%,100%{transform:translateY(0) rotate(-5deg);}50%{transform:translateY(-18px) rotate(5deg);}}
+.r-title{font-family:'Fredoka One',cursive;font-size:clamp(2rem,8vw,3.2rem);color:var(--navy);}
+.r-sub{font-size:1rem;color:#888;font-weight:800;max-width:320px;}
+.r-stars{font-size:2.6rem;letter-spacing:5px;}
+.r-score-box{background:var(--navy);border-radius:22px;padding:14px 40px;}
+.r-score-num{font-family:'Fredoka One',cursive;font-size:2.8rem;color:var(--yellow);display:block;}
+.r-score-lbl{font-size:0.8rem;color:rgba(255,255,255,0.55);font-weight:800;letter-spacing:1px;text-transform:uppercase;}
+.r-breakdown{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:280px;width:100%;}
+.r-box{border-radius:16px;padding:16px;}
+.rb-c{background:#F0FFF4;border:2px solid var(--green);}
+.rb-w{background:#FFF0F0;border:2px solid #FCA5A5;}
+.r-box-num{font-family:'Fredoka One',cursive;font-size:2rem;}
+.r-box-lbl{font-size:0.72rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:1px;}
+.r-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+.rbtn{padding:14px 26px;font-family:'Fredoka One',cursive;font-size:1rem;border:none;border-radius:50px;cursor:pointer;}
+.rbtn-retry{background:linear-gradient(135deg,var(--blue),var(--purple));color:white;}
+.rbtn-home{background:white;color:#aaa;border:2px solid #EEE;}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<!-- WELCOME -->
+<div class="screen active" id="welcome">
+  <div class="w-bg">
+    <span class="wbi wbi1">🤖</span><span class="wbi wbi2">⬆️</span>
+    <span class="wbi wbi3">⭐</span><span class="wbi wbi4">➡️</span><span class="wbi wbi5">🏆</span>
+  </div>
+  <div class="w-badge">🤖 Coding Game</div>
+  <div class="w-robot">🤖</div>
+  <h1 class="w-title"><span class="bl">Coding</span><br><span class="gr">Robot!</span></h1>
+  <p class="w-sub">Program the robot to reach the star! Use directions like a real coder! ⭐</p>
+  <div class="how-box">
+    <div class="how-title">HOW TO PLAY</div>
+    <div class="how-row"><div class="how-num">1</div>See the robot 🤖 and the star ⭐ on the grid</div>
+    <div class="how-row"><div class="how-num">2</div>Tap direction buttons to add steps to your program</div>
+    <div class="how-row"><div class="how-num">3</div>Press RUN ▶️ to see your robot follow the code!</div>
+    <div class="how-row"><div class="how-num">4</div>Expert mode: reach the star in the FEWEST steps for bonus points! 🏆</div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:10px;max-width:360px;width:100%;position:relative;z-index:1;">
+    <button class="start-btn" style="padding:14px 20px;font-size:1.1rem;background:linear-gradient(135deg,#4ADE80,#059669);" onclick="selectParent('beginner')">🌱 Beginner — Simple Mazes</button>
+    <button class="start-btn" style="padding:14px 20px;font-size:1.1rem;background:linear-gradient(135deg,#60A5FA,#1D4ED8);animation:none;" onclick="selectParent('advanced')">🔥 Advanced — Walls & Obstacles</button>
+    <button class="start-btn" style="padding:14px 20px;font-size:1.1rem;background:linear-gradient(135deg,#A855F7,#6D28D9);animation:none;" onclick="selectParent('expert')">🏆 Expert — Minimum Steps Challenge</button>
+  </div>
+  <div class="tl-tag">by <span>ThinkLab</span> — Raising smart thinkers!</div>
+</div>
+
+<!-- LEVEL UP -->
+<div class="screen" id="level-up">
+  <span class="lu-emoji" id="lu-emoji">🎉</span>
+  <h2 class="lu-title" id="lu-title">Level Up!</h2>
+  <p class="lu-sub" id="lu-sub">The maze is getting bigger!</p>
+  <div class="lu-badge" id="lu-badge">⭐⭐ Level 2!</div>
+  <button class="lu-btn" onclick="continueGame()">Let's Code! 🤖</button>
+</div>
+
+<!-- GAME -->
+<div class="screen" id="game">
+  <div class="g-topbar">
+    <button class="home-btn" onclick="goHome()">🏠</button>
+    <span class="g-title-lbl" id="g-title-lbl">🤖 Level 1</span>
+    <span class="g-lives" id="g-lives">❤️❤️❤️</span>
+    <span class="g-score-badge">⭐ <span id="g-score">0</span></span>
+    <div class="g-prog-wrap">
+      <div class="g-prog-bar"><div class="g-prog-fill" id="g-prog" style="width:0%"></div></div>
+      <span class="g-prog-txt" id="g-prog-txt">Level 1/4</span>
+    </div>
+  </div>
+  <div class="g-content">
+    <div class="level-card" id="level-card">
+      <div class="lc-tag" id="lc-tag">BEGINNER — MAZE 1</div>
+      <div class="lc-instr" id="lc-instr">Program the robot to reach the <span class="hl">⭐ star</span>!</div>
+      <div id="min-steps-badge" style="display:none;margin-top:6px;background:rgba(245,197,24,0.2);border:2px solid var(--yellow);border-radius:12px;padding:5px 12px;font-family:'Fredoka One',cursive;font-size:0.8rem;color:var(--yellow);">⚡ Minimum steps to solve: <span id="min-steps-num">?</span> — beat it for bonus!</div>
+    </div>
+
+    <!-- GRID -->
+    <div class="grid-wrap">
+      <div class="grid-info">
+        <span class="grid-info-txt" id="grid-info-txt">3×3 grid</span>
+        <span class="steps-counter" id="steps-counter">0 steps added</span>
+      </div>
+      <div class="grid" id="grid"></div>
+    </div>
+
+    <!-- PROGRAM SLOTS -->
+    <div class="program-area">
+      <div class="prog-lbl">📋 Your Program (tap a step to remove it)</div>
+      <div class="prog-slots" id="prog-slots">
+        <span class="prog-empty" id="prog-empty">Add directions below ↓</span>
+      </div>
+    </div>
+
+    <!-- DIRECTION CONTROLS -->
+    <div style="text-align:center;">
+      <div class="controls-lbl">Tap to add a step:</div>
+      <div class="dir-grid">
+        <div class="dir-btn empty"></div>
+        <button class="dir-btn" onclick="addStep('⬆️','up')" title="Up">⬆️</button>
+        <div class="dir-btn empty"></div>
+        <button class="dir-btn" onclick="addStep('⬅️','left')" title="Left">⬅️</button>
+        <div class="dir-btn empty" style="background:#F9FAFB;border:2px solid #E5E7EB;border-radius:16px;">🤖</div>
+        <button class="dir-btn" onclick="addStep('➡️','right')" title="Right">➡️</button>
+        <div class="dir-btn empty"></div>
+        <button class="dir-btn" onclick="addStep('⬇️','down')" title="Down">⬇️</button>
+        <div class="dir-btn empty"></div>
+      </div>
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div class="action-btns">
+      <button class="clear-btn" onclick="clearProgram()">🗑️ Clear All</button>
+      <button class="run-btn" onclick="runProgram()">▶️ Run Code!</button>
+    </div>
+
+    <div class="g-feedback" id="g-feedback"></div>
+    <button class="g-next-btn" id="g-next-btn" onclick="nextLevel()">Next Level →</button>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="screen" id="results">
+  <span class="r-emoji" id="r-emoji">🏆</span>
+  <h2 class="r-title" id="r-title">Master Coder!</h2>
+  <p class="r-sub" id="r-sub">You programmed the robot!</p>
+  <div class="r-stars" id="r-stars">⭐⭐⭐</div>
+  <div class="r-score-box">
+    <span class="r-score-num" id="r-score-num">0</span>
+    <span class="r-score-lbl">Points Earned</span>
+  </div>
+  <div class="r-breakdown">
+    <div class="r-box rb-c"><div class="r-box-num" id="r-correct" style="color:#14532D;">0</div><div class="r-box-lbl">Levels ✓</div></div>
+    <div class="r-box rb-w"><div class="r-box-num" id="r-wrong" style="color:#EF4444;">0</div><div class="r-box-lbl">Attempts ✗</div></div>
+  </div>
+  <div class="r-btns">
+    <button class="rbtn rbtn-home" onclick="goHome()">🏠 Home</button>
+    <button class="rbtn rbtn-retry" onclick="startGame()">🤖 Play Again!</button>
+  </div>
+  <div class="tl-tag" style="color:#bbb;font-family:'Fredoka One',cursive;font-size:0.8rem;letter-spacing:1px;margin-top:8px;">by <span style="color:#1B3A6B">ThinkLab</span></div>
+</div>
+
+<script>
+// ── LEVELS ───────────────────────────────────────────────────────────
+// Each level: gridSize, robot start, star position, walls[], solution steps
+// Grid coords: [row, col] 0-indexed
+// ── PARENT LEVELS ─────────────────────────────────────────────────────
+var PARENT_LEVELS = {
+  beginner: {
+    name:'Beginner', emoji:'🌱', color:'#4ADE80',
+    levels:[
+      {tag:'BEGINNER — MAZE 1', size:3, robot:[0,0], star:[2,2], walls:[], solution:['right','right','down','down'], maxSteps:8, pts:15},
+      {tag:'BEGINNER — MAZE 2', size:3, robot:[0,0], star:[0,2], walls:[], solution:['right','right'], maxSteps:6, pts:15},
+      {tag:'BEGINNER — MAZE 3', size:3, robot:[2,0], star:[0,2], walls:[], solution:['up','up','right','right'], maxSteps:7, pts:15},
+      {tag:'BEGINNER — MAZE 4', size:4, robot:[0,0], star:[3,3], walls:[], solution:['right','right','right','down','down','down'], maxSteps:10, pts:20},
+      {tag:'BEGINNER — MAZE 5', size:4, robot:[0,3], star:[3,0], walls:[], solution:['down','down','down','left','left','left'], maxSteps:10, pts:20},
+    ]
+  },
+  advanced: {
+    name:'Advanced', emoji:'🔥', color:'#60A5FA',
+    levels:[
+      {tag:'ADVANCED — MAZE 1', size:4, robot:[0,0], star:[3,3], walls:[[1,1],[2,2]], solution:['right','right','right','down','down','down'], maxSteps:9, pts:25},
+      {tag:'ADVANCED — MAZE 2', size:4, robot:[0,0], star:[3,2], walls:[[0,2],[1,1],[2,3]], solution:['right','down','right','down','down'], maxSteps:8, pts:25},
+      {tag:'ADVANCED — MAZE 3', size:4, robot:[0,3], star:[3,0], walls:[[1,2],[2,1]], solution:['down','down','down','left','left','left'], maxSteps:9, pts:25},
+      {tag:'ADVANCED — MAZE 4', size:5, robot:[0,0], star:[4,4], walls:[[1,1],[1,3],[2,2],[3,1]], solution:['right','right','down','right','right','down','down','down'], maxSteps:12, pts:30},
+      {tag:'ADVANCED — MAZE 5', size:5, robot:[0,4], star:[4,0], walls:[[1,2],[2,3],[3,2],[2,1]], solution:['down','left','down','left','left','down','left','down'], maxSteps:12, pts:30},
+    ]
+  },
+  expert: {
+    name:'Expert', emoji:'🏆', color:'#A855F7',
+    minStepsChallenge:true,
+    levels:[
+      {tag:'EXPERT — MAZE 1', size:4, robot:[0,0], star:[3,3], walls:[[0,2],[1,3],[2,0],[3,1]], solution:['down','right','down','right','down','right'], minSteps:6, maxSteps:12, pts:40},
+      {tag:'EXPERT — MAZE 2', size:5, robot:[0,0], star:[4,2], walls:[[1,1],[1,3],[2,2],[3,1],[3,3]], solution:['down','down','down','down','right','right'], minSteps:6, maxSteps:14, pts:40},
+      {tag:'EXPERT — MAZE 3', size:5, robot:[0,4], star:[4,0], walls:[[1,1],[1,3],[2,2],[3,1],[3,3]], solution:['down','down','down','down','left','left','left','left'], minSteps:8, maxSteps:16, pts:50},
+      {tag:'EXPERT — MAZE 4', size:5, robot:[2,0], star:[2,4], walls:[[0,2],[1,1],[1,3],[3,1],[3,3],[4,2]], solution:['right','right','right','right'], minSteps:4, maxSteps:12, pts:50},
+      {tag:'EXPERT — MAZE 5', size:6, robot:[0,0], star:[5,5], walls:[[1,1],[1,4],[2,2],[2,3],[3,2],[3,3],[4,1],[4,4]], solution:['down','down','down','down','down','right','right','right','right','right'], minSteps:10, maxSteps:18, pts:60},
+    ]
+  }
+};
+
+// ── STATE ─────────────────────────────────────────────────────────────
+var currentParent='beginner', currentLevel=0;
+var score=0, lives=3, levelsCompleted=0, totalAttempts=0;
+var program=[];
+var robotPos=[0,0];
+var isRunning=false;
+
+function getLv(){ return PARENT_LEVELS[currentParent].levels[currentLevel]; }
+function getParent(){ return PARENT_LEVELS[currentParent]; }
+
+// ── HELPERS ───────────────────────────────────────────────────────────
+function showScreen(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+var toastTmr;
+function showToast(type,msg){clearTimeout(toastTmr);var t=document.getElementById('toast');t.className='toast '+type+' on';t.textContent=msg;toastTmr=setTimeout(function(){t.classList.remove('on');},2200);}
+function confetti(){var c=['#F5C518','#FF8C42','#3DD68C','#FF6B9D','#4A90D9','#A855F7'];for(var i=0;i<40;i++){(function(i){setTimeout(function(){var e=document.createElement('div');e.className='cf';e.style.cssText='left:'+Math.random()*100+'vw;top:-12px;width:'+(6+Math.random()*7)+'px;height:'+(6+Math.random()*7)+'px;background:'+c[Math.floor(Math.random()*c.length)]+';animation-duration:'+(1.2+Math.random()*1.4)+'s;';document.body.appendChild(e);setTimeout(function(){e.remove();},3000);},i*28);})(i);}}
+function getLv(){return PARENT_LEVELS[currentParent].levels[currentLevel];}
+function getParent(){return PARENT_LEVELS[currentParent];}
+function isWall(r,c){var lv=getLv();return lv.walls.some(function(w){return w[0]===r&&w[1]===c;});}
+function isStar(r,c){var lv=getLv();return lv.star[0]===r&&lv.star[1]===c;}
+
+// ── GRID ──────────────────────────────────────────────────────────────
+function buildGrid(){
+  var lv=getLv();
+  var grid=document.getElementById('grid');
+  var cellSz=Math.min(Math.floor((window.innerWidth-60)/lv.size),72);
+  grid.style.gridTemplateColumns='repeat('+lv.size+','+cellSz+'px)';
+  grid.innerHTML='';
+  for(var r=0;r<lv.size;r++){
+    for(var c=0;c<lv.size;c++){
+      var cell=document.createElement('div');
+      cell.className='cell';
+      cell.id='cell-'+r+'-'+c;
+      cell.style.width=cellSz+'px';
+      cell.style.height=cellSz+'px';
+      cell.style.fontSize=Math.round(cellSz*0.45)+'px';
+      if(isWall(r,c)){cell.className='cell wall';cell.textContent='🧱';}
+      else if(isStar(r,c)){cell.className='cell star';cell.textContent='⭐';}
+      else if(r===lv.robot[0]&&c===lv.robot[1]){cell.className='cell robot-cell';cell.textContent='🤖';}
+      else{cell.textContent='';}
+      grid.appendChild(cell);
+    }
+  }
+  document.getElementById('grid-info-txt').textContent=lv.size+'×'+lv.size+' grid';
+}
+
+function updateGrid(){
+  var lv=getLv();
+  for(var r=0;r<lv.size;r++){
+    for(var c=0;c<lv.size;c++){
+      var cell=document.getElementById('cell-'+r+'-'+c);
+      if(!cell) continue;
+      if(isWall(r,c)){cell.className='cell wall';cell.textContent='🧱';}
+      else if(r===robotPos[0]&&c===robotPos[1]){cell.className='cell robot-cell';cell.textContent='🤖';}
+      else if(isStar(r,c)){cell.className='cell star';cell.textContent='⭐';}
+      else{cell.className='cell';cell.textContent='';}
+    }
+  }
+}
+
+// ── PROGRAM ───────────────────────────────────────────────────────────
+function addStep(emoji,dir){
+  if(isRunning) return;
+  var lv=getLv();
+  if(program.length>=lv.maxSteps){showToast('bad','Max '+lv.maxSteps+' steps! Clear some first.');return;}
+  program.push({emoji:emoji,dir:dir});
+  renderProgram();
+}
+
+function renderProgram(){
+  var slots=document.getElementById('prog-slots');
+  var empty=document.getElementById('prog-empty');
+  slots.innerHTML='';
+  if(program.length===0){
+    var e=document.createElement('span'); e.className='prog-empty'; e.id='prog-empty'; e.textContent='Add directions below ↓';
+    slots.appendChild(e);
+  } else {
+    program.forEach(function(step,i){
+      var s=document.createElement('div'); s.className='prog-slot'; s.textContent=step.emoji;
+      s.title='Tap to remove'; s.style.fontSize=Math.round(44*0.55)+'px';
+      s.onclick=(function(idx){return function(){removeStep(idx);};})(i);
+      slots.appendChild(s);
+    });
+  }
+  document.getElementById('steps-counter').textContent=program.length+' step'+(program.length!==1?'s':'')+' added';
+}
+
+function removeStep(idx){
+  if(isRunning) return;
+  program.splice(idx,1); renderProgram();
+}
+
+function clearProgram(){
+  if(isRunning) return;
+  program=[];
+  renderProgram();
+  resetRobot();
+  document.getElementById('g-feedback').className='g-feedback';
+  document.getElementById('g-next-btn').className='g-next-btn';
+}
+
+function resetRobot(){
+  var lv=getLv();
+  robotPos=[lv.robot[0],lv.robot[1]];
+  updateGrid();
+}
+
+// ── RUN PROGRAM ───────────────────────────────────────────────────────
+function runProgram(){
+  if(isRunning) return;
+  if(program.length===0){showToast('bad','Add some steps first!');return;}
+  isRunning=true;
+  totalAttempts++;
+  resetRobot();
+  document.getElementById('g-feedback').className='g-feedback';
+  document.getElementById('g-next-btn').className='g-next-btn';
+
+  var lv=getLv();
+  var stepIdx=0;
+
+  function runStep(){
+    if(stepIdx>=program.length){
+      // done running — check if at star
+      isRunning=false;
+      if(isStar(robotPos[0],robotPos[1])){
+        success();
+      } else {
+        fail('Almost! The robot didn\'t reach the ⭐ star. Try again!');
+      }
+      return;
+    }
+    var step=program[stepIdx];
+    var nr=robotPos[0], nc=robotPos[1];
+    if(step.dir==='up')    nr--;
+    if(step.dir==='down')  nr++;
+    if(step.dir==='left')  nc--;
+    if(step.dir==='right') nc++;
+
+    // check bounds
+    if(nr<0||nr>=lv.size||nc<0||nc>=lv.size){
+      isRunning=false;
+      // highlight current cell
+      var cell=document.getElementById('cell-'+robotPos[0]+'-'+robotPos[1]);
+      if(cell) cell.className='cell wrong-cell';
+      fail('Oops! The robot went out of bounds! 🚧 Try a different direction!');
+      return;
+    }
+    // check wall
+    if(isWall(nr,nc)){
+      isRunning=false;
+      var cell=document.getElementById('cell-'+nr+'-'+nc);
+      if(cell){cell.className='cell wall';cell.style.animation='cellShake 0.4s ease';}
+      fail('The robot hit a wall 🧱! Plan a different route!');
+      return;
+    }
+    robotPos=[nr,nc];
+    updateGrid();
+    stepIdx++;
+    setTimeout(runStep, 380);
+  }
+  setTimeout(runStep, 200);
+}
+
+function success(){
+  var lv=getLv();
+  var par=getParent();
+  var usedSteps=program.length;
+  var pts=lv.pts;
+  var bonusMsg='';
+  if(par.minStepsChallenge&&lv.minSteps){
+    if(usedSteps<=lv.minSteps){pts+=25;bonusMsg=' 🌟 PERFECT! Min steps bonus +25!';}
+    else if(usedSteps<=lv.minSteps+2){pts+=10;bonusMsg=' ⭐ Near-min bonus +10!';}
+    else{bonusMsg=' (Min possible: '+lv.minSteps+' — you used '+usedSteps+')';}
+  } else if(lv.solution&&program.length<=lv.solution.length){pts+=15;bonusMsg=' ⚡ Efficiency bonus +15!';}
+  score+=pts; levelsCompleted++;
+  document.getElementById('g-score').textContent=score;
+  var starCell=document.getElementById('cell-'+lv.star[0]+'-'+lv.star[1]);
+  if(starCell) starCell.className='cell success';
+  showFeedback('ok','🌟 Robot reached the star!'+bonusMsg+' +'+pts+' pts');
+  showToast('ok','✅ Star reached! +'+pts+' pts');
+  confetti();
+  var par2=getParent();
+  var nb=document.getElementById('g-next-btn');
+  nb.textContent=currentLevel+1>=par2.levels.length?'See Results! 🏆':'Next Maze! 🤖';
+  nb.className='g-next-btn show';
+}
+
+function fail(msg){
+  lives=Math.max(0,lives-1);
+  document.getElementById('g-lives').textContent='❤️'.repeat(lives)+'🖤'.repeat(3-lives);
+  showFeedback('bad',msg);
+  showToast('bad','❌ Try again!');
+  setTimeout(resetRobot, 600);
+}
+
+function showFeedback(type,msg){var fb=document.getElementById('g-feedback');fb.className='g-feedback '+type+' show';fb.textContent=msg;}
+
+// ── LEVEL MANAGEMENT ─────────────────────────────────────────────────
+function loadLevel(){
+  var lv=getLv();
+  var par=getParent();
+  program=[];
+  robotPos=[lv.robot[0],lv.robot[1]];
+  isRunning=false;
+  document.getElementById('g-title-lbl').textContent='🤖 '+par.name+' — Maze '+(currentLevel+1);
+  document.getElementById('g-prog').style.width=((currentLevel/par.levels.length)*100)+'%';
+  document.getElementById('g-prog-txt').textContent='Maze '+(currentLevel+1)+'/'+par.levels.length;
+  document.getElementById('g-score').textContent=score;
+  document.getElementById('g-lives').textContent='❤️'.repeat(lives)+'🖤'.repeat(3-lives);
+  document.getElementById('g-feedback').className='g-feedback';
+  document.getElementById('g-next-btn').className='g-next-btn';
+  var lc=document.getElementById('level-card');
+  if(currentParent==='beginner') lc.className='level-card lc-easy';
+  else if(currentParent==='advanced') lc.className='level-card lc-medium';
+  else lc.className='level-card lc-expert';
+  document.getElementById('lc-tag').textContent=lv.tag;
+  var badge=document.getElementById('min-steps-badge');
+  if(par.minStepsChallenge&&lv.minSteps){
+    badge.style.display='block';
+    document.getElementById('min-steps-num').textContent=lv.minSteps;
+  } else { badge.style.display='none'; }
+  buildGrid();
+  renderProgram();
+}
+
+function nextLevel(){
+  var par=getParent();
+  currentLevel++;
+  if(currentLevel>=par.levels.length){showResults();return;}
+  var msgs=['Nice start! Next maze gets trickier!','Great coding! Keep going!','Almost done! Can you beat the next one?','Nearly there! Last maze!'];
+  document.getElementById('lu-emoji').textContent=par.emoji;
+  document.getElementById('lu-title').textContent='Maze '+(currentLevel+1)+'! 🎉';
+  document.getElementById('lu-sub').textContent=msgs[Math.min(currentLevel-1,msgs.length-1)];
+  document.getElementById('lu-badge').textContent=par.name+' — Maze '+(currentLevel+1)+' of '+par.levels.length;
+  showScreen('level-up'); confetti();
+}
+
+function continueGame(){showScreen('game');loadLevel();}
+
+function selectParent(key){
+  currentParent=key;currentLevel=0;score=0;lives=3;levelsCompleted=0;totalAttempts=0;
+  showScreen('game');loadLevel();
+}
+
+function startGame(){selectParent('beginner');}
+function goHome(){showScreen('welcome');}
+
+function showResults(){
+  var par=getParent();
+  var total=par.levels.length;
+  var pct=levelsCompleted/total;
+  document.getElementById('r-emoji').textContent=pct>=0.8?'🏆':pct>=0.5?'🤖':'💪';
+  document.getElementById('r-title').textContent=pct>=0.8?'Master Coder! 🏆':pct>=0.5?'Great Programmer! 🤖':'Keep Coding! 💪';
+  document.getElementById('r-sub').textContent='Completed '+levelsCompleted+'/'+total+' mazes on '+par.name+'!';
+  document.getElementById('r-stars').textContent=pct>=0.8?'⭐⭐⭐':pct>=0.5?'⭐⭐☆':'⭐☆☆';
+  document.getElementById('r-score-num').textContent=score;
+  document.getElementById('r-correct').textContent=levelsCompleted;
+  document.getElementById('r-wrong').textContent=totalAttempts-levelsCompleted;
+  showScreen('results');confetti();confetti();
+}
+</script>
+</body>
+</html>
