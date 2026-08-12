@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Visual Puzzle! 🔷</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1B3A6B;--yellow:#F5C518;--orange:#FF8C42;--green:#3DD68C;--blue:#4A90D9;--purple:#A855F7;--red:#EF4444;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;min-height:100vh;overflow-x:hidden;}
+body{font-family:'Nunito',sans-serif;background:#f0f4ff;touch-action:pan-y;user-select:none;}
+.screen{display:none;min-height:100vh;flex-direction:column;align-items:center;}
+.screen.active{display:flex;}
+
+#welcome{background:linear-gradient(160deg,#EDE9FE,#E0F2FE,#FFF8E1);justify-content:center;align-items:center;text-align:center;padding:26px 20px;gap:12px;}
+.w-icon{font-size:4.5rem;animation:iconBob 1.8s ease-in-out infinite;}
+@keyframes iconBob{0%,100%{transform:translateY(0) rotate(-4deg);}50%{transform:translateY(-10px) rotate(4deg);}}
+.w-badge{background:rgba(59,111,212,0.12);border:2px solid rgba(59,111,212,0.35);border-radius:30px;padding:5px 14px;font-size:0.74rem;font-weight:800;color:var(--blue);letter-spacing:1.2px;text-transform:uppercase;}
+.w-title{font-family:'Fredoka One',cursive;font-size:clamp(2rem,9vw,3.2rem);color:var(--navy);}
+.w-title .bl{color:var(--blue);}.w-title .pu{color:var(--purple);}
+.w-sub{font-size:0.9rem;color:#888;font-weight:800;max-width:320px;}
+.how-box{background:white;border-radius:18px;padding:12px 16px;box-shadow:0 4px 16px rgba(0,0,0,0.07);max-width:340px;width:100%;}
+.how-title{font-family:'Fredoka One',cursive;font-size:0.7rem;color:#ccc;letter-spacing:2px;text-transform:uppercase;margin-bottom:7px;}
+.how-row{display:flex;align-items:flex-start;gap:9px;margin-bottom:5px;font-size:0.82rem;font-weight:800;color:#555;}
+.how-num{width:20px;height:20px;border-radius:50%;background:var(--navy);color:var(--yellow);font-family:'Fredoka One',cursive;font-size:0.68rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.start-btn{background:linear-gradient(135deg,var(--blue),var(--purple));color:white;border:none;padding:16px 46px;font-family:'Fredoka One',cursive;font-size:1.3rem;border-radius:50px;cursor:pointer;box-shadow:0 6px 24px rgba(59,111,212,0.4);animation:sPulse 2s ease infinite;}
+.start-btn:active{transform:scale(0.94);}
+@keyframes sPulse{0%,100%{box-shadow:0 6px 24px rgba(59,111,212,0.4),0 0 0 0 rgba(59,111,212,0.2);}50%{box-shadow:0 6px 24px rgba(59,111,212,0.4),0 0 0 12px rgba(59,111,212,0);}}
+.tl-tag{font-family:'Fredoka One',cursive;font-size:0.76rem;color:#bbb;}
+.tl-tag span{color:var(--navy);}
+
+#quiz{background:#f0f4ff;padding:0;justify-content:flex-start;}
+.q-topbar{display:flex;align-items:center;gap:8px;padding:10px 14px 8px;background:white;border-bottom:3px solid #EEE;position:sticky;top:0;z-index:100;flex-wrap:wrap;box-shadow:0 2px 10px rgba(0,0,0,0.07);}
+.home-btn{background:#F5F5F5;border:none;border-radius:12px;padding:7px 11px;font-size:0.95rem;cursor:pointer;font-weight:800;color:#888;}
+.q-title-lbl{font-family:'Fredoka One',cursive;font-size:0.85rem;color:var(--navy);flex:1;}
+.q-score-badge{background:linear-gradient(135deg,var(--yellow),var(--orange));color:var(--navy);font-family:'Fredoka One',cursive;font-size:0.88rem;padding:4px 11px;border-radius:16px;}
+.q-lives{font-size:0.95rem;letter-spacing:2px;}
+.q-prog-wrap{flex-basis:100%;display:flex;align-items:center;gap:8px;margin-top:2px;}
+.q-prog-bar{flex:1;height:8px;background:#EEE;border-radius:20px;overflow:hidden;}
+.q-prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:20px;transition:width 0.5s ease;}
+.q-prog-txt{font-family:'Fredoka One',cursive;font-size:0.74rem;color:#aaa;white-space:nowrap;}
+.q-content{width:100%;max-width:500px;padding:12px 14px;display:flex;flex-direction:column;gap:12px;padding-bottom:28px;}
+
+.q-header{background:white;border-radius:18px;padding:14px 16px;box-shadow:0 3px 12px rgba(0,0,0,0.07);}
+.q-num-badge{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;background:var(--navy);color:white;font-family:'Fredoka One',cursive;font-size:0.9rem;border-radius:8px;margin-bottom:8px;}
+.q-question-txt{font-size:0.95rem;font-weight:800;color:var(--navy);line-height:1.4;}
+
+.pieces-card{background:white;border-radius:20px;padding:16px;box-shadow:0 4px 16px rgba(0,0,0,0.08);border:3px solid #EEF2FF;animation:cardIn 0.4s ease;}
+@keyframes cardIn{from{transform:scale(0.94) translateY(8px);opacity:0;}to{transform:scale(1);opacity:1;}}
+.pieces-lbl{font-family:'Fredoka One',cursive;font-size:0.68rem;color:#bbb;letter-spacing:2px;text-transform:uppercase;text-align:center;margin-bottom:10px;}
+.pieces-row{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;}
+.piece-box{width:70px;height:70px;background:#EEF2FF;border-radius:12px;display:flex;align-items:center;justify-content:center;border:2px solid #C7D2FE;padding:8px;}
+.piece-box svg{width:54px;height:54px;}
+.piece-plus{font-family:'Fredoka One',cursive;font-size:1.3rem;color:#CBD5E1;}
+
+.timer-wrap{display:flex;align-items:center;gap:8px;width:100%;}
+.timer-track{flex:1;height:20px;background:#EEE;border-radius:30px;overflow:hidden;border:2px solid #E0E0E0;}
+.timer-fill{height:100%;border-radius:30px;transition:width 0.1s linear;}
+.timer-fill.green{background:linear-gradient(90deg,#4ADE80,#86EFAC);}
+.timer-fill.orange{background:linear-gradient(90deg,#FB923C,#FCD34D);}
+.timer-fill.red{background:linear-gradient(90deg,#EF4444,#FB923C);}
+.timer-num{font-family:'Fredoka One',cursive;font-size:0.9rem;min-width:32px;text-align:center;}
+.timer-num.green{color:#4ADE80;}.timer-num.orange{color:#FB923C;}.timer-num.red{color:#EF4444;animation:numP 0.3s ease infinite;}
+@keyframes numP{0%,100%{transform:scale(1);}50%{transform:scale(1.15);}}
+
+.opts-lbl{font-family:'Fredoka One',cursive;font-size:0.88rem;color:var(--navy);text-align:center;}
+.opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.opt-card{background:white;border:3px solid #EEE;border-radius:18px;padding:10px 8px;cursor:pointer;transition:all 0.18s;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(0,0,0,0.06);}
+.opt-card:not(.disabled):hover{border-color:var(--blue);transform:scale(1.04);}
+.opt-card:active{transform:scale(0.93);}
+.opt-letter{width:26px;height:26px;border-radius:7px;background:var(--navy);color:white;font-family:'Fredoka One',cursive;font-size:0.76rem;display:flex;align-items:center;justify-content:center;align-self:flex-start;}
+.opt-shape{width:100%;aspect-ratio:1;background:#F8FAFF;border-radius:10px;display:flex;align-items:center;justify-content:center;border:1.5px solid #E8EEFF;padding:6px;overflow:hidden;}
+.opt-shape svg{width:100%;height:100%;}
+.opt-card.correct{background:#F0FFF4;border-color:var(--green);}
+.opt-card.correct .opt-letter{background:var(--green);}
+.opt-card.wrong{background:#FFF0F0;border-color:var(--red);}
+.opt-card.wrong .opt-letter{background:var(--red);}
+.opt-card.show-correct{background:#F0FFF4;border-color:var(--green);}
+.opt-card.show-correct .opt-letter{background:var(--green);}
+.opt-card.disabled{cursor:not-allowed;opacity:0.65;}
+
+.q-feedback{border-radius:16px;padding:12px 16px;font-family:'Fredoka One',cursive;font-size:0.88rem;text-align:center;display:none;}
+.q-feedback.show{display:block;animation:fadeIn 0.3s ease;}
+.q-feedback.ok{background:#F0FFF4;color:#14532D;border:2px solid var(--green);}
+.q-feedback.bad{background:#FFF0F0;color:var(--red);border:2px solid var(--red);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.q-next-btn{width:100%;padding:13px;font-family:'Fredoka One',cursive;font-size:1rem;background:linear-gradient(135deg,var(--navy),var(--blue));color:white;border:none;border-radius:16px;cursor:pointer;display:none;}
+.q-next-btn.show{display:block;animation:fadeIn 0.3s ease;}
+
+.toast{position:fixed;top:12px;left:50%;transform:translateX(-50%) translateY(-70px);background:white;border-radius:26px;padding:9px 18px;font-family:'Fredoka One',cursive;font-size:0.9rem;box-shadow:0 8px 24px rgba(0,0,0,0.15);z-index:9999;transition:transform 0.3s ease;white-space:nowrap;pointer-events:none;}
+.toast.on{transform:translateX(-50%) translateY(0);}
+.toast.ok{color:#10B981;border-left:4px solid #10B981;}
+.toast.bad{color:#EF4444;border-left:4px solid #EF4444;}
+.cf{position:fixed;pointer-events:none;z-index:9998;border-radius:3px;animation:cfFall linear forwards;}
+@keyframes cfFall{to{transform:translateY(110vh) rotate(600deg);opacity:0;}}
+
+#results{background:linear-gradient(160deg,#EDE9FE,#E0F2FE,#FFF8E1);justify-content:center;align-items:center;text-align:center;padding:40px 20px;gap:14px;}
+.r-emoji{font-size:5rem;display:block;animation:rB 0.9s ease infinite;}
+@keyframes rB{0%,100%{transform:translateY(0) rotate(-5deg);}50%{transform:translateY(-16px) rotate(5deg);}}
+.r-title{font-family:'Fredoka One',cursive;font-size:clamp(1.9rem,7.5vw,2.8rem);color:var(--navy);}
+.r-sub{font-size:0.95rem;color:#888;font-weight:800;max-width:300px;}
+.r-stars{font-size:2.4rem;letter-spacing:4px;}
+.r-score-box{background:var(--navy);border-radius:20px;padding:13px 36px;}
+.r-score-num{font-family:'Fredoka One',cursive;font-size:2.6rem;color:var(--yellow);display:block;}
+.r-score-lbl{font-size:0.74rem;color:rgba(255,255,255,0.5);font-weight:800;letter-spacing:1px;text-transform:uppercase;}
+.r-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+.rbtn{padding:13px 24px;font-family:'Fredoka One',cursive;font-size:0.95rem;border:none;border-radius:46px;cursor:pointer;}
+.rbtn-retry{background:linear-gradient(135deg,var(--blue),var(--purple));color:white;}
+.rbtn-home{background:white;color:#aaa;border:2px solid #EEE;}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<div class="screen active" id="welcome">
+  <div class="w-badge">🔷 5-Min Challenge</div>
+  <div class="w-icon">🔷</div>
+  <h1 class="w-title"><span class="bl">Visual</span> <span class="pu">Puzzle!</span></h1>
+  <p class="w-sub">Look at the 3 shapes — which picture shows all of them put together? 👁️</p>
+  <div class="how-box">
+    <div class="how-title">HOW TO PLAY</div>
+    <div class="how-row"><div class="how-num">1</div>See the 3 shapes shown in the box</div>
+    <div class="how-row"><div class="how-num">2</div>Look at options A B C D — each shows 3 shapes placed together</div>
+    <div class="how-row"><div class="how-num">3</div>Only ONE option has all 3 correct shapes — tap it!</div>
+    <div class="how-row"><div class="how-num">4</div>You have 30 seconds per question!</div>
+  </div>
+  <button class="start-btn" onclick="startQuiz()">🔷 Start Thinking!</button>
+  <div class="tl-tag">by <span>ThinkLab</span> — Raising smart thinkers!</div>
+</div>
+
+<div class="screen" id="quiz">
+  <div class="q-topbar">
+    <button class="home-btn" onclick="goHome()">🏠</button>
+    <span class="q-title-lbl">🔷 Visual Puzzle</span>
+    <span class="q-lives" id="q-lives">❤️❤️❤️</span>
+    <span class="q-score-badge">⭐ <span id="q-score">0</span></span>
+    <div class="q-prog-wrap">
+      <div class="q-prog-bar"><div class="q-prog-fill" id="q-prog" style="width:0%"></div></div>
+      <span class="q-prog-txt" id="q-prog-txt">1/10</span>
+    </div>
+  </div>
+  <div class="q-content">
+    <div class="q-header">
+      <div class="q-num-badge" id="q-num-badge">01</div>
+      <div class="q-question-txt" id="q-question-txt">Which picture shows all 3 shapes?</div>
+    </div>
+    <div class="pieces-card">
+      <div class="pieces-lbl">FIND THESE 3 SHAPES IN THE ANSWER</div>
+      <div class="pieces-row" id="pieces-row"></div>
+    </div>
+    <div class="timer-wrap">
+      <span style="font-size:1rem;">⏱️</span>
+      <div class="timer-track"><div class="timer-fill green" id="timer-fill" style="width:100%"></div></div>
+      <span class="timer-num green" id="timer-num">30s</span>
+    </div>
+    <div class="opts-lbl">Which picture has all 3 shapes? 👇</div>
+    <div class="opts-grid" id="opts-grid"></div>
+    <div class="q-feedback" id="q-feedback"></div>
+    <button class="q-next-btn" id="q-next-btn" onclick="nextQ()">Next →</button>
+  </div>
+</div>
+
+<div class="screen" id="results">
+  <span class="r-emoji" id="r-emoji">🏆</span>
+  <h2 class="r-title" id="r-title">Visual Master!</h2>
+  <p class="r-sub" id="r-sub">Amazing visual thinking!</p>
+  <div class="r-stars" id="r-stars">⭐⭐⭐</div>
+  <div class="r-score-box">
+    <span class="r-score-num" id="r-score-num">0</span>
+    <span class="r-score-lbl">Points Earned</span>
+  </div>
+  <div class="r-btns">
+    <button class="rbtn rbtn-home" onclick="goHome()">🏠 Home</button>
+    <button class="rbtn rbtn-retry" onclick="startQuiz()">🔷 Try Again!</button>
+  </div>
+  <div style="font-family:'Fredoka One',cursive;font-size:0.76rem;color:#bbb;margin-top:8px;">by <span style="color:#1B3A6B">ThinkLab</span></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════
+// CLEAN VISUAL PUZZLE
+// Each question shows 3 PIECE shapes individually.
+// 4 options each show 3 shapes arranged in a 2x2 layout within a box.
+// CORRECT answer has ALL 3 matching piece shapes.
+// WRONG answers swap ONE shape for a different shape.
+// This makes it unambiguous — child checks each shape one by one.
+// ══════════════════════════════════════════════════════════════════════
+
+var D='#2B5BA8', M='#5B8FD4', L='#A8C4EE', W='white';
+
+// Each shape as a small SVG scaled to fit a 40x40 area within a 100x100 viewBox
+// Placed at specific grid positions in option cards
+// We use a 2-slot layout: big shape left, two small shapes stacked right
+
+function s(body){ return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">'+body+'</svg>'; }
+
+// INDIVIDUAL PIECES (shown in question box, 54x54)
+var PIECES = {
+  circle:    s('<circle cx="50" cy="50" r="42" fill="'+D+'"/>'),
+  triangle:  s('<polygon points="50,8 92,88 8,88" fill="'+D+'"/>'),
+  square:    s('<rect x="10" y="10" width="80" height="80" rx="8" fill="'+D+'"/>'),
+  star:      s('<polygon points="50,8 61,37 92,37 68,56 77,84 50,66 23,84 32,56 8,37 39,37" fill="'+D+'"/>'),
+  heart:     s('<path d="M50,80 C22,60 8,42 8,28 C8,16 17,8 28,8 C37,8 45,13 50,20 C55,13 63,8 72,8 C83,8 92,16 92,28 C92,42 78,60 50,80Z" fill="'+D+'"/>'),
+  diamond:   s('<polygon points="50,6 94,50 50,94 6,50" fill="'+D+'"/>'),
+  crescent:  s('<circle cx="50" cy="50" r="42" fill="'+D+'"/><circle cx="65" cy="38" r="30" fill="'+W+'"/>'),
+  ring:      s('<circle cx="50" cy="50" r="42" fill="'+D+'"/><circle cx="50" cy="50" r="24" fill="'+W+'"/>'),
+  pentagon:  s('<polygon points="50,8 92,38 76,86 24,86 8,38" fill="'+D+'"/>'),
+  hexagon:   s('<polygon points="50,8 88,28 88,72 50,92 12,72 12,28" fill="'+D+'"/>'),
+  cross:     s('<rect x="36" y="8" width="28" height="84" rx="5" fill="'+D+'"/><rect x="8" y="36" width="84" height="28" rx="5" fill="'+D+'"/>'),
+  semicircle:s('<path d="M8,54 A42,42 0 0,1 92,54 Z" fill="'+D+'"/>'),
+  arrow:     s('<polygon points="16,36 58,36 58,18 88,50 58,82 58,64 16,64" fill="'+D+'"/>'),
+};
+
+// OPTION BUILDER — places 3 shapes in a clean 100x100 canvas
+// Layout: shape1 big on left, shape2 top-right, shape3 bottom-right
+// OR: all 3 arranged in a triangular layout
+// Uses transform="translate(x,y) scale(s)" for clean placement
+
+function opt3(sh1, sh2, sh3, col1, col2, col3){
+  col1=col1||D; col2=col2||M; col3=col3||L;
+  // Shape 1: top-left 45x45 area
+  // Shape 2: top-right 45x45 area  
+  // Shape 3: bottom-center 45x45 area
+  return s(
+    '<g transform="translate(2,2) scale(0.45)">'+shapeBody(sh1,col1)+'</g>'+
+    '<g transform="translate(53,2) scale(0.45)">'+shapeBody(sh2,col2)+'</g>'+
+    '<g transform="translate(27,53) scale(0.45)">'+shapeBody(sh3,col3)+'</g>'
+  );
+}
+
+// shape body — returns the inner SVG path/polygon with given color
+var BODIES = {
+  circle:    function(c){return '<circle cx="50" cy="50" r="42" fill="'+c+'"/>';},
+  triangle:  function(c){return '<polygon points="50,8 92,88 8,88" fill="'+c+'"/>';},
+  square:    function(c){return '<rect x="10" y="10" width="80" height="80" rx="8" fill="'+c+'"/>';},
+  star:      function(c){return '<polygon points="50,8 61,37 92,37 68,56 77,84 50,66 23,84 32,56 8,37 39,37" fill="'+c+'"/>';},
+  heart:     function(c){return '<path d="M50,80 C22,60 8,42 8,28 C8,16 17,8 28,8 C37,8 45,13 50,20 C55,13 63,8 72,8 C83,8 92,16 92,28 C92,42 78,60 50,80Z" fill="'+c+'"/>';},
+  diamond:   function(c){return '<polygon points="50,6 94,50 50,94 6,50" fill="'+c+'"/>';},
+  crescent:  function(c){return '<circle cx="50" cy="50" r="42" fill="'+c+'"/><circle cx="65" cy="38" r="30" fill="white"/>';},
+  ring:      function(c){return '<circle cx="50" cy="50" r="42" fill="'+c+'"/><circle cx="50" cy="50" r="24" fill="white"/>';},
+  pentagon:  function(c){return '<polygon points="50,8 92,38 76,86 24,86 8,38" fill="'+c+'"/>';},
+  hexagon:   function(c){return '<polygon points="50,8 88,28 88,72 50,92 12,72 12,28" fill="'+c+'"/>';},
+  cross:     function(c){return '<rect x="36" y="8" width="28" height="84" rx="5" fill="'+c+'"/><rect x="8" y="36" width="84" height="28" rx="5" fill="'+c+'"/>';},
+  semicircle:function(c){return '<path d="M8,54 A42,42 0 0,1 92,54 Z" fill="'+c+'"/>';},
+  arrow:     function(c){return '<polygon points="16,36 58,36 58,18 88,50 58,82 58,64 16,64" fill="'+c+'"/>';},
+};
+
+function shapeBody(name, color){ return BODIES[name] ? BODIES[name](color) : ''; }
+
+function makeOpt(sh1, sh2, sh3, c1, c2, c3){
+  c1=c1||D; c2=c2||M; c3=c3||L;
+  return s(
+    '<g transform="translate(4,4) scale(0.43)">'+shapeBody(sh1,c1)+'</g>'+
+    '<g transform="translate(53,4) scale(0.43)">'+shapeBody(sh2,c2)+'</g>'+
+    '<g transform="translate(28,53) scale(0.43)">'+shapeBody(sh3,c3)+'</g>'
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// QUESTIONS
+// Each question: 3 pieces to identify, 4 options
+// Correct option has EXACTLY those 3 shapes (same shapes, same colors)
+// Wrong options replace exactly one shape with a different one
+// ══════════════════════════════════════════════════════════════════════
+var QUESTIONS = [
+  {pts:10, q:"Which picture has a Circle, Star and Square?",
+   pieces:[`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="42" fill="#2B5BA8"/></svg>`,`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="50,8 61,37 92,37 68,56 77,84 50,66 23,84 32,56 8,37 39,37" fill="#2B5BA8"/></svg>`,`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="8" width="84" height="84" rx="8" fill="#2B5BA8"/></svg>`],
+   answer:"B",
+   opts:{A:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><circle cx="50" cy="50" r="42" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><polygon points="50,8 61,37 92,37 68,56 77,84 50,66 23,84 32,56 8,37 39,37" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><polygon points="50,6 94,50 50,94 6,50" fill="#A8C4EE"/></g></svg>`,B:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><circle cx="50" cy="50" r="42" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><polygon points="50,8 61,37 92,37 68,56 77,84 50,66 23,84 32,56 8,37 39,37" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><rect x="8" y="8" width="84" height="84" rx="8" fill="#A8C4EE"/></g></svg>`,C:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><circle cx="50" cy="50" r="42" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><polygon points="50,8 92,90 8,90" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><rect x="8" y="8" width="84" height="84" rx="8" fill="#A8C4EE"/></g></svg>`,D:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><path d="M50,82 C22,62 8,42 8,28 C8,15 17,6 28,6 C37,6 45,12 50,20 C55,12 63,6 72,6 C83,6 92,15 92,28 C92,42 78,62 50,82Z" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><polygon points="50,8 61,37 92,37 68,56 77,84 50,66 23,84 32,56 8,37 39,37" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><rect x="8" y="8" width="84" height="84" rx="8" fill="#A8C4EE"/></g></svg>`}},
+  {pts:13, q:"Which picture has a Heart, Triangle and Diamond?",
+   pieces:[`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M50,82 C22,62 8,42 8,28 C8,15 17,6 28,6 C37,6 45,12 50,20 C55,12 63,6 72,6 C83,6 92,15 92,28 C92,42 78,62 50,82Z" fill="#2B5BA8"/></svg>`,`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="50,8 92,90 8,90" fill="#2B5BA8"/></svg>`,`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="50,6 94,50 50,94 6,50" fill="#2B5BA8"/></svg>`],
+   answer:"C",
+   opts:{A:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><polygon points="50,8 61,37 92,37 68,56 77,84 50,66 23,84 32,56 8,37 39,37" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><polygon points="50,8 92,90 8,90" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><polygon points="50,6 94,50 50,94 6,50" fill="#A8C4EE"/></g></svg>`,B:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><path d="M50,82 C22,62 8,42 8,28 C8,15 17,6 28,6 C37,6 45,12 50,20 C55,12 63,6 72,6 C83,6 92,15 92,28 C92,42 78,62 50,82Z" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><polygon points="50,8 92,90 8,90" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><rect x="8" y="8" width="84" height="84" rx="8" fill="#A8C4EE"/></g></svg>`,C:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><path d="M50,82 C22,62 8,42 8,28 C8,15 17,6 28,6 C37,6 45,12 50,20 C55,12 63,6 72,6 C83,6 92,15 92,28 C92,42 78,62 50,82Z" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><polygon points="50,8 92,90 8,90" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><polygon points="50,6 94,50 50,94 6,50" fill="#A8C4EE"/></g></svg>`,D:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><path d="M50,82 C22,62 8,42 8,28 C8,15 17,6 28,6 C37,6 45,12 50,20 C55,12 63,6 72,6 C83,6 92,15 92,28 C92,42 78,62 50,82Z" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><circle cx="50" cy="50" r="42" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><polygon points="50,6 94,50 50,94 6,50" fill="#A8C4EE"/></g></svg>`}},
+  {pts:16, q:"Which picture has a Pentagon, Circle and Triangle?",
+   pieces:[`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="50,6 92,36 76,88 24,88 8,36" fill="#2B5BA8"/></svg>`,`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="42" fill="#2B5BA8"/></svg>`,`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="50,8 92,90 8,90" fill="#2B5BA8"/></svg>`],
+   answer:"D",
+   opts:{A:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><polygon points="50,6 92,36 76,88 24,88 8,36" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><circle cx="50" cy="50" r="42" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><rect x="8" y="8" width="84" height="84" rx="8" fill="#A8C4EE"/></g></svg>`,B:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><polygon points="50,6 92,36 76,88 24,88 8,36" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><circle cx="50" cy="50" r="42" fill="#5B8FD4"/><circle cx="50" cy="50" r="24" fill="white"/></g><g transform="translate(20,42) scale(0.48)"><polygon points="50,8 92,90 8,90" fill="#A8C4EE"/></g></svg>`,C:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><circle cx="50" cy="50" r="42" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><polygon points="50,8 92,90 8,90" fill="#A8C4EE"/></g></svg>`,D:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><polygon points="50,6 92,36 76,88 24,88 8,36" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><circle cx="50" cy="50" r="42" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><polygon points="50,8 92,90 8,90" fill="#A8C4EE"/></g></svg>`}},
+  {pts:19, q:"Which picture has a Star, Crescent and Square?",
+   pieces:[`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="50,8 61,37 92,37 68,56 77,84 50,66 23,84 32,56 8,37 39,37" fill="#2B5BA8"/></svg>`,`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="42" fill="#2B5BA8"/><circle cx="66" cy="38" r="30" fill="white"/></svg>`,`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="8" width="84" height="84" rx="8" fill="#2B5BA8"/></svg>`],
+   answer:"A",
+   opts:{A:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><polygon points="50,8 61,37 92,37 68,56 77,84 50,66 23,84 32,56 8,37 39,37" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><circle cx="50" cy="50" r="42" fill="#5B8FD4"/><circle cx="66" cy="38" r="30" fill="white"/></g><g transform="translate(20,42) scale(0.48)"><rect x="8" y="8" width="84" height="84" rx="8" fill="#A8C4EE"/></g></svg>`,B:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><polygon points="50,8 61,37 92,37 68,56 77,84 50,66 23,84 32,56 8,37 39,37" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><circle cx="50" cy="50" r="42" fill="#5B8FD4"/><circle cx="66" cy="38" r="30" fill="white"/></g><g transform="translate(20,42) scale(0.48)"><polygon points="50,6 94,50 50,94 6,50" fill="#A8C4EE"/></g></svg>`,C:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><polygon points="50,6 92,36 76,88 24,88 8,36" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><circle cx="50" cy="50" r="42" fill="#5B8FD4"/><circle cx="66" cy="38" r="30" fill="white"/></g><g transform="translate(20,42) scale(0.48)"><rect x="8" y="8" width="84" height="84" rx="8" fill="#A8C4EE"/></g></svg>`,D:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><polygon points="50,8 61,37 92,37 68,56 77,84 50,66 23,84 32,56 8,37 39,37" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><circle cx="50" cy="50" r="42" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><rect x="8" y="8" width="84" height="84" rx="8" fill="#A8C4EE"/></g></svg>`}},
+  {pts:22, q:"Which picture has a Ring, Arrow and Triangle?",
+   pieces:[`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="42" fill="#2B5BA8"/><circle cx="50" cy="50" r="24" fill="white"/></svg>`,`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="14,35 56,35 56,16 90,50 56,84 56,65 14,65" fill="#2B5BA8"/></svg>`,`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="50,8 92,90 8,90" fill="#2B5BA8"/></svg>`],
+   answer:"D",
+   opts:{A:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><circle cx="50" cy="50" r="42" fill="#2B5BA8"/><circle cx="50" cy="50" r="24" fill="white"/></g><g transform="translate(38,4) scale(0.54)"><polygon points="14,35 56,35 56,16 90,50 56,84 56,65 14,65" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><rect x="8" y="8" width="84" height="84" rx="8" fill="#A8C4EE"/></g></svg>`,B:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><circle cx="50" cy="50" r="42" fill="#2B5BA8"/><circle cx="50" cy="50" r="24" fill="white"/></g><g transform="translate(38,4) scale(0.54)"><rect x="36" y="6" width="28" height="88" rx="6" fill="#5B8FD4"/><rect x="6" y="36" width="88" height="28" rx="6" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><polygon points="50,8 92,90 8,90" fill="#A8C4EE"/></g></svg>`,C:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><circle cx="50" cy="50" r="42" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><polygon points="14,35 56,35 56,16 90,50 56,84 56,65 14,65" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><polygon points="50,8 92,90 8,90" fill="#A8C4EE"/></g></svg>`,D:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><circle cx="50" cy="50" r="42" fill="#2B5BA8"/><circle cx="50" cy="50" r="24" fill="white"/></g><g transform="translate(38,4) scale(0.54)"><polygon points="14,35 56,35 56,16 90,50 56,84 56,65 14,65" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><polygon points="50,8 92,90 8,90" fill="#A8C4EE"/></g></svg>`}},
+  {pts:25, q:"Which picture has a Hexagon, Heart and Diamond?",
+   pieces:[`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="#2B5BA8"/></svg>`,`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M50,82 C22,62 8,42 8,28 C8,15 17,6 28,6 C37,6 45,12 50,20 C55,12 63,6 72,6 C83,6 92,15 92,28 C92,42 78,62 50,82Z" fill="#2B5BA8"/></svg>`,`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="50,6 94,50 50,94 6,50" fill="#2B5BA8"/></svg>`],
+   answer:"C",
+   opts:{A:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><polygon points="50,8 61,37 92,37 68,56 77,84 50,66 23,84 32,56 8,37 39,37" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><polygon points="50,6 94,50 50,94 6,50" fill="#A8C4EE"/></g></svg>`,B:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><polygon points="50,6 92,36 76,88 24,88 8,36" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><path d="M50,82 C22,62 8,42 8,28 C8,15 17,6 28,6 C37,6 45,12 50,20 C55,12 63,6 72,6 C83,6 92,15 92,28 C92,42 78,62 50,82Z" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><polygon points="50,6 94,50 50,94 6,50" fill="#A8C4EE"/></g></svg>`,C:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><path d="M50,82 C22,62 8,42 8,28 C8,15 17,6 28,6 C37,6 45,12 50,20 C55,12 63,6 72,6 C83,6 92,15 92,28 C92,42 78,62 50,82Z" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><polygon points="50,6 94,50 50,94 6,50" fill="#A8C4EE"/></g></svg>`,D:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><path d="M50,82 C22,62 8,42 8,28 C8,15 17,6 28,6 C37,6 45,12 50,20 C55,12 63,6 72,6 C83,6 92,15 92,28 C92,42 78,62 50,82Z" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><rect x="8" y="8" width="84" height="84" rx="8" fill="#A8C4EE"/></g></svg>`}},
+  {pts:28, q:"Which picture has a Cross, Semicircle and Pentagon?",
+   pieces:[`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="36" y="6" width="28" height="88" rx="6" fill="#2B5BA8"/><rect x="6" y="36" width="88" height="28" rx="6" fill="#2B5BA8"/></svg>`,`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M6,54 A44,44 0 0,1 94,54 Z" fill="#2B5BA8"/></svg>`,`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="50,6 92,36 76,88 24,88 8,36" fill="#2B5BA8"/></svg>`],
+   answer:"D",
+   opts:{A:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><rect x="36" y="6" width="28" height="88" rx="6" fill="#2B5BA8"/><rect x="6" y="36" width="88" height="28" rx="6" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><path d="M6,54 A44,44 0 0,1 94,54 Z" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="#A8C4EE"/></g></svg>`,B:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><rect x="36" y="6" width="28" height="88" rx="6" fill="#2B5BA8"/><rect x="6" y="36" width="88" height="28" rx="6" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><circle cx="50" cy="50" r="42" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><polygon points="50,6 92,36 76,88 24,88 8,36" fill="#A8C4EE"/></g></svg>`,C:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><polygon points="14,35 56,35 56,16 90,50 56,84 56,65 14,65" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><path d="M6,54 A44,44 0 0,1 94,54 Z" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><polygon points="50,6 92,36 76,88 24,88 8,36" fill="#A8C4EE"/></g></svg>`,D:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><rect x="36" y="6" width="28" height="88" rx="6" fill="#2B5BA8"/><rect x="6" y="36" width="88" height="28" rx="6" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><path d="M6,54 A44,44 0 0,1 94,54 Z" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><polygon points="50,6 92,36 76,88 24,88 8,36" fill="#A8C4EE"/></g></svg>`}},
+  {pts:31, q:"Which picture has a Crescent, Diamond and Arrow?",
+   pieces:[`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="42" fill="#2B5BA8"/><circle cx="66" cy="38" r="30" fill="white"/></svg>`,`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="50,6 94,50 50,94 6,50" fill="#2B5BA8"/></svg>`,`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="14,35 56,35 56,16 90,50 56,84 56,65 14,65" fill="#2B5BA8"/></svg>`],
+   answer:"D",
+   opts:{A:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><circle cx="50" cy="50" r="42" fill="#2B5BA8"/><circle cx="66" cy="38" r="30" fill="white"/></g><g transform="translate(38,4) scale(0.54)"><polygon points="50,6 94,50 50,94 6,50" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><polygon points="50,8 92,90 8,90" fill="#A8C4EE"/></g></svg>`,B:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><circle cx="50" cy="50" r="42" fill="#2B5BA8"/><circle cx="50" cy="50" r="24" fill="white"/></g><g transform="translate(38,4) scale(0.54)"><polygon points="50,6 94,50 50,94 6,50" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><polygon points="14,35 56,35 56,16 90,50 56,84 56,65 14,65" fill="#A8C4EE"/></g></svg>`,C:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><circle cx="50" cy="50" r="42" fill="#2B5BA8"/><circle cx="66" cy="38" r="30" fill="white"/></g><g transform="translate(38,4) scale(0.54)"><rect x="8" y="8" width="84" height="84" rx="8" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><polygon points="14,35 56,35 56,16 90,50 56,84 56,65 14,65" fill="#A8C4EE"/></g></svg>`,D:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><circle cx="50" cy="50" r="42" fill="#2B5BA8"/><circle cx="66" cy="38" r="30" fill="white"/></g><g transform="translate(38,4) scale(0.54)"><polygon points="50,6 94,50 50,94 6,50" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><polygon points="14,35 56,35 56,16 90,50 56,84 56,65 14,65" fill="#A8C4EE"/></g></svg>`}},
+  {pts:34, q:"Which picture has a Star, Ring and Hexagon?",
+   pieces:[`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="50,8 61,37 92,37 68,56 77,84 50,66 23,84 32,56 8,37 39,37" fill="#2B5BA8"/></svg>`,`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="42" fill="#2B5BA8"/><circle cx="50" cy="50" r="24" fill="white"/></svg>`,`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="#2B5BA8"/></svg>`],
+   answer:"D",
+   opts:{A:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><polygon points="50,6 94,50 50,94 6,50" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><circle cx="50" cy="50" r="42" fill="#5B8FD4"/><circle cx="50" cy="50" r="24" fill="white"/></g><g transform="translate(20,42) scale(0.48)"><polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="#A8C4EE"/></g></svg>`,B:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><polygon points="50,8 61,37 92,37 68,56 77,84 50,66 23,84 32,56 8,37 39,37" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><circle cx="50" cy="50" r="42" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="#A8C4EE"/></g></svg>`,C:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><polygon points="50,8 61,37 92,37 68,56 77,84 50,66 23,84 32,56 8,37 39,37" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><circle cx="50" cy="50" r="42" fill="#5B8FD4"/><circle cx="50" cy="50" r="24" fill="white"/></g><g transform="translate(20,42) scale(0.48)"><polygon points="50,6 92,36 76,88 24,88 8,36" fill="#A8C4EE"/></g></svg>`,D:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><polygon points="50,8 61,37 92,37 68,56 77,84 50,66 23,84 32,56 8,37 39,37" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><circle cx="50" cy="50" r="42" fill="#5B8FD4"/><circle cx="50" cy="50" r="24" fill="white"/></g><g transform="translate(20,42) scale(0.48)"><polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="#A8C4EE"/></g></svg>`}},
+  {pts:37, q:"Which picture has a Heart, Cross and Crescent?",
+   pieces:[`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M50,82 C22,62 8,42 8,28 C8,15 17,6 28,6 C37,6 45,12 50,20 C55,12 63,6 72,6 C83,6 92,15 92,28 C92,42 78,62 50,82Z" fill="#2B5BA8"/></svg>`,`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="36" y="6" width="28" height="88" rx="6" fill="#2B5BA8"/><rect x="6" y="36" width="88" height="28" rx="6" fill="#2B5BA8"/></svg>`,`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="42" fill="#2B5BA8"/><circle cx="66" cy="38" r="30" fill="white"/></svg>`],
+   answer:"A",
+   opts:{A:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><path d="M50,82 C22,62 8,42 8,28 C8,15 17,6 28,6 C37,6 45,12 50,20 C55,12 63,6 72,6 C83,6 92,15 92,28 C92,42 78,62 50,82Z" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><rect x="36" y="6" width="28" height="88" rx="6" fill="#5B8FD4"/><rect x="6" y="36" width="88" height="28" rx="6" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><circle cx="50" cy="50" r="42" fill="#A8C4EE"/><circle cx="66" cy="38" r="30" fill="white"/></g></svg>`,B:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><polygon points="50,8 61,37 92,37 68,56 77,84 50,66 23,84 32,56 8,37 39,37" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><rect x="36" y="6" width="28" height="88" rx="6" fill="#5B8FD4"/><rect x="6" y="36" width="88" height="28" rx="6" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><circle cx="50" cy="50" r="42" fill="#A8C4EE"/><circle cx="66" cy="38" r="30" fill="white"/></g></svg>`,C:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><path d="M50,82 C22,62 8,42 8,28 C8,15 17,6 28,6 C37,6 45,12 50,20 C55,12 63,6 72,6 C83,6 92,15 92,28 C92,42 78,62 50,82Z" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><rect x="36" y="6" width="28" height="88" rx="6" fill="#5B8FD4"/><rect x="6" y="36" width="88" height="28" rx="6" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><circle cx="50" cy="50" r="42" fill="#A8C4EE"/></g></svg>`,D:`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(2,2) scale(0.54)"><path d="M50,82 C22,62 8,42 8,28 C8,15 17,6 28,6 C37,6 45,12 50,20 C55,12 63,6 72,6 C83,6 92,15 92,28 C92,42 78,62 50,82Z" fill="#2B5BA8"/></g><g transform="translate(38,4) scale(0.54)"><polygon points="14,35 56,35 56,16 90,50 56,84 56,65 14,65" fill="#5B8FD4"/></g><g transform="translate(20,42) scale(0.48)"><circle cx="50" cy="50" r="42" fill="#A8C4EE"/><circle cx="66" cy="38" r="30" fill="white"/></g></svg>`}},
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────
+var qIdx=0,score=0,lives=3,numCorrect=0,numWrong=0;
+var questions=[],answered=false;
+var timerInterval=null, TIMER_SECS=30;
+
+function shuffle(a){var b=a.slice();for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t;}return b;}
+function showScreen(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+var toastTmr;
+function showToast(type,msg){clearTimeout(toastTmr);var t=document.getElementById('toast');t.className='toast '+type+' on';t.textContent=msg;toastTmr=setTimeout(function(){t.classList.remove('on');},2200);}
+function confetti(){var c=['#F5C518','#FF8C42','#3DD68C','#FF6B9D','#4A90D9','#A855F7'];for(var i=0;i<44;i++){(function(i){setTimeout(function(){var e=document.createElement('div');e.className='cf';e.style.cssText='left:'+Math.random()*100+'vw;top:-12px;width:'+(5+Math.random()*8)+'px;height:'+(5+Math.random()*8)+'px;background:'+c[Math.floor(Math.random()*c.length)]+';animation-duration:'+(1.2+Math.random()*1.4)+'s;';document.body.appendChild(e);setTimeout(function(){e.remove();},3000);},i*24);})(i);}}
+
+function startTimer(){
+  clearInterval(timerInterval);
+  var t=TIMER_SECS;
+  updateTimer(t);
+  timerInterval=setInterval(function(){t-=0.1;updateTimer(t);if(t<=0){clearInterval(timerInterval);if(!answered)timeUp();}},100);
+}
+function stopTimer(){clearInterval(timerInterval);}
+function updateTimer(t){
+  var pct=Math.max(0,(t/TIMER_SECS)*100);
+  var fill=document.getElementById('timer-fill');
+  var num=document.getElementById('timer-num');
+  if(!fill||!num)return;
+  fill.style.width=pct+'%';
+  var secs=Math.ceil(Math.max(0,t));
+  if(pct>50){fill.className='timer-fill green';num.className='timer-num green';}
+  else if(pct>25){fill.className='timer-fill orange';num.className='timer-num orange';}
+  else{fill.className='timer-fill red';num.className='timer-num red';}
+  num.textContent=secs+'s';
+}
+function timeUp(){
+  answered=true;
+  document.querySelectorAll('.opt-card').forEach(function(c){c.classList.add('disabled');});
+  var correctDisplay=document.getElementById('opts-grid').dataset.correctDisplay;
+  document.getElementById('opt-'+correctDisplay).classList.add('show-correct');
+  lives=Math.max(0,lives-1);numWrong++;
+  document.getElementById('q-lives').textContent='❤️'.repeat(lives)+'🖤'.repeat(3-lives);
+  showFb('bad',"⏰ Time's up! The correct answer is highlighted green.");
+  var nb=document.getElementById('q-next-btn');
+  nb.textContent=qIdx+1>=questions.length?'See Results! 🏆':'Next →';
+  nb.className='q-next-btn show';
+}
+
+function loadQ(){
+  answered=false;
+  var q=questions[qIdx];
+  document.getElementById('q-num-badge').textContent=(qIdx+1<10?'0':'')+(qIdx+1);
+  document.getElementById('q-question-txt').textContent=q.q;
+  document.getElementById('q-prog').style.width=((qIdx/questions.length)*100)+'%';
+  document.getElementById('q-prog-txt').textContent=(qIdx+1)+'/'+questions.length;
+  document.getElementById('q-score').textContent=score;
+  document.getElementById('q-lives').textContent='❤️'.repeat(lives)+'🖤'.repeat(3-lives);
+  document.getElementById('q-feedback').className='q-feedback';
+  document.getElementById('q-next-btn').className='q-next-btn';
+
+  // Show individual pieces
+  var row=document.getElementById('pieces-row');
+  row.innerHTML='';
+  q.pieces.forEach(function(svgStr,i){
+    if(i>0){var pl=document.createElement('span');pl.className='piece-plus';pl.textContent='+';row.appendChild(pl);}
+    var box=document.createElement('div');
+    box.className='piece-box';
+    box.innerHTML=svgStr||'';
+    row.appendChild(box);
+  });
+
+  // Shuffle options
+  var letters=['A','B','C','D'];
+  var opts=letters.map(function(l){return{letter:l,svg:q.opts[l],isCorrect:l===q.answer};});
+  var shuffled=shuffle(opts);
+  var grid=document.getElementById('opts-grid');
+  grid.innerHTML='';
+  var newCorrect='A';
+  shuffled.forEach(function(opt,i){
+    var disp=letters[i];
+    if(opt.isCorrect) newCorrect=disp;
+    var card=document.createElement('div');
+    card.className='opt-card';card.id='opt-'+disp;
+    card.innerHTML='<div class="opt-letter">'+disp+'</div><div class="opt-shape">'+opt.svg+'</div>';
+    card.onclick=(function(ltr,isC){return function(){tapOpt(ltr,isC,q);};})(disp,opt.isCorrect);
+    grid.appendChild(card);
+  });
+  grid.dataset.correctDisplay=newCorrect;
+  startTimer();
+}
+
+function tapOpt(letter,isCorrect,q){
+  if(answered)return;
+  answered=true;stopTimer();
+  document.querySelectorAll('.opt-card').forEach(function(c){c.classList.add('disabled');});
+  var correctDisplay=document.getElementById('opts-grid').dataset.correctDisplay;
+  if(isCorrect){
+    score+=q.pts;numCorrect++;
+    document.getElementById('opt-'+letter).classList.add('correct');
+    document.getElementById('q-score').textContent=score;
+    var msgs=['Visual genius! 🌟','Sharp eyes! ✨','Correct! ⭐','Brilliant! 🏆'];
+    showFb('ok',msgs[Math.floor(Math.random()*msgs.length)]+' +'+q.pts+' pts!');
+    showToast('ok','✅ Correct! +'+q.pts+' pts');
+    confetti();
+  } else {
+    lives=Math.max(0,lives-1);numWrong++;
+    document.getElementById('opt-'+letter).classList.add('wrong');
+    document.getElementById('opt-'+correctDisplay).classList.add('show-correct');
+    document.getElementById('q-lives').textContent='❤️'.repeat(lives)+'🖤'.repeat(3-lives);
+    showFb('bad','Not quite! The green option has all 3 matching shapes.');
+    showToast('bad','❌ Look carefully at each shape!');
+  }
+  var nb=document.getElementById('q-next-btn');
+  nb.textContent=qIdx+1>=questions.length?'See Results! 🏆':'Next →';
+  nb.className='q-next-btn show';
+}
+
+function showFb(type,msg){var fb=document.getElementById('q-feedback');fb.className='q-feedback '+type+' show';fb.textContent=msg;}
+function nextQ(){qIdx++;if(qIdx>=questions.length){showResults();return;}loadQ();}
+function startQuiz(){qIdx=0;score=0;lives=3;numCorrect=0;numWrong=0;questions=shuffle(QUESTIONS).slice(0,10);showScreen('quiz');loadQ();}
+function goHome(){stopTimer();showScreen('welcome');}
+function showResults(){
+  var pct=numCorrect/questions.length;
+  document.getElementById('r-emoji').textContent=pct>=0.8?'🏆':pct>=0.5?'🔷':'💪';
+  document.getElementById('r-title').textContent=pct>=0.8?'Visual Master! 🏆':pct>=0.5?'Sharp Eyes! 🔷':'Keep Practising! 💪';
+  document.getElementById('r-sub').textContent='You got '+numCorrect+'/'+questions.length+' correct!';
+  document.getElementById('r-stars').textContent=pct>=0.8?'⭐⭐⭐':pct>=0.5?'⭐⭐☆':'⭐☆☆';
+  document.getElementById('r-score-num').textContent=score;
+  showScreen('results');confetti();confetti();
+}
+</script>
+</body>
+</html>
