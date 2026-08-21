@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Ollie's Adventure! 🦉</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1B3A6B;--yellow:#F5C518;--orange:#FF8C42;--pink:#FF6B9D;--green:#3DD68C;--blue:#4A90D9;--purple:#A855F7;--red:#EF4444;--cream:#FFF8F0;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;min-height:100vh;overflow-x:hidden;}
+body{font-family:'Nunito',sans-serif;background:var(--cream);touch-action:pan-y;user-select:none;}
+.screen{display:none;min-height:100vh;flex-direction:column;align-items:center;}
+.screen.active{display:flex;}
+
+#welcome{background:linear-gradient(160deg,#E0F2FE 0%,#FFF8E1 50%,#F0FFF4 100%);justify-content:center;align-items:center;text-align:center;padding:26px 20px;gap:10px;position:relative;overflow:hidden;}
+.w-bg{position:absolute;inset:0;pointer-events:none;}
+.wbi{position:absolute;font-size:2rem;opacity:0.08;animation:wbF 5s ease-in-out infinite;}
+.wbi1{top:8%;left:5%;}.wbi2{top:12%;right:8%;animation-delay:1s;}.wbi3{top:40%;left:3%;animation-delay:2s;}.wbi4{bottom:20%;right:6%;animation-delay:0.5s;}.wbi5{bottom:15%;left:8%;animation-delay:1.5s;}
+@keyframes wbF{0%,100%{transform:translateY(0);}50%{transform:translateY(-14px) rotate(10deg);}}
+.w-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(74,144,217,0.15);border:2px solid rgba(74,144,217,0.4);border-radius:30px;padding:5px 14px;font-size:0.75rem;font-weight:800;color:var(--blue);letter-spacing:1.2px;text-transform:uppercase;position:relative;z-index:1;}
+.w-owl{font-size:5rem;animation:owlBob 1.8s ease-in-out infinite;filter:drop-shadow(0 8px 16px rgba(0,0,0,0.15));position:relative;z-index:1;}
+@keyframes owlBob{0%,100%{transform:translateY(0) rotate(-4deg);}50%{transform:translateY(-12px) rotate(4deg);}}
+.w-title{font-family:'Fredoka One',cursive;font-size:clamp(1.9rem,8.5vw,3.2rem);color:var(--navy);line-height:1.05;position:relative;z-index:1;}
+.w-title .bl{color:var(--blue);}.w-title .gr{color:var(--green);}
+.w-sub{font-size:clamp(0.85rem,3.4vw,1rem);color:#888;font-weight:800;max-width:340px;position:relative;z-index:1;}
+
+.parent-levels{display:flex;flex-direction:column;gap:10px;max-width:360px;width:100%;position:relative;z-index:1;}
+.pl-card{background:white;border-radius:18px;padding:14px 16px;box-shadow:0 4px 16px rgba(0,0,0,0.08);display:flex;align-items:center;gap:12px;cursor:pointer;border:3px solid transparent;transition:all 0.2s;text-align:left;}
+.pl-card:hover{transform:scale(1.02);}
+.pl-card:active{transform:scale(0.97);}
+.pl-card.beginner{border-color:#4ADE80;}
+.pl-card.advanced{border-color:#60A5FA;}
+.pl-card.expert{border-color:#A855F7;}
+.pl-icon{font-size:2.2rem;flex-shrink:0;}
+.pl-info{flex:1;}
+.pl-name{font-family:'Fredoka One',cursive;font-size:1rem;color:var(--navy);}
+.pl-desc{font-size:0.74rem;color:#999;font-weight:700;margin-top:2px;}
+.pl-stars{font-size:0.85rem;}
+.tl-tag{font-family:'Fredoka One',cursive;font-size:0.78rem;color:#bbb;letter-spacing:1px;position:relative;z-index:1;}
+.tl-tag span{color:var(--navy);}
+
+#level-intro{justify-content:center;align-items:center;text-align:center;padding:40px 20px;gap:16px;}
+#level-intro.beginner-bg{background:linear-gradient(135deg,#065F46,#059669);}
+#level-intro.advanced-bg{background:linear-gradient(135deg,#1E40AF,#2563EB);}
+#level-intro.expert-bg{background:linear-gradient(135deg,#4C1D95,#7C3AED);}
+.li-emoji{font-size:4.5rem;animation:liPop 0.6s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes liPop{from{transform:scale(0) rotate(-20deg);}to{transform:scale(1) rotate(0);}}
+.li-title{font-family:'Fredoka One',cursive;font-size:2.2rem;color:var(--yellow);}
+.li-sub{font-family:'Fredoka One',cursive;font-size:1rem;color:rgba(255,255,255,0.85);max-width:300px;line-height:1.4;}
+.li-btn{background:var(--yellow);color:var(--navy);border:none;padding:16px 40px;font-family:'Fredoka One',cursive;font-size:1.15rem;border-radius:50px;cursor:pointer;box-shadow:0 6px 20px rgba(245,197,24,0.4);}
+
+#map-screen{padding:0;justify-content:flex-start;align-items:center;}
+.map-bg-beginner{background:linear-gradient(180deg,#BBF7D0 0%,#86EFAC 40%,#4ADE80 100%);}
+.map-bg-advanced{background:linear-gradient(180deg,#BFDBFE 0%,#93C5FD 40%,#60A5FA 100%);}
+.map-bg-expert{background:linear-gradient(180deg,#E9D5FF 0%,#D8B4FE 40%,#A855F7 100%);}
+.map-topbar{width:100%;display:flex;align-items:center;gap:10px;padding:14px 16px;background:rgba(255,255,255,0.85);backdrop-filter:blur(6px);position:relative;z-index:5;}
+.map-home-btn{background:white;border:none;border-radius:12px;padding:8px 12px;font-size:1rem;cursor:pointer;font-weight:800;color:#888;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+.map-title{font-family:'Fredoka One',cursive;font-size:1.05rem;color:var(--navy);flex:1;}
+.map-score{background:linear-gradient(135deg,var(--yellow),var(--orange));color:var(--navy);font-family:'Fredoka One',cursive;font-size:0.92rem;padding:5px 12px;border-radius:18px;}
+.map-clouds{position:absolute;width:100%;pointer-events:none;height:300px;overflow:hidden;}
+.cloud-deco{position:absolute;font-size:2.4rem;opacity:0.6;animation:cloudDrift 20s linear infinite;}
+@keyframes cloudDrift{from{transform:translateX(-10vw);}to{transform:translateX(110vw);}}
+
+.map-trail-wrap{position:relative;width:100%;max-width:380px;padding:30px 24px 60px;flex:1;display:flex;flex-direction:column;align-items:center;z-index:2;}
+.trail-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}
+#stage-stops-container{position:relative;width:100%;display:flex;flex-direction:column;gap:42px;}
+.stage-stop{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;z-index:2;cursor:pointer;}
+.stage-stop:nth-child(odd){align-self:flex-start;margin-left:8%;}
+.stage-stop:nth-child(even){align-self:flex-end;margin-right:8%;}
+.stage-circle{width:64px;height:64px;border-radius:50%;background:white;border:4px solid #E5E7EB;display:flex;align-items:center;justify-content:center;font-size:1.8rem;box-shadow:0 6px 16px rgba(0,0,0,0.15);transition:all 0.2s;}
+.stage-stop.done .stage-circle{border-color:var(--green);background:linear-gradient(135deg,#DCFCE7,#BBF7D0);}
+.stage-stop.current .stage-circle{border-color:var(--yellow);background:white;animation:currentPulse 1.4s ease infinite;}
+@keyframes currentPulse{0%,100%{box-shadow:0 6px 16px rgba(0,0,0,0.15),0 0 0 0 rgba(245,197,24,0.5);}50%{box-shadow:0 6px 16px rgba(0,0,0,0.15),0 0 0 12px rgba(245,197,24,0);}}
+.stage-stop.locked .stage-circle{border-color:#D1D5DB;background:#F3F4F6;opacity:0.6;}
+.stage-stop:not(.locked):hover .stage-circle{transform:scale(1.08);}
+.stage-num{font-family:'Fredoka One',cursive;font-size:0.7rem;background:var(--navy);color:white;border-radius:10px;padding:2px 8px;}
+
+.map-cta{position:sticky;bottom:0;width:100%;background:rgba(255,255,255,0.92);backdrop-filter:blur(8px);padding:16px;display:flex;justify-content:center;z-index:5;}
+.map-cta-btn{background:linear-gradient(135deg,var(--orange),var(--pink));color:white;border:none;padding:14px 36px;font-family:'Fredoka One',cursive;font-size:1.1rem;border-radius:50px;cursor:pointer;box-shadow:0 6px 20px rgba(255,140,66,0.4);}
+
+#game{padding:0;justify-content:flex-start;position:relative;overflow:hidden;min-height:100vh;}
+.scene-bg{position:fixed;inset:0;z-index:0;transition:background 0.5s ease;}
+.scene-bg.bg-day{background:linear-gradient(180deg,#7DD3FC 0%,#BAE6FD 35%,#FDE68A 55%,#D9F99D 100%);}
+.scene-bg.bg-rain{background:linear-gradient(180deg,#64748B 0%,#94A3B8 35%,#CBD5E1 70%,#86EFAC 100%);}
+.scene-bg.bg-night{background:linear-gradient(180deg,#1E293B 0%,#334155 40%,#475569 70%,#334155 100%);}
+.scene-bg.bg-sunny{background:linear-gradient(180deg,#FCD34D 0%,#FDE68A 35%,#FEF3C7 60%,#BEF264 100%);}
+.scene-bg.bg-garden{background:linear-gradient(180deg,#86EFAC 0%,#BBF7D0 40%,#D9F99D 70%,#A3E635 100%);}
+.scene-bg.bg-room{background:linear-gradient(180deg,#FED7AA 0%,#FDE68A 50%,#FEF3C7 100%);}
+.scene-bg.bg-school{background:linear-gradient(180deg,#BFDBFE 0%,#DBEAFE 45%,#FEF9C3 100%);}
+.scene-decor{position:absolute;font-size:2.4rem;opacity:0.75;pointer-events:none;}
+
+.g-topbar{position:relative;z-index:50;width:100%;display:flex;align-items:center;gap:8px;padding:10px 14px 8px;background:rgba(255,255,255,0.92);backdrop-filter:blur(6px);flex-wrap:wrap;}
+.home-btn{background:white;border:none;border-radius:12px;padding:8px 12px;font-size:1rem;cursor:pointer;font-weight:800;color:#888;box-shadow:0 2px 6px rgba(0,0,0,0.08);}
+.g-title-lbl{font-family:'Fredoka One',cursive;font-size:0.85rem;color:var(--navy);flex:1;}
+.g-score-badge{background:linear-gradient(135deg,var(--yellow),var(--orange));color:var(--navy);font-family:'Fredoka One',cursive;font-size:0.9rem;padding:5px 12px;border-radius:18px;}
+.g-lives{font-size:1rem;letter-spacing:2px;}
+.g-prog-wrap{flex-basis:100%;display:flex;align-items:center;gap:8px;margin-top:2px;}
+.g-prog-bar{flex:1;height:8px;background:rgba(0,0,0,0.08);border-radius:20px;overflow:hidden;}
+.g-prog-fill{height:100%;border-radius:20px;transition:width 0.5s ease;background:linear-gradient(90deg,var(--orange),var(--pink));}
+.g-prog-txt{font-family:'Fredoka One',cursive;font-size:0.76rem;color:#888;white-space:nowrap;}
+
+.timer-wrap-out{position:relative;z-index:50;width:100%;max-width:480px;padding:8px 16px 0;}
+.timer-row{display:flex;align-items:center;gap:8px;width:100%;}
+.timer-num{font-family:'Fredoka One',cursive;font-size:1rem;min-width:36px;text-align:center;transition:color 0.3s;background:rgba(255,255,255,0.85);border-radius:10px;padding:2px 4px;}
+.timer-num.green{color:#4ADE80;}.timer-num.orange{color:#FB923C;}.timer-num.red{color:#EF4444;animation:numPulse 0.3s ease infinite;}
+@keyframes numPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.15);}}
+.timer-track{flex:1;height:22px;background:rgba(255,255,255,0.6);border-radius:30px;overflow:hidden;position:relative;border:2.5px solid rgba(255,255,255,0.8);}
+.timer-fill{height:100%;border-radius:30px;position:absolute;left:0;top:0;transition:width 0.1s linear;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;}
+.timer-fill.green{background:linear-gradient(90deg,#4ADE80,#86EFAC);}
+.timer-fill.orange{background:linear-gradient(90deg,#FB923C,#FCD34D);}
+.timer-fill.red{background:linear-gradient(90deg,#EF4444,#FB923C);}
+.timer-face{font-size:0.95rem;}
+
+.stage-stage{position:relative;z-index:10;width:100%;max-width:480px;flex:1;display:flex;flex-direction:column;align-items:center;padding:16px;gap:14px;}
+
+.ollie-speech-row{display:flex;align-items:flex-end;gap:10px;width:100%;}
+.ollie-figure{font-size:4.2rem;flex-shrink:0;filter:drop-shadow(0 8px 14px rgba(0,0,0,0.2));animation:ollieIdle 2s ease-in-out infinite;}
+@keyframes ollieIdle{0%,100%{transform:translateY(0) rotate(-2deg);}50%{transform:translateY(-6px) rotate(2deg);}}
+.speech-bubble2{flex:1;background:white;border-radius:16px 16px 16px 4px;padding:10px 14px;box-shadow:0 4px 14px rgba(0,0,0,0.12);position:relative;}
+.speech-bubble2-txt{font-family:'Fredoka One',cursive;font-size:0.84rem;color:var(--navy);line-height:1.4;}
+
+.cause-platform{position:relative;width:160px;height:160px;display:flex;align-items:center;justify-content:center;}
+.cause-platform-shadow{position:absolute;bottom:6px;width:110px;height:18px;background:rgba(0,0,0,0.15);border-radius:50%;filter:blur(3px);}
+.cause-emoji-big{font-size:clamp(4rem,16vw,5.5rem);filter:drop-shadow(0 10px 16px rgba(0,0,0,0.18));animation:causeFloat 2.4s ease-in-out infinite;z-index:2;}
+@keyframes causeFloat{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-10px) scale(1.03);}}
+
+.scene-question2{font-family:'Fredoka One',cursive;font-size:0.92rem;color:var(--navy);text-align:center;background:rgba(255,255,255,0.85);border-radius:14px;padding:8px 16px;}
+.scene-question2 .hl2{color:var(--orange);}
+
+
+.options-shelf{width:100%;background:rgba(255,255,255,0.5);border-radius:18px;padding:14px 10px;}
+.options-shelf-lbl{font-family:'Fredoka One',cursive;font-size:0.74rem;color:var(--navy);text-align:center;margin-bottom:8px;background:rgba(255,255,255,0.7);border-radius:10px;padding:3px;}
+.opts-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.opt-card{background:white;border:3px solid #EEE;border-radius:16px;padding:12px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 4px 10px rgba(0,0,0,0.12);transition:transform 0.15s, box-shadow 0.15s;position:relative;}
+.opt-card:not(.disabled):active{transform:scale(0.92);}
+.opt-card:not(.disabled):hover{transform:scale(1.05);box-shadow:0 6px 14px rgba(0,0,0,0.16);}
+.opt-card-emoji{font-size:clamp(1.6rem,6.5vw,2.1rem);pointer-events:none;}
+.opt-card-txt{font-family:'Fredoka One',cursive;font-size:0.62rem;color:#888;text-align:center;pointer-events:none;}
+.opt-card.correct{border-color:var(--green);background:#F0FFF4;animation:optPop 0.4s ease;}
+.opt-card.wrong{border-color:var(--red);background:#FFF0F0;animation:optShake 0.4s ease;}
+.opt-card.show-correct{border-color:var(--green);background:#F0FFF4;}
+.opt-card.disabled{cursor:not-allowed;opacity:0.55;}
+@keyframes optPop{0%{transform:scale(1);}40%{transform:scale(1.12);}100%{transform:scale(1);}}
+@keyframes optShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-8px);}75%{transform:translateX(8px);}}
+
+
+.q-feedback{width:100%;border-radius:16px;padding:12px 16px;font-family:'Fredoka One',cursive;font-size:0.9rem;text-align:center;display:none;}
+.q-feedback.show{display:block;animation:fadeIn 0.3s ease;}
+.q-feedback.ok{background:#F0FFF4;color:#14532D;border:2px solid var(--green);}
+.q-feedback.bad{background:#FFF0F0;color:var(--red);border:2px solid var(--red);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.q-next-btn{width:100%;padding:14px;font-family:'Fredoka One',cursive;font-size:1.02rem;background:linear-gradient(135deg,var(--navy),var(--blue));color:white;border:none;border-radius:16px;cursor:pointer;display:none;box-shadow:0 4px 14px rgba(0,0,0,0.2);}
+.q-next-btn.show{display:block;animation:fadeIn 0.3s ease;}
+
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-80px);background:white;border-radius:28px;padding:10px 20px;font-family:'Fredoka One',cursive;font-size:0.95rem;box-shadow:0 8px 28px rgba(0,0,0,0.15);z-index:9999;transition:transform 0.3s ease;white-space:nowrap;pointer-events:none;}
+.toast.on{transform:translateX(-50%) translateY(0);}
+.toast.ok{color:#10B981;border-left:5px solid #10B981;}
+.toast.bad{color:#EF4444;border-left:5px solid #EF4444;}
+.cf{position:fixed;pointer-events:none;z-index:9998;border-radius:3px;animation:cfFall linear forwards;}
+@keyframes cfFall{to{transform:translateY(110vh) rotate(600deg);opacity:0;}}
+
+#level-complete{justify-content:center;align-items:center;text-align:center;padding:40px 20px;gap:14px;}
+.lc-bg-beginner{background:linear-gradient(160deg,#D1FAE5,#A7F3D0);}
+.lc-bg-advanced{background:linear-gradient(160deg,#DBEAFE,#BFDBFE);}
+.lc-bg-expert{background:linear-gradient(160deg,#EDE9FE,#DDD6FE);}
+.lc-emoji{font-size:5rem;animation:rB 0.9s ease infinite;}
+@keyframes rB{0%,100%{transform:translateY(0) rotate(-5deg);}50%{transform:translateY(-18px) rotate(5deg);}}
+.lc-title{font-family:'Fredoka One',cursive;font-size:clamp(1.8rem,7.5vw,2.6rem);color:var(--navy);}
+.lc-sub{font-size:0.95rem;color:#777;font-weight:800;max-width:300px;}
+.lc-score-box{background:var(--navy);border-radius:20px;padding:12px 32px;}
+.lc-score-num{font-family:'Fredoka One',cursive;font-size:2.2rem;color:var(--yellow);display:block;}
+.lc-score-lbl{font-size:0.74rem;color:rgba(255,255,255,0.55);font-weight:800;letter-spacing:1px;text-transform:uppercase;}
+.lc-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+.lcbtn{padding:14px 24px;font-family:'Fredoka One',cursive;font-size:0.95rem;border:none;border-radius:50px;cursor:pointer;}
+.lcbtn-next{background:linear-gradient(135deg,var(--blue),var(--purple));color:white;}
+.lcbtn-home{background:white;color:#aaa;border:2px solid #EEE;}
+
+#results{background:linear-gradient(160deg,#E0F2FE,#FFF8E1,#F0FFF4);justify-content:center;align-items:center;text-align:center;padding:40px 20px;gap:14px;}
+.r-emoji{font-size:5.5rem;display:block;animation:rB 0.9s ease infinite;}
+.r-title{font-family:'Fredoka One',cursive;font-size:clamp(2rem,8vw,3.2rem);color:var(--navy);}
+.r-sub{font-size:1rem;color:#888;font-weight:800;max-width:320px;}
+.r-stars{font-size:2.6rem;letter-spacing:5px;}
+.r-score-box{background:var(--navy);border-radius:22px;padding:14px 40px;}
+.r-score-num{font-family:'Fredoka One',cursive;font-size:2.8rem;color:var(--yellow);display:block;}
+.r-score-lbl{font-size:0.8rem;color:rgba(255,255,255,0.55);font-weight:800;letter-spacing:1px;text-transform:uppercase;}
+.r-breakdown{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:280px;width:100%;}
+.r-box{border-radius:16px;padding:16px;}
+.rb-c{background:#F0FFF4;border:2px solid var(--green);}
+.rb-w{background:#FFF0F0;border:2px solid #FCA5A5;}
+.r-box-num{font-family:'Fredoka One',cursive;font-size:2rem;}
+.r-box-lbl{font-size:0.72rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:1px;}
+.r-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+.rbtn{padding:14px 26px;font-family:'Fredoka One',cursive;font-size:1rem;border:none;border-radius:50px;cursor:pointer;}
+.rbtn-retry{background:linear-gradient(135deg,var(--blue),var(--purple));color:white;}
+.rbtn-home{background:white;color:#aaa;border:2px solid #EEE;}
+.tl-tag2{font-family:'Fredoka One',cursive;font-size:0.78rem;color:#bbb;letter-spacing:1px;}
+.tl-tag2 span{color:var(--navy);}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<div class="screen active" id="welcome">
+  <div class="w-bg">
+    <span class="wbi wbi1">☔</span><span class="wbi wbi2">🌱</span>
+    <span class="wbi wbi3">🍦</span><span class="wbi wbi4">⭐</span><span class="wbi wbi5">🏆</span>
+  </div>
+  <div class="w-badge">🦉 Adventure Game</div>
+  <div class="w-owl">🦉</div>
+  <h1 class="w-title"><span class="bl">Ollie's</span> <span class="gr">Adventure!</span></h1>
+  <p class="w-sub">Walk Ollie's path and tap the right answer at each scene! 🌟</p>
+
+  <div class="parent-levels">
+    <div class="pl-card beginner" onclick="selectParentLevel('beginner')">
+      <span class="pl-icon">🌱</span>
+      <div class="pl-info">
+        <div class="pl-name">Beginner</div>
+        <div class="pl-desc">Daily life — rain, light, hot & cold! 5 stops</div>
+      </div>
+      <span class="pl-stars">⭐</span>
+    </div>
+    <div class="pl-card advanced" onclick="selectParentLevel('advanced')">
+      <span class="pl-icon">🌍</span>
+      <div class="pl-info">
+        <div class="pl-name">Advanced</div>
+        <div class="pl-desc">Daily life + Nature & Science! 5 stops</div>
+      </div>
+      <span class="pl-stars">⭐⭐</span>
+    </div>
+    <div class="pl-card expert" onclick="selectParentLevel('expert')">
+      <span class="pl-icon">🧠</span>
+      <div class="pl-info">
+        <div class="pl-name">Expert</div>
+        <div class="pl-desc">Tricky story & social situations! 5 stops</div>
+      </div>
+      <span class="pl-stars">⭐⭐⭐</span>
+    </div>
+  </div>
+
+  <div class="tl-tag">by <span>ThinkLab</span> — Raising smart thinkers!</div>
+</div>
+
+<div class="screen" id="level-intro">
+  <span class="li-emoji" id="li-emoji">🌱</span>
+  <h2 class="li-title" id="li-title">Beginner World</h2>
+  <p class="li-sub" id="li-sub">Help Ollie figure out what happens in everyday life!</p>
+  <button class="li-btn" onclick="showMap()">See the Path! 🗺️</button>
+</div>
+
+<div class="screen" id="map-screen">
+  <div class="map-topbar">
+    <button class="map-home-btn" onclick="goHome()">🏠</button>
+    <span class="map-title" id="map-title">Beginner World</span>
+    <span class="map-score">⭐ <span id="map-score">0</span></span>
+  </div>
+  <div class="map-clouds" id="map-clouds"></div>
+  <div class="map-trail-wrap" id="map-trail-wrap">
+    <svg class="trail-svg" id="trail-svg"></svg>
+    <div id="stage-stops-container"></div>
+  </div>
+  <div class="map-cta">
+    <button class="map-cta-btn" id="map-cta-btn" onclick="enterCurrentStage()">Start Stop 1! 🦉</button>
+  </div>
+</div>
+
+<div class="screen" id="game">
+  <div class="scene-bg" id="scene-bg"></div>
+  <div id="scene-decor-layer"></div>
+
+  <div class="g-topbar">
+    <button class="home-btn" onclick="goHome()">🏠</button>
+    <span class="g-title-lbl" id="g-title-lbl">🦉 Beginner — Stop 1</span>
+    <span class="g-lives" id="g-lives">❤️❤️❤️</span>
+    <span class="g-score-badge">⭐ <span id="g-score">0</span></span>
+    <div class="g-prog-wrap">
+      <div class="g-prog-bar"><div class="g-prog-fill" id="g-prog" style="width:0%"></div></div>
+      <span class="g-prog-txt" id="g-prog-txt">1/5</span>
+    </div>
+  </div>
+
+  <div class="timer-wrap-out">
+    <div class="timer-row">
+      <div class="timer-num green" id="timer-num">15s</div>
+      <div class="timer-track">
+        <div class="timer-fill green" id="timer-bar" style="width:100%">
+          <span class="timer-face" id="timer-face">🦉</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage-stage" id="stage-stage">
+    <div class="ollie-speech-row">
+      <span class="ollie-figure" id="ollie-figure">🦉</span>
+      <div class="speech-bubble2">
+        <div class="speech-bubble2-txt" id="scene-bubble-txt">Ollie is watching the sky...</div>
+      </div>
+    </div>
+
+    <div class="cause-platform">
+      <div class="cause-platform-shadow"></div>
+      <div class="cause-emoji-big" id="scene-emoji-display">🌧️</div>
+    </div>
+
+    <div class="scene-question2" id="scene-question">What happens <span class="hl2">next</span>?</div>
+
+    <div class="options-shelf">
+      <div class="options-shelf-lbl">👆 Tap the right answer!</div>
+      <div class="opts-row" id="q-opts-grid"></div>
+    </div>
+
+    <div class="q-feedback" id="q-feedback"></div>
+    <button class="q-next-btn" id="q-next-btn" onclick="nextQ()">Next →</button>
+  </div>
+</div>
+
+<div class="screen" id="level-complete">
+  <span class="lc-emoji" id="lc-emoji">🎉</span>
+  <h2 class="lc-title" id="lc-title">Beginner Complete!</h2>
+  <p class="lc-sub" id="lc-sub">Ollie is proud of you!</p>
+  <div class="lc-score-box">
+    <span class="lc-score-num" id="lc-score-num">0</span>
+    <span class="lc-score-lbl">Total Points</span>
+  </div>
+  <div class="lc-btns">
+    <button class="lcbtn lcbtn-home" onclick="goHome()">🏠 Home</button>
+    <button class="lcbtn lcbtn-next" id="lcbtn-next" onclick="nextParentLevel()">Next Level! 🚀</button>
+  </div>
+</div>
+
+<div class="screen" id="results">
+  <span class="r-emoji" id="r-emoji">🏆</span>
+  <h2 class="r-title" id="r-title">Adventure Master!</h2>
+  <p class="r-sub" id="r-sub">Ollie says you're a super thinker!</p>
+  <div class="r-stars" id="r-stars">⭐⭐⭐</div>
+  <div class="r-score-box">
+    <span class="r-score-num" id="r-score-num">0</span>
+    <span class="r-score-lbl">Points Earned</span>
+  </div>
+  <div class="r-breakdown">
+    <div class="r-box rb-c"><div class="r-box-num" id="r-correct" style="color:#14532D;">0</div><div class="r-box-lbl">Correct ✓</div></div>
+    <div class="r-box rb-w"><div class="r-box-num" id="r-wrong" style="color:#EF4444;">0</div><div class="r-box-lbl">Wrong ✗</div></div>
+  </div>
+  <div class="r-btns">
+    <button class="rbtn rbtn-home" onclick="goHome()">🏠 Home</button>
+    <button class="rbtn rbtn-retry" onclick="goHome()">🦉 Play Again!</button>
+  </div>
+  <div class="tl-tag2" style="margin-top:8px;">by <span>ThinkLab</span></div>
+</div>
+
+<script>
+var PARENT_LEVELS = {
+  beginner: {
+    name:'Beginner', emoji:'🌱', cls:'beginner', bgCls:'beginner-bg', mapBg:'map-bg-beginner',
+    intro:'Help Ollie with everyday things! Tap your answer.',
+    stages:[
+      {ollie:"Ollie made a snowman. Now the sun is out and it's warm!", cause:'⛄', bg:'bg-sunny',
+       decor:[{e:'🌤️',x:'10%',y:'8%'},{e:'🍃',x:'80%',y:'14%'}],
+       q:'What will happen to the snowman?',
+       answer:{e:'💧',t:'Melts to water'}, wrong:[{e:'⛄',t:'Stays the same'},{e:'🧊',t:'Becomes solid ice'},{e:'🪨',t:'Turns to stone'}], pts:10},
+      {ollie:"Ollie is reading. The room is getting darker.", cause:'📖', bg:'bg-night',
+       decor:[{e:'⭐',x:'15%',y:'8%'},{e:'⭐',x:'78%',y:'12%'},{e:'🌠',x:'55%',y:'5%'}],
+       q:'What should Ollie do to keep reading?',
+       answer:{e:'💡',t:'Turn on a light'}, wrong:[{e:'🪟',t:'Close the curtains'},{e:'😴',t:'Close eyes tighter'},{e:'📕',t:'Read the cover instead'}], pts:10},
+      {ollie:"Ollie put chocolate in his pocket. He played outside all afternoon in the sun.", cause:'🍫', bg:'bg-sunny',
+       decor:[{e:'☀️',x:'12%',y:'8%'}],
+       q:'What will Ollie find in his pocket?',
+       answer:{e:'🟤',t:'A melted, gooey mess'}, wrong:[{e:'🍫',t:'Perfectly fine'},{e:'🧊',t:'Frozen solid'},{e:'🍬',t:'Turned into candy'}], pts:10},
+      {ollie:"Ollie ran a lot at the playground. Now he is sweaty and his throat feels dry.", cause:'🏃', bg:'bg-day',
+       decor:[{e:'☀️',x:'14%',y:'8%'},{e:'🌳',x:'78%',y:'18%'}],
+       q:'What does Ollie need most right now?',
+       answer:{e:'💧',t:'Water to drink'}, wrong:[{e:'🍬',t:'A sugary sweet'},{e:'🛏️',t:'A long nap'},{e:'🎮',t:'A video game'}], pts:10},
+      {ollie:"Ollie was digging in the garden. His hands got muddy. Now it's almost lunchtime!", cause:'🤲', bg:'bg-garden',
+       decor:[{e:'🌸',x:'12%',y:'14%'},{e:'🌼',x:'80%',y:'10%'}],
+       q:'What should Ollie do before he eats?',
+       answer:{e:'🧼',t:'Wash hands with soap'}, wrong:[{e:'🍽️',t:'Start eating quickly'},{e:'🧹',t:'Sweep the floor'},{e:'🪣',t:'Just rinse with mud water'}], pts:10},
+    ]
+  },
+  advanced: {
+    name:'Advanced', emoji:'🌍', cls:'advanced', bgCls:'advanced-bg', mapBg:'map-bg-advanced',
+    intro:'Mix daily life with nature and science. Watch out — the wrong answers look tricky!',
+    stages:[
+      {ollie:"Ollie put an ice cube in a glass. He left it in the sun all morning.", cause:'🧊', bg:'bg-sunny',
+       decor:[{e:'☀️',x:'14%',y:'8%'}],
+       q:'What will Ollie find in the glass later?',
+       answer:{e:'💧',t:'Just water'}, wrong:[{e:'🧊',t:'A bigger ice cube'},{e:'❄️',t:'Frost on the glass'},{e:'🥛',t:'Milk'}], pts:15},
+      {ollie:"Ollie planted a tiny seed. He gave it water and sun every day for three weeks.", cause:'🌱', bg:'bg-garden',
+       decor:[{e:'☀️',x:'14%',y:'8%'},{e:'💧',x:'80%',y:'14%'}],
+       q:'What has most likely grown by now?',
+       answer:{e:'🌿',t:'A small sprout'}, wrong:[{e:'🌳',t:'A fully grown tree'},{e:'🍎',t:'A ripe apple'},{e:'🪨',t:'Nothing, just a rock'}], pts:15},
+      {ollie:"Ollie is blowing up a balloon. It's already very stretched and tight. He blows one more big breath...", cause:'🎈', bg:'bg-room',
+       decor:[{e:'🎉',x:'12%',y:'10%'},{e:'🎊',x:'80%',y:'12%'}],
+       q:'What will happen next?',
+       answer:{e:'💥',t:'It pops loudly'}, wrong:[{e:'🎈',t:'It keeps stretching forever'},{e:'🪶',t:'It turns into a feather'},{e:'📉',t:'It slowly shrinks back down'}], pts:15},
+      {ollie:"Ollie has watched a caterpillar for two weeks. It stopped moving and wrapped itself up tight.", cause:'🐛', bg:'bg-garden',
+       decor:[{e:'🍃',x:'12%',y:'14%'},{e:'🌿',x:'78%',y:'12%'}],
+       q:'What is happening inside that cocoon?',
+       answer:{e:'🦋',t:'Turning into a butterfly'}, wrong:[{e:'🐝',t:'Turning into a bee'},{e:'😴',t:'Just sleeping forever'},{e:'🪱',t:'Staying a caterpillar'}], pts:15},
+      {ollie:"Ollie is in a dark room. He shines his flashlight at his teddy bear on the wall.", cause:'🔦', bg:'bg-night',
+       decor:[{e:'⭐',x:'15%',y:'10%'},{e:'⭐',x:'78%',y:'14%'}],
+       q:'What will appear behind the teddy bear?',
+       answer:{e:'👤',t:'A dark shadow'}, wrong:[{e:'🌈',t:'A colourful rainbow'},{e:'🔥',t:'A small fire'},{e:'💡',t:'A second light'}], pts:15},
+    ]
+  },
+  expert: {
+    name:'Expert', emoji:'🧠', cls:'expert', bgCls:'expert-bg', mapBg:'map-bg-expert',
+    intro:'Tricky friend problems! Every choice sounds almost right — think carefully.',
+    stages:[
+      {ollie:"Ollie's friend looks sad at lunch. Ollie wants to keep playing his video game with others.", cause:'😢', bg:'bg-school',
+       decor:[{e:'🏫',x:'10%',y:'10%'},{e:'📚',x:'80%',y:'14%'}],
+       q:'What is the BEST thing for Ollie to do?',
+       answer:{e:'🤗',t:'Pause game, go comfort friend'}, wrong:[{e:'🎮',t:'Finish the game first'},{e:'📱',t:'Text the friend instead'},{e:'🤔',t:'Wait for someone else to help'}], pts:25},
+      {ollie:"Ollie broke his sister's toy by accident. He could hide it, or tell her the truth.", cause:'🧸', bg:'bg-room',
+       decor:[{e:'🏠',x:'12%',y:'10%'}],
+       q:'What is the most HONEST choice?',
+       answer:{e:'🙏',t:'Tell her and say sorry'}, wrong:[{e:'🔧',t:'Quietly fix it, say nothing'},{e:'🤫',t:'Hide it where she won\u2019t look'},{e:'😡',t:'Say the dog probably did it'}], pts:25},
+      {ollie:"Two friends both want the same toy car. One grabbed it first and won't share.", cause:'🧸', bg:'bg-school',
+       decor:[{e:'🎈',x:'14%',y:'10%'},{e:'🎯',x:'78%',y:'14%'}],
+       q:'What is the FAIREST thing to do?',
+       answer:{e:'🔄',t:'Take turns with a timer'}, wrong:[{e:'🥇',t:'First one keeps it'},{e:'😭',t:'Other friend gives up'},{e:'🚫',t:'No one gets to play'}], pts:25},
+      {ollie:"Ollie sees kids teasing a classmate. If he helps, they might tease him too.", cause:'😟', bg:'bg-school',
+       decor:[{e:'🏫',x:'10%',y:'10%'}],
+       q:'What is the BRAVEST thing Ollie can do?',
+       answer:{e:'🛡️',t:'Calmly stand up for them'}, wrong:[{e:'🤐',t:'Stay quiet to avoid trouble'},{e:'😆',t:'Laugh along with the group'},{e:'🏃',t:'Walk away, tell no one'}], pts:25},
+      {ollie:"Ollie finds a wallet with money. No one is around. It's not his.", cause:'👛', bg:'bg-school',
+       decor:[{e:'🏫',x:'10%',y:'10%'},{e:'🌳',x:'78%',y:'16%'}],
+       q:'What is the most HONEST thing to do?',
+       answer:{e:'🏫',t:'Give it to a teacher'}, wrong:[{e:'💰',t:'Keep a little, give back rest'},{e:'🗑️',t:'Leave it and walk away'},{e:'🤔',t:'Wait a few days first'}], pts:25},
+    ]
+  }
+};
+
+var LEVEL_ORDER=['beginner','advanced','expert'];
+
+var TIMER_BY_LEVEL = {beginner:15, advanced:12, expert:10};
+
+var currentParentLevel='beginner', currentStage=0;
+var score=0, lives=3, numCorrect=0, numWrong=0;
+var answered=false;
+var timerInterval=null, TIMER_SECS=15;
+var stageCompleted={beginner:[false,false,false,false,false],advanced:[false,false,false,false,false],expert:[false,false,false,false,false]};
+
+function shuffle(a){var b=a.slice();for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t;}return b;}
+function showScreen(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+var toastTmr;
+function showToast(type,msg){clearTimeout(toastTmr);var t=document.getElementById('toast');t.className='toast '+type+' on';t.textContent=msg;toastTmr=setTimeout(function(){t.classList.remove('on');},2200);}
+function confetti(){var c=['#F5C518','#FF8C42','#3DD68C','#FF6B9D','#4A90D9','#A855F7'];for(var i=0;i<40;i++){(function(i){setTimeout(function(){var e=document.createElement('div');e.className='cf';e.style.cssText='left:'+Math.random()*100+'vw;top:-12px;width:'+(6+Math.random()*7)+'px;height:'+(6+Math.random()*7)+'px;background:'+c[Math.floor(Math.random()*c.length)]+';animation-duration:'+(1.2+Math.random()*1.4)+'s;';document.body.appendChild(e);setTimeout(function(){e.remove();},3000);},i*28);})(i);}}
+
+function startTimer(){
+  clearInterval(timerInterval);
+  var t=TIMER_SECS;
+  updateTimer(t);
+  timerInterval=setInterval(function(){
+    t-=0.1;
+    updateTimer(t);
+    if(t<=0) clearInterval(timerInterval);
+  },100);
+}
+function stopTimer(){clearInterval(timerInterval);}
+function updateTimer(t){
+  var pct=Math.max(0,(t/TIMER_SECS)*100);
+  var bar=document.getElementById('timer-bar');
+  var num=document.getElementById('timer-num');
+  var face=document.getElementById('timer-face');
+  if(!bar||!num) return;
+  bar.style.width=pct+'%';
+  var secs=Math.ceil(Math.max(0,t));
+  if(pct>50){bar.className='timer-fill green';num.className='timer-num green';num.textContent=secs+'s';if(face)face.textContent='🦉';}
+  else if(pct>25){bar.className='timer-fill orange';num.className='timer-num orange';num.textContent=secs+'s';if(face)face.textContent='😅';}
+  else if(t>0){bar.className='timer-fill red';num.className='timer-num red';num.textContent=secs+'s';if(face)face.textContent='😮';}
+  else{bar.className='timer-fill red';num.className='timer-num red';num.textContent='🔔';if(face)face.textContent='😅';}
+}
+
+function selectParentLevel(key){
+  currentParentLevel=key;
+  currentStage=0;
+  var lv=PARENT_LEVELS[key];
+  document.getElementById('li-emoji').textContent=lv.emoji;
+  document.getElementById('li-title').textContent=lv.name+' World';
+  document.getElementById('li-sub').textContent=lv.intro;
+  showScreen('level-intro');
+  document.getElementById('level-intro').className='screen active '+lv.bgCls;
+}
+
+function showMap(){
+  var lv=PARENT_LEVELS[currentParentLevel];
+  document.getElementById('map-title').textContent=lv.name+' Path';
+  document.getElementById('map-score').textContent=score;
+  buildMap();
+  showScreen('map-screen');
+  document.getElementById('map-screen').className='screen active '+lv.mapBg;
+
+  var cloudsEl=document.getElementById('map-clouds');
+  cloudsEl.innerHTML='';
+  for(var i=0;i<3;i++){
+    var c=document.createElement('div');
+    c.className='cloud-deco';
+    c.textContent='☁️';
+    c.style.top=(10+i*22)+'%';
+    c.style.animationDuration=(16+i*5)+'s';
+    c.style.animationDelay=(i*3)+'s';
+    cloudsEl.appendChild(c);
+  }
+}
+
+function buildMap(){
+  var lv=PARENT_LEVELS[currentParentLevel];
+  var completedArr=stageCompleted[currentParentLevel];
+  var firstIncomplete=completedArr.findIndex(function(c){return !c;});
+  var allDone = firstIncomplete===-1;
+  if(allDone) firstIncomplete=lv.stages.length-1;
+
+  var container=document.getElementById('stage-stops-container');
+  container.innerHTML='';
+
+  lv.stages.forEach(function(stage,i){
+    var stop=document.createElement('div');
+    var state= completedArr[i] ? 'done' : (i===firstIncomplete ? 'current' : 'locked');
+    stop.className='stage-stop '+state;
+    stop.dataset.idx=i;
+    var circle=document.createElement('div');
+    circle.className='stage-circle';
+    circle.textContent= completedArr[i] ? '✅' : stage.cause;
+    var num=document.createElement('div');
+    num.className='stage-num';
+    num.textContent='Stop '+(i+1);
+    stop.appendChild(circle);
+    stop.appendChild(num);
+    if(state!=='locked'){
+      stop.onclick=(function(idx){return function(){ jumpToStage(idx); };})(i);
+    }
+    container.appendChild(stop);
+  });
+
+  setTimeout(function(){
+    var svg=document.getElementById('trail-svg');
+    svg.innerHTML='';
+    var wrapRect=document.getElementById('map-trail-wrap').getBoundingClientRect();
+    var stopEls=document.querySelectorAll('.stage-stop');
+    var pts=Array.from(stopEls).map(function(el){
+      var r=el.getBoundingClientRect();
+      return {x:r.left-wrapRect.left+r.width/2, y:r.top-wrapRect.top+r.height/2};
+    });
+    var path='';
+    pts.forEach(function(p,i){ path+= (i===0?'M':'L')+p.x+','+p.y+' '; });
+    var pathEl=document.createElementNS('http://www.w3.org/2000/svg','path');
+    pathEl.setAttribute('d',path);
+    pathEl.setAttribute('stroke','rgba(255,255,255,0.85)');
+    pathEl.setAttribute('stroke-width','5');
+    pathEl.setAttribute('fill','none');
+    pathEl.setAttribute('stroke-dasharray','10,10');
+    pathEl.setAttribute('stroke-linecap','round');
+    svg.appendChild(pathEl);
+  },50);
+
+  var btn=document.getElementById('map-cta-btn');
+  if(allDone){
+    btn.textContent='All Done! See Results 🏆';
+  } else {
+    btn.textContent='Start Stop '+(firstIncomplete+1)+'! 🦉';
+  }
+  btn.dataset.targetStage=firstIncomplete;
+  btn.dataset.allDone = allDone ? '1':'0';
+}
+
+function jumpToStage(idx){
+  currentStage=idx;
+  showScreen('game');
+  loadStage();
+}
+
+function enterCurrentStage(){
+  var btn=document.getElementById('map-cta-btn');
+  if(btn.dataset.allDone==='1'){
+    showLevelComplete();
+    return;
+  }
+  var idx=parseInt(btn.dataset.targetStage||'0');
+  currentStage=idx;
+  showScreen('game');
+  loadStage();
+}
+
+function loadStage(){
+  answered=false;
+  var lv=PARENT_LEVELS[currentParentLevel];
+  var stage=lv.stages[currentStage];
+  TIMER_SECS = TIMER_BY_LEVEL[currentParentLevel] || 15;
+
+  document.getElementById('g-title-lbl').textContent='🦉 '+lv.name+' — Stop '+(currentStage+1);
+  document.getElementById('g-score').textContent=score;
+  document.getElementById('g-lives').textContent='❤️'.repeat(lives)+'🖤'.repeat(3-lives);
+  document.getElementById('g-prog').style.width=((currentStage/lv.stages.length)*100)+'%';
+  document.getElementById('g-prog-txt').textContent=(currentStage+1)+'/'+lv.stages.length;
+  document.getElementById('q-feedback').className='q-feedback';
+  document.getElementById('q-next-btn').className='q-next-btn';
+
+  var bgEl=document.getElementById('scene-bg');
+  bgEl.className='scene-bg '+stage.bg;
+
+  var decorLayer=document.getElementById('scene-decor-layer');
+  decorLayer.innerHTML='';
+  (stage.decor||[]).forEach(function(d){
+    var el=document.createElement('div');
+    el.className='scene-decor';
+    el.textContent=d.e;
+    el.style.left=d.x; el.style.top=d.y;
+    decorLayer.appendChild(el);
+  });
+
+  document.getElementById('scene-bubble-txt').textContent=stage.ollie;
+  document.getElementById('scene-emoji-display').textContent=stage.cause;
+  document.getElementById('scene-question').innerHTML=stage.q.replace(/next/i,'<span class="hl2">next</span>');
+  document.getElementById('ollie-figure').textContent='🦉';
+
+  var opts=shuffle([stage.answer].concat(stage.wrong));
+  var grid=document.getElementById('q-opts-grid');
+  grid.innerHTML='';
+  opts.forEach(function(opt,i){
+    var card=document.createElement('div');
+    card.className='opt-card';
+    card.id='qopt-'+i;
+    card.dataset.answer = (opt.e===stage.answer.e)?'1':'0';
+    card.dataset.emoji = opt.e;
+    card.innerHTML='<span class="opt-card-emoji">'+opt.e+'</span><span class="opt-card-txt">'+opt.t+'</span>';
+    card.addEventListener('click', function(){ handleAnswer(card, stage); });
+    grid.appendChild(card);
+  });
+
+  startTimer();
+}
+
+function handleAnswer(card, stage){
+  if(answered) return;
+  if(card.classList.contains('disabled')) return;
+  answered=true;
+  stopTimer();
+  document.querySelectorAll('.opt-card').forEach(function(c){c.classList.add('disabled');});
+
+  var isCorrect = card.dataset.answer==='1';
+
+  if(isCorrect){
+    score+=stage.pts; numCorrect++;
+    card.classList.add('correct');
+    document.getElementById('g-score').textContent=score;
+    document.getElementById('ollie-figure').textContent='😄';
+    var msgs=['Great thinking! 🌟','Ollie is happy! ✨','Correct! ⭐','Smart choice! 🏆'];
+    showFb('ok',msgs[Math.floor(Math.random()*msgs.length)]+' +'+stage.pts+' pts!');
+    showToast('ok','✅ Correct! +'+stage.pts+' pts');
+    confetti();
+    stageCompleted[currentParentLevel][currentStage]=true;
+  } else {
+    lives=Math.max(0,lives-1); numWrong++;
+    card.classList.add('wrong');
+    document.getElementById('g-lives').textContent='❤️'.repeat(lives)+'🖤'.repeat(3-lives);
+    document.querySelectorAll('.opt-card').forEach(function(c){
+      if(c.dataset.answer==='1') c.classList.add('show-correct');
+    });
+    document.getElementById('ollie-figure').textContent='😅';
+    showFb('bad','Not quite! Ollie would pick '+stage.answer.e+' '+stage.answer.t);
+    showToast('bad','❌ Think about it again!');
+  }
+
+  var lv=PARENT_LEVELS[currentParentLevel];
+  var nb=document.getElementById('q-next-btn');
+  nb.textContent=currentStage+1>=lv.stages.length?'Back to Map! 🗺️':'Next Stop →';
+  nb.className='q-next-btn show';
+}
+
+function showFb(type,msg){var fb=document.getElementById('q-feedback');fb.className='q-feedback '+type+' show';fb.textContent=msg;}
+
+function nextQ(){
+  var lv=PARENT_LEVELS[currentParentLevel];
+  currentStage++;
+  if(currentStage>=lv.stages.length){
+    var completedArr=stageCompleted[currentParentLevel];
+    if(completedArr.every(function(c){return c;})){
+      showLevelComplete();
+    } else {
+      showMap();
+    }
+  } else {
+    showMap();
+  }
+}
+
+function showLevelComplete(){
+  var lv=PARENT_LEVELS[currentParentLevel];
+  var idx=LEVEL_ORDER.indexOf(currentParentLevel);
+  var isLast=idx>=LEVEL_ORDER.length-1;
+
+  document.getElementById('lc-emoji').textContent=lv.emoji;
+  document.getElementById('lc-title').textContent=lv.name+' Complete! 🎉';
+  document.getElementById('lc-sub').textContent=isLast?'You finished ALL levels! Ollie is so proud!':'Ready for the next challenge?';
+  document.getElementById('lc-score-num').textContent=score;
+
+  var nb=document.getElementById('lcbtn-next');
+  if(isLast){
+    nb.textContent='See Final Results! 🏆';
+    nb.onclick=function(){ showResults(); };
+  } else {
+    var nextLv=PARENT_LEVELS[LEVEL_ORDER[idx+1]];
+    nb.textContent='Next: '+nextLv.name+' 🚀';
+    nb.onclick=function(){ nextParentLevel(); };
+  }
+
+  showScreen('level-complete');
+  document.getElementById('level-complete').className='screen active lc-bg-'+currentParentLevel;
+  confetti();confetti();
+}
+
+function nextParentLevel(){
+  var idx=LEVEL_ORDER.indexOf(currentParentLevel);
+  if(idx>=LEVEL_ORDER.length-1){ showResults(); return; }
+  currentParentLevel=LEVEL_ORDER[idx+1];
+  currentStage=0;
+  lives=3;
+  selectParentLevel(currentParentLevel);
+}
+
+function goHome(){stopTimer();showScreen('welcome');}
+
+function showResults(){
+  var totalQ=0;
+  LEVEL_ORDER.forEach(function(k){totalQ+=PARENT_LEVELS[k].stages.length;});
+  var pct=numCorrect/totalQ;
+  document.getElementById('r-emoji').textContent=pct>=0.75?'🏆':pct>=0.5?'🦉':'💪';
+  document.getElementById('r-title').textContent=pct>=0.75?'Adventure Master! 🏆':pct>=0.5?'Smart Helper! 🦉':'Keep Practising! 💪';
+  document.getElementById('r-sub').textContent='Ollie says: you got '+numCorrect+'/'+totalQ+' correct across all levels!';
+  document.getElementById('r-stars').textContent=pct>=0.75?'⭐⭐⭐':pct>=0.5?'⭐⭐☆':'⭐☆☆';
+  document.getElementById('r-score-num').textContent=score;
+  document.getElementById('r-correct').textContent=numCorrect;
+  document.getElementById('r-wrong').textContent=numWrong;
+  showScreen('results');confetti();confetti();
+}
+</script>
+</body>
+</html>
